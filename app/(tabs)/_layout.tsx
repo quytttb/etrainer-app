@@ -1,45 +1,80 @@
-import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { FontAwesome } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
+import HomeScreen from './home'; 
+import TestScreen from './mock-test'; 
+import ChatScreen from './chatAI'; 
+import StudyPlanScreen from './study-plan'; 
+import ProfileScreen from './profile'; 
 
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+const Tab = createBottomTabNavigator();
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
+export default function App() {
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+    <Tab.Navigator
+       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
-      <Tabs.Screen
-        name="index"
+        tabBarStyle: { 
+          position: 'absolute', 
+          backgroundColor: '#fff', 
+          height: 70, 
+          borderTopLeftRadius: 30, 
+          borderTopRightRadius: 30,
+          display: route.name === 'chat' ? 'none' : 'flex', // Hide tab bar only for "chat"
+        }
+      })}
+    >
+      <Tab.Screen 
+        name="home" 
+        component={HomeScreen} 
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome name="home" size={size} color={color} />
+          ),
+          tabBarLabel: 'Trang chủ'
+        }} 
       />
-      <Tabs.Screen
-        name="explore"
+      <Tab.Screen 
+        name="mock-test" 
+        component={TestScreen} 
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome name="pencil" size={size} color={color} />
+          ),
+          tabBarLabel: 'Thi thử'
+        }} 
       />
-    </Tabs>
+      <Tab.Screen 
+        name="chat" 
+        component={ChatScreen} 
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="chatbubble-ellipses" size={size} color={color} />
+          ),
+          tabBarLabel: 'Trợ lý AI',
+        }} 
+      />
+      <Tab.Screen 
+        name="study-plan" 
+        component={StudyPlanScreen} 
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome name="calendar" size={size} color={color} />
+          ),
+          tabBarLabel: 'Lộ trình học'
+        }} 
+      />
+      <Tab.Screen 
+        name="profile" 
+        component={ProfileScreen} 
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome name="user" size={size} color={color} />
+          ),
+          tabBarLabel: 'Hồ sơ'
+        }} 
+      />
+    </Tab.Navigator>
   );
 }

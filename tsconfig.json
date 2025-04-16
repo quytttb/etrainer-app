@@ -1,7 +1,11 @@
 {
-  "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
     "paths": {
       "@/*": [
         "./*"
@@ -13,5 +17,6 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-  ]
+, "app/exam/detail/[examId].tsx", "app/exam/list/[partId].tsx", "app/_layout.tsx", "app/vocabulary/index.tsx", "app/vocabulary/_layout.tsx", "app/vocabulary/detail/[id].tsx", "app/grammar/_layout.tsx", "app/(tabs)/_layout.tsx", "app/exam/prepare/[id].tsx", "app/onboarding.tsx", "app/index.tsx", "app/(tabs)/mock-test.jsx", "app/(tabs)/chatAI.tsx", "context/AuthContext.jsx", "context/AuthContext.jsx", "context/AuthContext.jsx", "constants/colors.jsx", "components/QuestionCard.jsx", "components/NavigationButtons.jsx", "components/Modal.jsx", "components/HeaderCard.jsx", "components/Header.jsx", "components/ExamList.jsx", "components/AudioControls.tsx", "components/Home/Header.jsx", "app/(tabs)/chatAI.tsx", "context/AuthContext.jsx", "context/AuthContext.jsx", "context/UserDetailContext.jsx", "app/(tabs)/home.jsx", "app/(tabs)/mock-test.jsx", "app/(tabs)/profile.jsx", "app/(tabs)/study-plan.jsx", "app/splash.jsx", "app/auth/login.js"  ],
+  "extends": "expo/tsconfig.base"
 }
