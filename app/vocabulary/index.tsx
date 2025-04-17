@@ -8,42 +8,38 @@ export default function VocabularyListScreen() {
 
   // Danh sách mô tả bài học
   const lessonDescriptions = [
-    "Mô tả bài học 1",
-    "Mô tả bài học 2",
-    "Mô tả bài học 3",
-    "Mô tả bài học 4",
-    "Mô tả bài học 5",
-    "Mô tả bài học 6",
-    "Mô tả bài học 7",
-    "Mô tả bài học 8",
-    "Mô tả bài học 9",
-    "Mô tả bài học 10",
-    "Mô tả bài học 11",
-    "Mô tả bài học 12",
-    "Mô tả bài học 13",
-    "Mô tả bài học 14",
-    "Mô tả bài học 15",
-    "Mô tả bài học 16",
-    "Mô tả bài học 17",
-    "Mô tả bài học 18",
-    "Mô tả bài học 19",
-    "Mô tả bài học 20",
-    "Mô tả bài học 21",
-    "Mô tả bài học 22",
-    "Mô tả bài học 23",
-    "Mô tả bài học 24",
-    "Mô tả bài học 25",
-    "Mô tả bài học 26",
-    "Mô tả bài học 27",
-    "Mô tả bài học 28",
-    "Mô tả bài học 29",
-    "Mô tả bài học 30",
-    "Mô tả bài học 31",
-    "Mô tả bài học 32",
-    "Mô tả bài học 33",
-    "Mô tả bài học 34",
-    "Mô tả bài học 35",
-    "Mô tả bài học 36",
+    "Chủ đề 1",
+    "Chủ đề 2",
+    "Chủ đề 3",
+    "Chủ đề 4",
+    "Chủ đề 5",
+    "Chủ đề 6",
+    "Chủ đề 7",
+    "Chủ đề 8",
+    "Chủ đề 9",
+    "Chủ đề 10",
+    "Chủ đề 11",
+    "Chủ đề 12",
+    "Chủ đề 13",
+    "Chủ đề 14",
+    "Chủ đề 15",
+    "Chủ đề 16",
+    "Chủ đề 17",
+    "Chủ đề 18",
+    "Chủ đề 19",
+    "Chủ đề 20",
+    "Chủ đề 21",
+    "Chủ đề 22",
+    "Chủ đề 23",
+    "Chủ đề 24",
+    "Chủ đề 25",
+    "Chủ đề 26",
+    "Chủ đề 27",
+    "Chủ đề 28",
+    "Chủ đề 29",
+    "Chủ đề 30",
+    "Chủ đề 31",
+    "Chủ đề 32",
   ];
 
   // Hàm điều hướng đến trang chi tiết bài học
@@ -53,7 +49,7 @@ export default function VocabularyListScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      {/* Truyền tiêu đề cho Header */}
+
       <Header title="Từ vựng TOIEC" />
 
       {/* Nội dung của trang */}
@@ -93,11 +89,12 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
     paddingTop: 80,  
-    paddingHorizontal: 20,
+    
   },
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginStart: 19,
     marginBottom: 25,
     padding: 20,
     backgroundColor: '#ffffff',  
@@ -125,6 +122,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    paddingHorizontal: 20,
   },
   lessonCard: {
     backgroundColor: '#FFF',

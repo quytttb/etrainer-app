@@ -8,10 +8,10 @@ export default function GrammarListScreen() {
 
   // Danh sách mô tả bài học
   const lessonDescriptions: string[] = [
-    "Mô tả bài học 1",
-    "Mô tả bài học 2",
-    "Mô tả bài học 3",
-    "Mô tả bài học 4",
+    "Ngữ pháp 1",
+    "Ngữ pháp 2",
+    "Ngữ pháp 3",
+    "Ngữ pháp 4",
   ];
 
   // Hàm điều hướng đến trang chi tiết bài học
@@ -21,7 +21,6 @@ export default function GrammarListScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      {/* Truyền tiêu đề cho Header */}
       <Header title="Ngữ pháp TOIEC" />
 
       {/* Nội dung của trang */}
@@ -61,13 +60,12 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
     paddingTop: 80,  
-    paddingHorizontal: 20,
   },
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 25,
-    marginLeft: 55,
+    marginLeft: 80,
     padding: 20,
     backgroundColor: '#ffffff',  
     borderRadius: 10,
@@ -94,11 +92,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    paddingHorizontal: 20,
   },
   lessonCard: {
     backgroundColor: '#FFF',
     padding: 20,
-    marginLeft: 10,
+    marginStart: 11,
     borderRadius: 10,
     alignItems: 'center',
     width: '21%',
@@ -135,5 +134,6 @@ const styles = StyleSheet.create({
     left: '170%',
     transform: [{ translateX: -50 }], 
     color: '#000000',
+    textAlign: 'center',
   },
 });

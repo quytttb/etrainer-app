@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'rea
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
-import Header from '../../components/Home/Header'; 
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -27,6 +26,7 @@ export default function HomeScreen() {
         // Lấy tên người dùng từ AsyncStorage
         const storedName = await AsyncStorage.getItem('name');
         setUsername(storedName || 'Guest');  // Nếu không có tên, đặt là 'Guest'
+        
 
         // Gọi API để lấy dữ liệu bài luyện nghe và luyện đọc
         const response = await axios.get<any[]>('http://197.187.3.101:8080/api/lessons');
@@ -68,8 +68,27 @@ export default function HomeScreen() {
   return (
     <ScrollView style={styles.container}>
       {/* Header */}
-      <Header />
-      
+      <View style={styles.headerContainer}>
+        <View style={styles.headerLeft}>
+          <Text style={styles.headerTitle}>ETRAINER</Text>
+          <Text style={styles.headerSubtitle}>Hello! {username}</Text>
+        </View>
+        <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.notificationIcon}>
+            <Text style={styles.notificationText}>🔔</Text>
+          </TouchableOpacity>
+          <Image 
+            source={require('../../assets/images/default_avatar.png')}style={styles.avatar} />
+        </View>
+      </View>
+
+      <View style={styles.greenBox}>
+        <Text style={styles.studyTime}>Let's study with Etrainer!</Text>
+        <Text style={styles.studyTime}>45 minutes</Text>
+        <Image 
+            source={require('../../assets/images/diary.png')}style={styles.boxImage} />
+      </View>
+    
       {/* Luyện nghe Section */}
       <View style={styles.lessonSection}>
         <Text style={styles.sectionTitle}>Luyện nghe</Text>
@@ -134,24 +153,24 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
       
-      {/* History Section */}
-      <View style={styles.historySection}>
+       {/* Lịch sử Section */}
+       <View style={styles.historySection}>
         <Text style={styles.sectionTitle}>Lịch sử</Text>
-        
+
         {/* Tab buttons for switching between "Luyện tập" and "Thi" */}
         <View style={styles.tabContainer}>
           <TouchableOpacity
-            onPress={() => handleTabChange('practice')}>
+            onPress={() => setActiveTab('practice')}>
             <Text style={styles.tabText}>Luyện tập</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => handleTabChange('exam')}>
+            onPress={() => setActiveTab('exam')}>
             <Text style={styles.tabText}>Thi</Text>
           </TouchableOpacity>
         </View>
 
         {/* Content for each tab */}
-        {activeTab === 'practice' ? (
+        {activeTab === 'practice' && (
           <View style={styles.historyCard}>
             <View style={styles.historyColumn}>
               <Text style={styles.historySubTitle}>Luyện tập</Text>
@@ -169,7 +188,9 @@ export default function HomeScreen() {
               </View>
             </View>
           </View>
-        ) : (
+        )}
+
+        {activeTab === 'exam' && (
           <View style={styles.historyCard}>
             <View style={styles.historyColumn}>
               <Text style={styles.historySubTitle}>Thi</Text>
@@ -199,11 +220,74 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9F9F9',
     paddingHorizontal: 20,
   },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingVertical: 15,
+  },
+  headerLeft: {
+    flexDirection: 'column',
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  greenBox: {
+    backgroundColor: '#E8F5E9',
+    marginTop: 10,
+    padding: 50,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  boxImage: {
+    width: 200,
+    height: 200,
+    position: 'absolute',
+    marginLeft: 200,
+    marginTop: -25,
+  },
+  notificationIcon: {
+    marginLeft: 10,
+    padding: 10,
+  },
+  notificationText: {
+    fontSize: 20,
+    color: '#333',
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+  },
+  headerSubtitle: {
+    marginTop: 10,
+    fontSize: 38,
+    color: '#009999',
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
   lessonSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 70,
+  },
+  studyTime: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 10,
   },
   sectionTitle: {
     fontSize: 20,
@@ -223,7 +307,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '20%',
     marginBottom: 15,
-    marginRight: 15,
+    marginRight: 17,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,

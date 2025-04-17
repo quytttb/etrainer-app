@@ -3,12 +3,22 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons'; 
 
-const ResultScreen = ({ route }) => {
+import { RouteProp } from '@react-navigation/native';
+
+type ResultScreenRouteProp = RouteProp<{ params: { selectedAnswers?: string; questionData?: string; partId?: string } }, 'params'>;
+
+type QuestionDataItem = {
+  id: string;
+  question: string;
+  correctAnswer: string;
+};
+
+const ResultScreen = ({ route }: { route: ResultScreenRouteProp }) => {
   const { selectedAnswers = '{}', questionData = '[]', partId } = route?.params || {}; // Lấy partId từ params
 
   // Chuyển chuỗi JSON thành đối tượng JavaScript
-  const parsedSelectedAnswers = JSON.parse(selectedAnswers);
-  const parsedQuestionData = JSON.parse(questionData);
+  const parsedSelectedAnswers: Record<string, string> = JSON.parse(selectedAnswers);
+  const parsedQuestionData: QuestionDataItem[] = JSON.parse(questionData);
 
   // Tính số câu trả lời đúng
   const correctAnswersCount = parsedQuestionData.filter(

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import HeaderCard from '../../../components/HeaderCard';
+import HeaderCard from '../../../components/HeaderTest';
 import QuestionCard from '../../../components/QuestionCard';
 import AudioControls from '../../../components/AudioControls';
 import NavigationButtons from '../../../components/NavigationButtons';
@@ -18,20 +18,28 @@ const ExamDetailScreen = () => {
   const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
   const [questions, setQuestions] = useState<any[]>([]); // Dữ liệu câu hỏi
 
-  // Lấy dữ liệu câu hỏi từ API khi component được mount
-  useEffect(() => {
-    const fetchExamDetails = async () => {
-      try {
-        const response = await axios.get(`http://197.187.3.101:8080/api/exams/${examId}`);
-        const data = response.data as { questions: any[] }; // Explicitly type response.data
-        setQuestions(data.questions || []); // Lưu câu hỏi vào state
-      } catch (error) {
-        console.error('Error fetching exam details:', error);
-      }
-    };
+  // Fake data with both image and text questions
+  const mockData = [
+    {
+      id: '1',
+      image: 'https://via.placeholder.com/200', 
+      question: 'Who is in the photo?',
+      options: ['A', 'B', 'C'],
+      correctAnswer: 'A',
+      audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+    },
+    {
+      id: '2',
+      question: 'Where is the meeting happening?', 
+      options: ['A', 'B', 'C'],
+      correctAnswer: 'B',
+      audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+    },
+  ];
 
-    fetchExamDetails(); // Lấy dữ liệu câu hỏi
-  }, [examId]);
+  useEffect(() => {
+    setQuestions(mockData); // Use mock data instead of API call
+  }, []);
 
   const currentQuestion = questions[currentQuestionIndex];
 
@@ -66,7 +74,7 @@ const ExamDetailScreen = () => {
 
   const getOptionStyle = (questionId: string, option: string) => {
     if (selectedAnswers[questionId] === option) {
-      return { backgroundColor: '#4CAF50', color: '#fff' }; // Màu khi chọn đúng
+      return { backgroundColor: '#4CAF50', color: '#fff' };
     }
     return { backgroundColor: '#f2f2f2', color: '#000' };
   };
@@ -76,12 +84,19 @@ const ExamDetailScreen = () => {
   return (
     <View style={styles.container}>
       <HeaderCard onBackPress={() => {}} onMenuPress={openModal} />
-      
+
       <ScrollView contentContainerStyle={styles.scrollView}>
         {currentQuestion && currentQuestion.image && (
           <View style={[styles.pictureSection, styles.sectionBorder]}>
             <Text style={styles.sectionTitle}>Picture</Text>
             <Image source={{ uri: currentQuestion.image }} style={styles.questionImage} />
+          </View>
+        )}
+
+        {currentQuestion && !currentQuestion.image && (
+          <View style={[styles.textSection, styles.sectionBorder]}>
+            <Text style={styles.sectionTitle}>Question</Text>
+            <Text style={styles.questionText}>{currentQuestion.question}</Text>
           </View>
         )}
 
@@ -94,12 +109,7 @@ const ExamDetailScreen = () => {
       </ScrollView>
 
       {currentQuestion && currentQuestion.audio && (
-        <AudioControls
-          isPlaying={false}
-          onPlayPause={() => {}}
-          onRewind={() => {}}
-          onForward={() => {}}
-        />
+        <AudioControls audioUri={currentQuestion.audio} />
       )}
 
       <NavigationButtons
@@ -202,6 +212,8 @@ const styles = StyleSheet.create({
   optionButton: { padding: 10, backgroundColor: '#f2f2f2', margin: 5, borderRadius: 8, borderWidth: 1, borderColor: '#ccc' },
   optionText: { fontSize: 14, color: '#000' },
   modalScrollView: { marginBottom: 20 },
+  textSection: { marginVertical: 10 },
+  questionText: { fontSize: 16, color: '#000', marginBottom: 10 },
 });
 
 export default ExamDetailScreen;

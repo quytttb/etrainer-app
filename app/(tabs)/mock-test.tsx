@@ -2,10 +2,11 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import { useRouter } from 'expo-router'; 
+import Header from '../../components/Header';
 
 export default function TestScreen() {
   const router = useRouter(); 
-
+ 
   const fulltests: Array<{ id: number; name: string; isLocked: boolean; year: string; type: 'full' }> = [
     { id: 1, name: 'Test 1', isLocked: false, year: 'ETS 2024', type: 'full' },
     { id: 2, name: 'Test 2', isLocked: false, year: 'ETS 2024', type: 'full' },
@@ -49,6 +50,8 @@ export default function TestScreen() {
 
   return (
     <ScrollView style={styles.container}>
+      <Header title="Thi thử" />
+
       {/* Fulltests */}
       {fulltests.length > 0 && (
         <View style={styles.categoryContainer}>
@@ -118,14 +121,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9F9F9',
-    paddingHorizontal: 20,
   },
 
   categoryContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 40,
+    paddingHorizontal: 20,
+    marginTop: 100,
   },
 
   category: {
@@ -145,6 +148,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 20,
     marginTop: 20,
+    paddingHorizontal: 20,
   },
 
   testCard: {
@@ -164,12 +168,12 @@ const styles = StyleSheet.create({
   },
 
   lockedTest: {
-    backgroundColor: '#D3D3D3', // Màu nền xám cho bài kiểm tra bị khóa
+    backgroundColor: '#D3D3D3',
   },
 
   test: {
-    width: 45,
-    height: 45,
+    width: 35,
+    height: 35,
     marginBottom: 10,
   },
 
@@ -181,7 +185,6 @@ const styles = StyleSheet.create({
   },
 
   testText: {
-    marginTop: 5,
     fontSize: 14,
     fontWeight: 'bold',
     position: 'absolute',
@@ -192,7 +195,7 @@ const styles = StyleSheet.create({
   },
 
   yearText: {
-    marginTop: 5,
+    marginTop: 2,
     fontSize: 14,
     position: 'absolute',
     top: 100,

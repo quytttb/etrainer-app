@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import { FontAwesome } from '@expo/vector-icons'; 
 
 import PropTypes from 'prop-types';
 
@@ -14,22 +14,23 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
 
   // Hàm quay lại trang trước
   const handleBackPress = () => {
-    router.back();  // Điều hướng quay lại trang trước
+    router.back();  
   };
 
   return (
     <View style={styles.headerContainer}>
-      {/* Nút quay lại */}
       <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
-        <Text style={styles.backText}>{"<"}</Text> {/* Dấu "<" quay lại */}
+        <FontAwesome name="chevron-left" size={20} color="#FFFFFF" /> 
       </TouchableOpacity>
 
       {/* Tiêu đề */}
-      <Text style={styles.title}>{title}</Text> {/* Tiêu đề động */}
+      <View style={styles.titleContainer}>
+        <Text style={styles.title}>{title}</Text> 
+      </View>
 
       {/* Biểu tượng thông tin (i) */}
       <TouchableOpacity style={styles.infoButton}>
-        <Text style={styles.infoText}>i</Text> {/* Biểu tượng thông tin */}
+        <Text style={styles.infoText}>i</Text> 
       </TouchableOpacity>
     </View>
   );
@@ -43,7 +44,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     backgroundColor: '#00BFAE',
-    width: '112%',  
+    width: '100%',  
     position: 'absolute', 
     top: 0, 
     zIndex: 1000, 
@@ -51,17 +52,16 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 5,
   },
-  backText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
+  titleContainer: {
+    flex: 1,  
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   title: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    flex: 1,  // Tiêu đề sẽ chiếm phần còn lại nếu có
-    textAlign: 'center', // Căn giữa tiêu đề
+    textAlign: 'center', 
   },
   infoButton: {
     padding: 10,
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
 });
 
 Header.propTypes = {
-  title: PropTypes.string.isRequired, // Tiêu đề của header
+  title: PropTypes.string.isRequired, 
 };
 
 export default Header;

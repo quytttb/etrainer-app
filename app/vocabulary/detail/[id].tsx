@@ -41,12 +41,10 @@ export default function VocabularyDetailScreen() {
   // Hàm xử lý khi nhấn vào một box (nút)
   const handleBoxPress = (boxName: string) => {
     console.log(`${boxName} clicked`);
-    // Thêm hành động cần thiết khi nhấn vào các box này
   };
 
   return (
     <View style={styles.container}>
-      {/* Header không cuộn */}
       <Header title={`Từ vựng ${id}`} />
 
       {/* Nội dung chính cuộn xuống */}

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, Modal, Dimensions } from 'react-native';
-import { BookKey, Heart, PenLine } from 'lucide-react-native';  // Giữ lại icon BookKey
+import { BookKey, Heart, PenLine } from 'lucide-react-native';  
 
 interface NavigationButtonsProps {
-  currentQuestionIndex: number; // Add this prop
+  currentQuestionIndex: number; 
   totalQuestions: number;
   onPrevious: () => void;
   onNext: () => void;
@@ -13,7 +13,7 @@ interface NavigationButtonsProps {
 }
 
 const NavigationButtons: React.FC<NavigationButtonsProps> = ({
-  currentQuestionIndex, // Use this prop
+  currentQuestionIndex, 
   totalQuestions,
   onPrevious,
   onNext,

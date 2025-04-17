@@ -21,7 +21,7 @@ export default function App() {
           height: 70, 
           borderTopLeftRadius: 30, 
           borderTopRightRadius: 30,
-          display: route.name === 'chat' ? 'none' : 'flex', // Hide tab bar only for "chat"
+          display: route.name === 'chat' ? 'none' : 'flex', 
         }
       })}
     >
