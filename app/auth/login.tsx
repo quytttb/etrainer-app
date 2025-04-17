@@ -13,7 +13,7 @@ const LoginScreen = () => {
   const [password, setPassword] = useState<string>('');  // Mật khẩu
 
   // Hàm xử lý đăng nhập
-  const handleLogin = async () => {
+  /*const handleLogin = async () => {
     try {
       interface LoginResponse {
         token: string;
@@ -35,10 +35,10 @@ const LoginScreen = () => {
         Alert.alert('Đăng nhập thành công!');
 
         const storedName = await AsyncStorage.getItem('name');
-        console.log('Stored name after login:', storedName);
+        console.log('Stored name after login:', storedName);*/
 
         // Điều hướng đến trang home sau khi đăng nhập thành công
-        router.push('../(tabs)/home');  // Đảm bảo đường dẫn chính xác
+        /*router.push('../(tabs)/home');  // Đảm bảo đường dẫn chính xác
       } else {
         Alert.alert('Lỗi', 'Thông tin đăng nhập không hợp lệ');
       }
@@ -46,7 +46,32 @@ const LoginScreen = () => {
       console.error('Lỗi khi đăng nhập:', error);
       Alert.alert('Lỗi', 'Có lỗi xảy ra. Vui lòng thử lại.');
     }
+  };*/
+  const fakeUser = {
+    email: 'test@gmail.com',
+    password: '123456',
+    token: 'fake-jwt-token-12345',
+    name: 'Anna Doe',
   };
+
+  // Hàm xử lý đăng nhập
+  const handleLogin = async () => {
+    // Kiểm tra dữ liệu đăng nhập ảo
+    if (email === fakeUser.email && password === fakeUser.password) {
+      // Lưu token vào AsyncStorage
+      await AsyncStorage.setItem('token', fakeUser.token);
+      await AsyncStorage.setItem('name', fakeUser.name);
+
+      // Hiển thị thông báo và điều hướng đến trang Home
+      Alert.alert('Đăng nhập thành công!');
+      
+      // Điều hướng đến trang Home sau khi đăng nhập thành công
+      router.push('/(tabs)/home'); // Đảm bảo đường dẫn chính xác
+    } else {
+      Alert.alert('Lỗi', 'Thông tin đăng nhập không hợp lệ');
+    }
+  };
+
 
   return (
     <View style={styles.container}>
