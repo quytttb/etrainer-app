@@ -1,16 +1,32 @@
-import React, { useState } from 'react';
-import { useRouter } from 'expo-router';
-import { View, Text, TextInput, Button, Alert, StyleSheet, TouchableOpacity } from 'react-native';
-import axios from 'axios';
-import { FontAwesome } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState } from "react";
+import { useRouter } from "expo-router";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  Alert,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
+import { FontAwesome } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
+
+GoogleSignin.configure({
+  webClientId:
+    "773784725105-567pu4tnkktfbk59phipvbmen8kfh70u.apps.googleusercontent.com",
+  iosClientId:
+    "773784725105-lkfnha638ntavoek5r2cdovf49ptka3p.apps.googleusercontent.com",
+  scopes: ["profile", "email"],
+});
 
 const LoginScreen = () => {
   const router = useRouter();
 
   // States để lưu thông tin đăng nhập
-  const [email, setEmail] = useState<string>('');       // Email
-  const [password, setPassword] = useState<string>('');  // Mật khẩu
+  const [email, setEmail] = useState<string>(""); // Email
+  const [password, setPassword] = useState<string>(""); // Mật khẩu
 
   // Hàm xử lý đăng nhập
   /*const handleLogin = async () => {
@@ -37,8 +53,8 @@ const LoginScreen = () => {
         const storedName = await AsyncStorage.getItem('name');
         console.log('Stored name after login:', storedName);*/
 
-        // Điều hướng đến trang home sau khi đăng nhập thành công
-        /*router.push('../(tabs)/home');  // Đảm bảo đường dẫn chính xác
+  // Điều hướng đến trang home sau khi đăng nhập thành công
+  /*router.push('../(tabs)/home');  // Đảm bảo đường dẫn chính xác
       } else {
         Alert.alert('Lỗi', 'Thông tin đăng nhập không hợp lệ');
       }
@@ -48,10 +64,10 @@ const LoginScreen = () => {
     }
   };*/
   const fakeUser = {
-    email: 'test@gmail.com',
-    password: '123456',
-    token: 'fake-jwt-token-12345',
-    name: 'Anna Doe',
+    email: "test@gmail.com",
+    password: "123456",
+    token: "fake-jwt-token-12345",
+    name: "Anna Doe",
   };
 
   // Hàm xử lý đăng nhập
@@ -59,27 +75,31 @@ const LoginScreen = () => {
     // Kiểm tra dữ liệu đăng nhập ảo
     if (email === fakeUser.email && password === fakeUser.password) {
       // Lưu token vào AsyncStorage
-      await AsyncStorage.setItem('token', fakeUser.token);
-      await AsyncStorage.setItem('name', fakeUser.name);
+      await AsyncStorage.setItem("token", fakeUser.token);
+      await AsyncStorage.setItem("name", fakeUser.name);
 
       // Hiển thị thông báo và điều hướng đến trang Home
-      Alert.alert('Đăng nhập thành công!');
-      
+      Alert.alert("Đăng nhập thành công!");
+
       // Điều hướng đến trang Home sau khi đăng nhập thành công
-      router.push('/(tabs)/home'); // Đảm bảo đường dẫn chính xác
+      router.push("/(tabs)/home"); // Đảm bảo đường dẫn chính xác
     } else {
-      Alert.alert('Lỗi', 'Thông tin đăng nhập không hợp lệ');
+      Alert.alert("Lỗi", "Thông tin đăng nhập không hợp lệ");
     }
   };
-
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Đăng Nhập</Text>
-      
+
       {/* Input cho Email */}
       <View style={styles.inputContainer}>
-        <FontAwesome name="envelope" size={20} color="#7f8c8d" style={styles.icon} />
+        <FontAwesome
+          name="envelope"
+          size={20}
+          color="#7f8c8d"
+          style={styles.icon}
+        />
         <TextInput
           placeholder="Email"
           value={email}
@@ -88,10 +108,15 @@ const LoginScreen = () => {
           keyboardType="email-address"
         />
       </View>
-      
+
       {/* Input cho Mật khẩu */}
       <View style={styles.inputContainer}>
-        <FontAwesome name="lock" size={20} color="#7f8c8d" style={styles.icon} />
+        <FontAwesome
+          name="lock"
+          size={20}
+          color="#7f8c8d"
+          style={styles.icon}
+        />
         <TextInput
           placeholder="Mật khẩu"
           value={password}
@@ -100,7 +125,7 @@ const LoginScreen = () => {
           style={styles.input}
         />
       </View>
-      
+
       {/* Nút Đăng nhập */}
       <Button title="Đăng nhập" onPress={handleLogin} color="#1abc9c" />
 
@@ -108,17 +133,41 @@ const LoginScreen = () => {
       <Text style={styles.orText}>--- OR ---</Text>
 
       <View style={styles.socialLoginContainer}>
-        <Button title="Đăng nhập bằng Google" onPress={() => { /* Logic Google Login */ }} color="#DB4437" />
-        <Button title="Đăng nhập bằng Facebook" onPress={() => { /* Logic Facebook Login */ }} color="#3b5998" />
+        <Button
+          title="Đăng nhập bằng Google"
+          onPress={async () => {
+            console.log(123);
+            try {
+              await GoogleSignin.hasPlayServices();
+              const userInfo = await GoogleSignin.signIn();
+              console.log(userInfo);
+            } catch (error) {
+              console.log("🚀 352 ~ onPress={ ~ error:", error);
+            }
+            /* Logic Google Login */
+          }}
+          color="#DB4437"
+        />
+        <Button
+          title="Đăng nhập bằng Facebook"
+          onPress={() => {
+            /* Logic Facebook Login */
+          }}
+          color="#3b5998"
+        />
       </View>
 
       {/* Quên mật khẩu và điều hướng tới đăng ký */}
       <View style={styles.linksContainer}>
-        <TouchableOpacity onPress={() => { /* Logic Quên mật khẩu */ }}>
+        <TouchableOpacity
+          onPress={() => {
+            /* Logic Quên mật khẩu */
+          }}
+        >
           <Text style={styles.linkText}>Quên mật khẩu?</Text>
         </TouchableOpacity>
-        <Text style={styles.linkText}>  |  </Text>
-        <TouchableOpacity onPress={() => router.push('/auth/register')}>
+        <Text style={styles.linkText}> | </Text>
+        <TouchableOpacity onPress={() => router.push("/auth/register")}>
           <Text style={styles.linkText}>Tạo tài khoản</Text>
         </TouchableOpacity>
       </View>
@@ -130,20 +179,20 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     flex: 1,
-    justifyContent: 'center',
-    backgroundColor: '#ecf0f1',
+    justifyContent: "center",
+    backgroundColor: "#ecf0f1",
   },
   title: {
     fontSize: 28,
     marginBottom: 20,
-    textAlign: 'center',
-    fontWeight: 'bold',
+    textAlign: "center",
+    fontWeight: "bold",
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: "#ccc",
     marginBottom: 15,
     paddingLeft: 10,
   },
@@ -157,22 +206,22 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
   },
   orText: {
-    textAlign: 'center',
+    textAlign: "center",
     marginVertical: 10,
-    color: '#7f8c8d',
+    color: "#7f8c8d",
   },
   socialLoginContainer: {
     marginTop: 10,
     marginBottom: 15,
   },
   linksContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     marginTop: 15,
   },
   linkText: {
-    color: '#1abc9c',
-    fontWeight: 'bold',
+    color: "#1abc9c",
+    fontWeight: "bold",
     fontSize: 16,
   },
 });
