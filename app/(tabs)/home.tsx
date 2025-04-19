@@ -14,7 +14,6 @@ import useProfile from "@/hooks/useProfile";
 
 export default function HomeScreen() {
   const { profile } = useProfile();
-  console.log("🚀 352 ~ HomeScreen ~ profile:", profile);
 
   const router = useRouter();
   const [username, setUsername] = useState<string>(""); // Tên người dùng
@@ -93,7 +92,11 @@ export default function HomeScreen() {
             <Text style={styles.notificationText}>🔔</Text>
           </TouchableOpacity>
           <Image
-            source={require("../../assets/images/default_avatar.png")}
+            source={
+              profile?.avatarUrl
+                ? { uri: profile?.avatarUrl }
+                : require("../../assets/images/default_avatar.png")
+            }
             style={styles.avatar}
           />
         </View>

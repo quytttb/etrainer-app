@@ -35,7 +35,7 @@ export const removeAccessToken = async () => {
 const onLogout = async () => {
   await removeAccessToken();
 
-  router.replace("/auth/login");
+  router.push("/auth/login");
 };
 
 const useAuth = () => {

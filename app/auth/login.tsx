@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import {
   View,
   Text,
@@ -10,17 +10,34 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
-import { makeRedirectUri } from "expo-auth-session";
+import { useMutation } from "@tanstack/react-query";
+import { loginService } from "./service";
+import useAuth from "@/hooks/useAuth";
 
 WebBrowser.maybeCompleteAuthSession();
 
 const LoginScreen = () => {
+  const { setAccessToken } = useAuth();
+
   const router = useRouter();
 
-  const [request, response, promS] = Google.useAuthRequest({
+  const loginMutation = useMutation({
+    mutationFn: loginService,
+    onSuccess: async (r) => {
+      await setAccessToken(r.token);
+      router.push("../(tabs)/home");
+    },
+    onError: (error: any) => {
+      Alert.alert(
+        "Lỗi",
+        error?.response?.data?.message || "Có lỗi xảy ra. Vui lòng thử lại."
+      );
+    },
+  });
+
+  const [_, __, promptAsync] = Google.useAuthRequest({
     // androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
     webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
     clientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
@@ -31,70 +48,18 @@ const LoginScreen = () => {
     responseType: "token",
   });
 
-  console.log(makeRedirectUri({ path: "/" }));
-
   // States để lưu thông tin đăng nhập
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
   // Hàm xử lý đăng nhập
-  /*const handleLogin = async () => {
-    try {
-      interface LoginResponse {
-        token: string;
-        name: string;
-      }
-
-      const response = await axios.post('http://197.187.3.101:8080/api/login', {
-        email,
-        password,
-      });
-
-      if (response.status === 200) {
-        const { token, name } = response.data as LoginResponse;
-        const userName = name || 'Guest';
-
-        // Lưu token vào AsyncStorage
-        await AsyncStorage.setItem('token', token);
-        await AsyncStorage.setItem('name', name);
-        Alert.alert('Đăng nhập thành công!');
-
-        const storedName = await AsyncStorage.getItem('name');
-        console.log('Stored name after login:', storedName);*/
-
-  // Điều hướng đến trang home sau khi đăng nhập thành công
-  /*router.push('../(tabs)/home');  // Đảm bảo đường dẫn chính xác
-      } else {
-        Alert.alert('Lỗi', 'Thông tin đăng nhập không hợp lệ');
-      }
-    } catch (error) {
-      console.error('Lỗi khi đăng nhập:', error);
-      Alert.alert('Lỗi', 'Có lỗi xảy ra. Vui lòng thử lại.');
-    }
-  };*/
-  const fakeUser = {
-    email: "test@gmail.com",
-    password: "123456",
-    token: "fake-jwt-token-12345",
-    name: "Anna Doe",
-  };
-
-  // Hàm xử lý đăng nhập
   const handleLogin = async () => {
-    // Kiểm tra dữ liệu đăng nhập ảo
-    if (email === fakeUser.email && password === fakeUser.password) {
-      // Lưu token vào AsyncStorage
-      await AsyncStorage.setItem("token", fakeUser.token);
-      await AsyncStorage.setItem("name", fakeUser.name);
-
-      // Hiển thị thông báo và điều hướng đến trang Home
-      Alert.alert("Đăng nhập thành công!");
-
-      // Điều hướng đến trang Home sau khi đăng nhập thành công
-      router.push("/(tabs)/home"); // Đảm bảo đường dẫn chính xác
-    } else {
-      Alert.alert("Lỗi", "Thông tin đăng nhập không hợp lệ");
+    if (!email || !password) {
+      Alert.alert("Thông báo", "Vui lòng nhập đầy đủ thông tin");
+      return;
     }
+
+    loginMutation.mutate({ email, password });
   };
 
   return (
@@ -144,7 +109,7 @@ const LoginScreen = () => {
       <View style={styles.socialLoginContainer}>
         <Button
           title="Đăng nhập bằng Google"
-          onPress={() => promS()}
+          onPress={() => promptAsync()}
           color="#DB4437"
         />
         <Button
