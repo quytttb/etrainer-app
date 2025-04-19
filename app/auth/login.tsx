@@ -1,39 +1,92 @@
-import React, { useState } from 'react';
-import { useRouter } from 'expo-router';
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { FontAwesome } from '@expo/vector-icons'; 
+import React, { useState } from "react";
+import { useRouter } from "expo-router";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  Alert,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
+import { FontAwesome } from "@expo/vector-icons";
+import * as WebBrowser from "expo-web-browser";
+import * as Google from "expo-auth-session/providers/google";
+import { useMutation } from "@tanstack/react-query";
+import { loginService } from "./service";
+import useAuth from "@/hooks/useAuth";
+
+WebBrowser.maybeCompleteAuthSession();
 
 const LoginScreen = () => {
-  const router = useRouter();
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const { setAccessToken } = useAuth();
 
-  const fakeUser = {
-    email: 'test@gmail.com',
-    password: '123456',
-    token: 'fake-jwt-token-12345',
-    name: 'Anna Doe',
+  const router = useRouter();
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+
+  const loginMutation = useMutation({
+    mutationFn: loginService,
+    onSuccess: async (r) => {
+      await setAccessToken(r.token);
+      router.push("../(tabs)/home");
+    },
+    onError: (error: any) => {
+      Alert.alert(
+        "Lỗi",
+        error?.response?.data?.message || "Có lỗi xảy ra. Vui lòng thử lại."
+      );
+    },
+  });
+
+  const loginButtonText = {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   };
 
+  const [_, __, promptAsync] = Google.useAuthRequest({
+    // androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
+    clientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
+    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+    scopes: ["profile", "email"],
+    redirectUri: process.env.EXPO_PUBLIC_REDIRECT_URI,
+    selectAccount: true,
+    responseType: "token",
+  });
+
+  // States để lưu thông tin đăng nhập
+  // Removed duplicate password state declaration
+
   const handleLogin = async () => {
-    if (email === fakeUser.email && password === fakeUser.password) {
-      await AsyncStorage.setItem('token', fakeUser.token);
-      await AsyncStorage.setItem('name', fakeUser.name);
-      Alert.alert('Đăng nhập thành công!');
-      router.push('/(tabs)/home');
-    } else {
-      Alert.alert('Lỗi', 'Thông tin đăng nhập không hợp lệ');
+    if (!email || !password) {
+      Alert.alert("Thông báo", "Vui lòng nhập đầy đủ thông tin");
+      return;
     }
+
+    const createAccountText = {
+      color: "#1abc9c",
+      fontWeight: "bold",
+      fontSize: 16,
+      marginVertical: 10,
+    };
+
+    loginMutation.mutate({ email, password });
   };
 
   return (
     <View style={styles.container}>
-      <Image source={require('../../assets/images/Etrainer_LOGO.png')} style={styles.robotImage} />
-      <Text style={styles.title}>Login</Text>
+      <Text style={styles.title}>Đăng Nhập</Text>
 
+      {/* Input cho Email */}
       <View style={styles.inputContainer}>
-        <FontAwesome name="envelope" size={20} color="#333" style={styles.inputIcon} />
+        <FontAwesome
+          name="envelope"
+          size={20}
+          color="#7f8c8d"
+          style={styles.icon}
+        />
         <TextInput
           placeholder="Email"
           value={email}
@@ -43,8 +96,14 @@ const LoginScreen = () => {
         />
       </View>
 
+      {/* Input cho Mật khẩu */}
       <View style={styles.inputContainer}>
-        <FontAwesome name="lock" size={20} color="#333" style={styles.inputIcon} />
+        <FontAwesome
+          name="lock"
+          size={20}
+          color="#7f8c8d"
+          style={styles.icon}
+        />
         <TextInput
           placeholder="Password"
           value={password}
@@ -53,6 +112,9 @@ const LoginScreen = () => {
           style={styles.input}
         />
       </View>
+
+      {/* Nút Đăng nhập */}
+      <Button title="Đăng nhập" onPress={handleLogin} color="#1abc9c" />
 
       <TouchableOpacity onPress={handleLogin} style={styles.loginButton}>
         <Text style={styles.loginButtonText}>Login</Text>
@@ -67,11 +129,32 @@ const LoginScreen = () => {
       </TouchableOpacity>
 
       <View style={styles.socialLoginContainer}>
-        <TouchableOpacity>
-          <Image source={require('../../assets/images/facebook.png')} style={styles.socialIcon} />
+        <Button
+          title="Đăng nhập bằng Google"
+          onPress={() => promptAsync()}
+          color="#DB4437"
+        />
+        <Button
+          title="Đăng nhập bằng Facebook"
+          onPress={() => {
+            /* Logic Facebook Login */
+          }}
+          color="#3b5998"
+        />
+      </View>
+
+      {/* Quên mật khẩu và điều hướng tới đăng ký */}
+      <View style={styles.linksContainer}>
+        <TouchableOpacity
+          onPress={() => {
+            /* Logic Quên mật khẩu */
+          }}
+        >
+          <Text style={styles.linkText}>Quên mật khẩu?</Text>
         </TouchableOpacity>
-        <TouchableOpacity>
-          <Image source={require('../../assets/images/google.png')} style={styles.socialIcon} />
+        <Text style={styles.linkText}> | </Text>
+        <TouchableOpacity onPress={() => router.push("/auth/register")}>
+          <Text style={styles.linkText}>Tạo tài khoản</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -81,32 +164,31 @@ const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
+    justifyContent: "center",
+    backgroundColor: "#ecf0f1",
   },
-  robotImage: {
-    width: 250,
-    height: 250,
-    marginTop: -100,
+  loginButton: {
+    backgroundColor: "#1abc9c",
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    marginVertical: 10,
   },
   title: {
-    fontSize: 30,
-    fontWeight: 'bold',
+    fontSize: 28,
     marginBottom: 20,
-    color: '#333',
+    textAlign: "center",
+    fontWeight: "bold",
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-    backgroundColor: '#fff',
-    borderRadius: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
     marginBottom: 15,
     paddingHorizontal: 15,
     paddingVertical: 10,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 5,
@@ -117,51 +199,30 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#333',
+    color: "#333",
   },
-  loginButton: {
-    backgroundColor: '#0099CC',
-    borderRadius: 20,
-    paddingVertical: 15,
-    paddingHorizontal: 90,
-    marginTop: 40,
-    marginBottom: 20,
+  icon: {
+    marginRight: 10,
+    color: "#7f8c8d",
   },
-  loginButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  linkContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  forgotPasswordText: {
-    color: '#333',
-    fontSize: 14,
-  },
-  separator: {
-    color: '#333',
-    fontSize: 14,
-    marginHorizontal: 5,
-  },
-  createAccountText: {
-    color: '#1abc9c',
-    fontSize: 14,
-    fontWeight: 'bold',
+  orText: {
+    textAlign: "center",
+    marginVertical: 10,
+    color: "#7f8c8d",
   },
   socialLoginContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
     marginTop: 10,
+    marginBottom: 15,
   },
-  socialIcon: {
-    width: 40,
-    height: 40,
-    marginHorizontal: 15,
+  linksContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 15,
+  },
+  linkText: {
+    color: "#1abc9c",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });
 
