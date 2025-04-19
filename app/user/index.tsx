@@ -45,8 +45,6 @@ export default function EditProfileScreen() {
     return require("../../assets/images/default_avatar.png");
   }, [avatarUrl, avatarUri]);
 
-  console.log("🚀 352 ~ avatar ~ avatar:", avatar);
-
   const updateProfileMutation = useMutation({
     mutationFn: updateProfileService,
     onSuccess: () => {
