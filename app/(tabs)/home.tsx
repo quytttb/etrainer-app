@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     marginTop: 10,
     fontSize: 38,
-    color: '#009999',
+    color: '#0099CC',
     fontWeight: 'bold',
     marginBottom: 5,
   },

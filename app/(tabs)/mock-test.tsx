@@ -23,7 +23,6 @@ export default function TestScreen() {
     { id: 2, name: 'Test 2', isLocked: false, type: 'mini' },
     { id: 3, name: 'Test 3', isLocked: true, type: 'mini' },
     { id: 4, name: 'Test 4', isLocked: true, type: 'mini' },
-    { id: 5, name: 'Test 5', isLocked: true, type: 'mini' },
   ];
 
   // Function to handle test selection and navigate to the correct page
@@ -93,7 +92,7 @@ export default function TestScreen() {
             key={test.id} 
             style={[styles.testCard, test.isLocked && styles.lockedTest]} 
             onPress={() => !test.isLocked && handleTestSelect(test.id, test.type)}  // Kiểm tra xem bài kiểm tra có bị khóa không trước khi xử lý nhấn
-            disabled={test.isLocked}  // Vô hiệu hóa nút nếu bài kiểm tra bị khóa
+            disabled={test.isLocked}  
           >
             <Image
               source={require('../../assets/images/test.png')}
@@ -106,13 +105,6 @@ export default function TestScreen() {
           </TouchableOpacity>
         ))}
       </View>
-
-      {/* Nút Bắt đầu nào */}
-      {hasValidTest && (
-        <TouchableOpacity style={styles.startButton}>
-          <Text style={styles.startButtonText}>Bắt đầu nào</Text>
-        </TouchableOpacity>
-      )}
     </ScrollView>
   );
 }
@@ -146,7 +138,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: -55,
     marginTop: 20,
     paddingHorizontal: 20,
   },
@@ -204,20 +196,5 @@ const styles = StyleSheet.create({
     color: '#000000',
     width: '180%',
     textAlign: 'center',
-  },
-
-  startButton: {
-    backgroundColor: '#00BFAE',
-    paddingVertical: 15,
-    marginHorizontal: 50,
-    borderRadius: 30,
-    marginTop: 30,
-    alignItems: 'center',
-  },
-
-  startButtonText: {
-    fontSize: 18,
-    color: '#fff',
-    fontWeight: 'bold',
   },
 });

@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
   },
   startButton: {
-    backgroundColor: '#00BFAE', 
+    backgroundColor: '#0099CC', 
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 20,
@@ -120,7 +120,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
   },
-  // Style cho nút back
   backButton: {
     position: 'absolute',
     top: 20,

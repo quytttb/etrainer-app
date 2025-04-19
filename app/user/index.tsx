@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet, TouchableOpacity, ScrollView, Platform, Image } from 'react-native';
+import { View, Text, TextInput, Alert, StyleSheet, TouchableOpacity, ScrollView, Platform, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { RadioButton } from 'react-native-paper';
-import * as ImagePicker from 'expo-image-picker';  // Import expo-image-picker
+import * as ImagePicker from 'expo-image-picker';  
 
 export default function EditProfileScreen() {
   const router = useRouter();

@@ -1,52 +1,14 @@
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
-import { View, Text, TextInput, Button, Alert, StyleSheet, TouchableOpacity } from 'react-native';
-import axios from 'axios';
-import { FontAwesome } from '@expo/vector-icons';
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { FontAwesome } from '@expo/vector-icons'; 
 
 const LoginScreen = () => {
   const router = useRouter();
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
 
-  // States để lưu thông tin đăng nhập
-  const [email, setEmail] = useState<string>('');       // Email
-  const [password, setPassword] = useState<string>('');  // Mật khẩu
-
-  // Hàm xử lý đăng nhập
-  /*const handleLogin = async () => {
-    try {
-      interface LoginResponse {
-        token: string;
-        name: string;
-      }
-
-      const response = await axios.post('http://197.187.3.101:8080/api/login', {
-        email,
-        password,
-      });
-
-      if (response.status === 200) {
-        const { token, name } = response.data as LoginResponse;
-        const userName = name || 'Guest';
-
-        // Lưu token vào AsyncStorage
-        await AsyncStorage.setItem('token', token);
-        await AsyncStorage.setItem('name', name);
-        Alert.alert('Đăng nhập thành công!');
-
-        const storedName = await AsyncStorage.getItem('name');
-        console.log('Stored name after login:', storedName);*/
-
-        // Điều hướng đến trang home sau khi đăng nhập thành công
-        /*router.push('../(tabs)/home');  // Đảm bảo đường dẫn chính xác
-      } else {
-        Alert.alert('Lỗi', 'Thông tin đăng nhập không hợp lệ');
-      }
-    } catch (error) {
-      console.error('Lỗi khi đăng nhập:', error);
-      Alert.alert('Lỗi', 'Có lỗi xảy ra. Vui lòng thử lại.');
-    }
-  };*/
   const fakeUser = {
     email: 'test@gmail.com',
     password: '123456',
@@ -54,32 +16,24 @@ const LoginScreen = () => {
     name: 'Anna Doe',
   };
 
-  // Hàm xử lý đăng nhập
   const handleLogin = async () => {
-    // Kiểm tra dữ liệu đăng nhập ảo
     if (email === fakeUser.email && password === fakeUser.password) {
-      // Lưu token vào AsyncStorage
       await AsyncStorage.setItem('token', fakeUser.token);
       await AsyncStorage.setItem('name', fakeUser.name);
-
-      // Hiển thị thông báo và điều hướng đến trang Home
       Alert.alert('Đăng nhập thành công!');
-      
-      // Điều hướng đến trang Home sau khi đăng nhập thành công
-      router.push('/(tabs)/home'); // Đảm bảo đường dẫn chính xác
+      router.push('/(tabs)/home');
     } else {
       Alert.alert('Lỗi', 'Thông tin đăng nhập không hợp lệ');
     }
   };
 
-
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Đăng Nhập</Text>
-      
-      {/* Input cho Email */}
+      <Image source={require('../../assets/images/Etrainer_LOGO.png')} style={styles.robotImage} />
+      <Text style={styles.title}>Login</Text>
+
       <View style={styles.inputContainer}>
-        <FontAwesome name="envelope" size={20} color="#7f8c8d" style={styles.icon} />
+        <FontAwesome name="envelope" size={20} color="#333" style={styles.inputIcon} />
         <TextInput
           placeholder="Email"
           value={email}
@@ -88,38 +42,36 @@ const LoginScreen = () => {
           keyboardType="email-address"
         />
       </View>
-      
-      {/* Input cho Mật khẩu */}
+
       <View style={styles.inputContainer}>
-        <FontAwesome name="lock" size={20} color="#7f8c8d" style={styles.icon} />
+        <FontAwesome name="lock" size={20} color="#333" style={styles.inputIcon} />
         <TextInput
-          placeholder="Mật khẩu"
+          placeholder="Password"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
           style={styles.input}
         />
       </View>
-      
-      {/* Nút Đăng nhập */}
-      <Button title="Đăng nhập" onPress={handleLogin} color="#1abc9c" />
 
-      {/* Hoặc đăng nhập bằng Google và Facebook */}
-      <Text style={styles.orText}>--- OR ---</Text>
+      <TouchableOpacity onPress={handleLogin} style={styles.loginButton}>
+        <Text style={styles.loginButtonText}>Login</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.linkContainer}>
+        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+        <Text style={styles.separator}> | </Text>
+        <TouchableOpacity onPress={() => router.push('/auth/register')}>
+          <Text style={styles.createAccountText}>Create Account</Text>
+        </TouchableOpacity>
+      </TouchableOpacity>
 
       <View style={styles.socialLoginContainer}>
-        <Button title="Đăng nhập bằng Google" onPress={() => { /* Logic Google Login */ }} color="#DB4437" />
-        <Button title="Đăng nhập bằng Facebook" onPress={() => { /* Logic Facebook Login */ }} color="#3b5998" />
-      </View>
-
-      {/* Quên mật khẩu và điều hướng tới đăng ký */}
-      <View style={styles.linksContainer}>
-        <TouchableOpacity onPress={() => { /* Logic Quên mật khẩu */ }}>
-          <Text style={styles.linkText}>Quên mật khẩu?</Text>
+        <TouchableOpacity>
+          <Image source={require('../../assets/images/facebook.png')} style={styles.socialIcon} />
         </TouchableOpacity>
-        <Text style={styles.linkText}>  |  </Text>
-        <TouchableOpacity onPress={() => router.push('/auth/register')}>
-          <Text style={styles.linkText}>Tạo tài khoản</Text>
+        <TouchableOpacity>
+          <Image source={require('../../assets/images/google.png')} style={styles.socialIcon} />
         </TouchableOpacity>
       </View>
     </View>
@@ -128,52 +80,88 @@ const LoginScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
     flex: 1,
+    backgroundColor: '#FFF',
+    alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#ecf0f1',
+    padding: 20,
+  },
+  robotImage: {
+    width: 250,
+    height: 250,
+    marginTop: -100,
   },
   title: {
-    fontSize: 28,
-    marginBottom: 20,
-    textAlign: 'center',
+    fontSize: 30,
     fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#333',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 10,
     marginBottom: 15,
-    paddingLeft: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
   },
-  icon: {
+  inputIcon: {
     marginRight: 10,
   },
   input: {
     flex: 1,
-    height: 40,
     fontSize: 16,
-    paddingLeft: 10,
+    color: '#333',
   },
-  orText: {
+  loginButton: {
+    backgroundColor: '#0099CC',
+    borderRadius: 20,
+    paddingVertical: 15,
+    paddingHorizontal: 90,
+    marginTop: 40,
+    marginBottom: 20,
+  },
+  loginButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
     textAlign: 'center',
-    marginVertical: 10,
-    color: '#7f8c8d',
   },
-  socialLoginContainer: {
-    marginTop: 10,
-    marginBottom: 15,
-  },
-  linksContainer: {
+  linkContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 15,
+    alignItems: 'center',
+    marginBottom: 20,
   },
-  linkText: {
+  forgotPasswordText: {
+    color: '#333',
+    fontSize: 14,
+  },
+  separator: {
+    color: '#333',
+    fontSize: 14,
+    marginHorizontal: 5,
+  },
+  createAccountText: {
     color: '#1abc9c',
+    fontSize: 14,
     fontWeight: 'bold',
-    fontSize: 16,
+  },
+  socialLoginContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 10,
+  },
+  socialIcon: {
+    width: 40,
+    height: 40,
+    marginHorizontal: 15,
   },
 });
 

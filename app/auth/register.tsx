@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { Button, Alert, View, TextInput, StyleSheet, Text } from 'react-native';
+import { Button, Alert, View, TextInput, StyleSheet, Text, Image, TouchableOpacity } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 
 const RegisterScreen = () => {
   const router = useRouter();
 
-  // States để lưu thông tin đăng ký
   const [name, setName] = useState<string>('');  
-  const [email, setEmail] = useState<string>('');        // Email
-  const [phone, setPhone] = useState<string>('');        // Số điện thoại
-  const [password, setPassword] = useState<string>('');   // Mật khẩu
+  const [email, setEmail] = useState<string>('');       
+  const [phone, setPhone] = useState<string>('');        
+  const [password, setPassword] = useState<string>('');  
   const [confirmPassword, setConfirmPassword] = useState<string>('');  // Xác nhận mật khẩu
 
   // Hàm xử lý khi người dùng đăng ký
@@ -51,13 +51,19 @@ const RegisterScreen = () => {
 
   return (
     <View style={styles.container}>
+      <Image source={require('../../assets/images/Etrainer_LOGO.png')} style={styles.LogoImage} />
+        <Text style={styles.title}>Register</Text>
+    <View style={styles.inputContainer}>
+      <FontAwesome name="user" size={20} color="#333" style={styles.inputIcon} />
       <TextInput
         placeholder="Họ và tên"
         value={name}
         onChangeText={setName}
         style={styles.input}
       />
-
+    </View>
+    <View style={styles.inputContainer}>
+      <FontAwesome name="envelope" size={20} color="#333" style={styles.inputIcon} />
       <TextInput
         placeholder="Email"
         value={email}
@@ -65,7 +71,9 @@ const RegisterScreen = () => {
         style={styles.input}
         keyboardType="email-address"
       />
-
+    </View>
+    <View style={styles.inputContainer}>
+      <FontAwesome name="phone" size={20} color="#333" style={styles.inputIcon} />
       <TextInput
         placeholder="Số điện thoại"
         value={phone}
@@ -73,7 +81,9 @@ const RegisterScreen = () => {
         style={styles.input}
         keyboardType="phone-pad"
       />
-
+    </View>
+    <View style={styles.inputContainer}>
+      <FontAwesome name="lock" size={20} color="#333" style={styles.inputIcon} />
       <TextInput
         placeholder="Mật khẩu"
         value={password}
@@ -81,7 +91,9 @@ const RegisterScreen = () => {
         secureTextEntry
         style={styles.input}
       />
-
+    </View>
+    <View style={styles.inputContainer}>
+      <FontAwesome name="lock" size={20} color="#333" style={styles.inputIcon} />
       <TextInput
         placeholder="Xác nhận mật khẩu"
         value={confirmPassword}
@@ -89,8 +101,13 @@ const RegisterScreen = () => {
         secureTextEntry
         style={styles.input}
       />
+    </View>
 
-      <Button title="Đăng ký" onPress={handleRegister} />
+      {/* Nút đăng ký */}
+
+      <TouchableOpacity onPress={handleRegister} style={styles.regisButton}>
+              <Text style={styles.regisButtonText}>Register</Text>
+      </TouchableOpacity>
 
       <View style={styles.linksContainer}>
         <Text
@@ -109,19 +126,62 @@ const styles = StyleSheet.create({
     padding: 20,
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  LogoImage: {
+    width: 250,
+    height: 250,
+    marginTop: -60,
+    marginBottom: -30,
+  },
+  title: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#333',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    marginBottom: 15,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  inputIcon: {
+    marginRight: 10,
   },
   input: {
-    borderWidth: 1,
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 6,
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
+  },
+  regisButton: {
+    backgroundColor: '#0099CC',
+    borderRadius: 20,
+    paddingVertical: 15,
+    paddingHorizontal: 90,
+    marginTop: 40,
+    marginBottom: 20,
+  },
+  regisButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   linksContainer: {
-    marginTop: 15,
+    marginTop: 5,
     alignItems: 'center',
   },
   linkText: {
-    color: 'blue',
+    color: '#00BFAE',
     textDecorationLine: 'underline',
   },
 });

@@ -4,10 +4,12 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useLocalSearchParams } from 'expo-router';
 import Header from '../../../components/Header';
+import { useRouter } from 'expo-router';
 
 export default function VocabularyDetailScreen() {
   const { id } = useLocalSearchParams();  // Lấy id của bài học từ URL (id sẽ được truyền khi nhấn vào bài học trong màn hình trước)
   const parsedId = Number(id);  // Chuyển đổi id từ string sang number
+  const router = useRouter();
 
   // Dữ liệu mô phỏng cho các bài học
   const vocabularyData: { [key: number]: { word: string; pronunciation: string; meaning: string; }[] } = {
@@ -41,11 +43,26 @@ export default function VocabularyDetailScreen() {
   // Hàm xử lý khi nhấn vào một box (nút)
   const handleBoxPress = (boxName: string) => {
     console.log(`${boxName} clicked`);
+    // Điều hướng tới trang graft/[id] khi nhấn vào "Ghép từ"
+    if (boxName === "Ghép từ") {
+      router.push(`vocabulary/graft/${id}` as any);
+    }
+    // Điều hướng tới trang select-words/[id] khi nhấn vào "Chọn từ"
+    if (boxName === "Chọn từ") {
+      router.push(`vocabulary/select-words/${id}` as any);
+    }
+    // Điều hướng tới trang flash-card/[id] khi nhấn vào "FlashCard"
+    if (boxName === "FlashCard") {
+      router.push(`/vocabulary/flash-card/${id}` as any); // Đảm bảo đường dẫn chính xác
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Header title={`Từ vựng ${id}`} />
+      <Header
+        title={`Từ vựng ${id}`}
+        onBackPress={() => router.push('/vocabulary' as any)} // Always navigate to the vocabulary index page
+      />
 
       {/* Nội dung chính cuộn xuống */}
       <ScrollView style={styles.content}>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
-import Header from '../../components/Header';  // Import Header
-import { useRouter } from 'expo-router';  // Để điều hướng
+import Header from '../../components/Header';  
+import { useRouter } from 'expo-router';  
 
 export default function VocabularyListScreen() {
   const router = useRouter();
@@ -49,8 +49,10 @@ export default function VocabularyListScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-
-      <Header title="Từ vựng TOIEC" />
+      <Header
+        title="Từ vựng TOIEC"
+        onBackPress={() => router.push('/home')} 
+      />
 
       {/* Nội dung của trang */}
       <View style={styles.headerContainer}>
