@@ -22,3 +22,7 @@ export const updateProfileService = async ({
 
   return request.put("/users/profile", payload);
 };
+
+export const deleteAccountService = async () => {
+  return request.delete("/users/profile/delete-account");
+};

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -11,17 +11,19 @@ import {
   Image,
 } from "react-native";
 import { useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { RadioButton } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker"; // Import expo-image-picker
 import useProfile from "@/hooks/useProfile";
 import dayjs from "dayjs";
 import { useMutation } from "@tanstack/react-query";
-import { updateProfileService } from "./service";
+import { deleteAccountService, updateProfileService } from "./service";
+import useAuth from "@/hooks/useAuth";
 
 export default function EditProfileScreen() {
   const router = useRouter();
+
+  const { onLogout } = useAuth();
 
   const { profile } = useProfile();
 
@@ -31,7 +33,19 @@ export default function EditProfileScreen() {
   const [dob, setDob] = useState<Date>(dayjs().toDate());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [gender, setGender] = useState<string>("");
-  const [avatarUri, setAvatarUri] = useState(""); // State để lưu uri của avatar
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [avatarUri, setAvatarUri] = useState<string>("");
+
+  const avatar = useMemo(() => {
+    if (avatarUrl) {
+      return { uri: avatarUrl };
+    } else if (avatarUri) {
+      return { uri: avatarUri };
+    }
+    return require("../../assets/images/default_avatar.png");
+  }, [avatarUrl, avatarUri]);
+
+  console.log("🚀 352 ~ avatar ~ avatar:", avatar);
 
   const updateProfileMutation = useMutation({
     mutationFn: updateProfileService,
@@ -40,6 +54,18 @@ export default function EditProfileScreen() {
     },
     onError: () => {
       Alert.alert("Lỗi", "Có lỗi xảy ra khi cập nhật thông tin cá nhân.");
+    },
+  });
+
+  const deleteAccountMutation = useMutation({
+    mutationFn: deleteAccountService,
+    onSuccess: async () => {
+      await onLogout();
+      Alert.alert("Thành công", "Xóa tài khoản thành công!");
+      router.push("/auth/login");
+    },
+    onError: () => {
+      Alert.alert("Lỗi", "Có lỗi xảy ra khi xóa tài khoản.");
     },
   });
 
@@ -54,7 +80,7 @@ export default function EditProfileScreen() {
       }
 
       setGender(profile.gender);
-      setAvatarUri(profile.avatarUrl);
+      setAvatarUrl(profile.avatarUrl);
     }
   }, [profile]);
 
@@ -91,7 +117,6 @@ export default function EditProfileScreen() {
       });
 
       if (!result.canceled) {
-        console.log("🚀 352 ~ handleChooseAvatar ~ result:", result);
         setAvatarUri(result.assets[0].uri);
       }
     } else {
@@ -111,16 +136,7 @@ export default function EditProfileScreen() {
         },
         {
           text: "Xóa",
-          onPress: async () => {
-            try {
-              // Xóa thông tin người dùng khỏi AsyncStorage
-              await AsyncStorage.removeItem("user");
-              alert("Tài khoản của bạn đã bị xóa!");
-              router.push("/auth/login"); // Điều hướng về màn hình đăng nhập
-            } catch (error) {
-              console.error("Lỗi khi xóa tài khoản:", error);
-            }
-          },
+          onPress: () => deleteAccountMutation.mutate(),
         },
       ]
     );
@@ -131,14 +147,7 @@ export default function EditProfileScreen() {
       {/* Avatar */}
       <View style={styles.avatarContainer}>
         <TouchableOpacity onPress={handleChooseAvatar}>
-          <Image
-            source={
-              avatarUri
-                ? { uri: avatarUri }
-                : require("../../assets/images/default_avatar.png")
-            }
-            style={styles.avatar}
-          />
+          <Image source={avatar} style={styles.avatar} />
         </TouchableOpacity>
         <Text style={styles.changeAvatarText}>Thay đổi ảnh đại diện</Text>
       </View>
