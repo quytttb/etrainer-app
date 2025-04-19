@@ -1,52 +1,54 @@
-import React, { useState } from 'react';
-import { Button, Alert, View, TextInput, StyleSheet, Text, Image, TouchableOpacity } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
-import axios from 'axios';
-import { useRouter } from 'expo-router';
+import React, { useState } from "react";
+import { Button, Alert, View, TextInput, StyleSheet, Text, Image, TouchableOpacity } from "react-native";
+import { FontAwesome } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useMutation } from "@tanstack/react-query";
+import { registerService } from "./service";
 
 const RegisterScreen = () => {
   const router = useRouter();
 
-  const [name, setName] = useState<string>('');  
-  const [email, setEmail] = useState<string>('');       
-  const [phone, setPhone] = useState<string>('');        
-  const [password, setPassword] = useState<string>('');  
-  const [confirmPassword, setConfirmPassword] = useState<string>('');  // Xác nhận mật khẩu
+  // States để lưu thông tin đăng ký
+  const [name, setName] = useState<string | undefined>("");
+  const [email, setEmail] = useState<string | undefined>(""); // Email
+  const [phone, setPhone] = useState<string | undefined>(""); // Số điện thoại
+  const [password, setPassword] = useState<string | undefined>(""); // Mật khẩu
+  const [confirmPassword, setConfirmPassword] = useState<string | undefined>(""); // Xác nhận mật khẩu
+
+  const registerMutation = useMutation({
+    mutationFn: registerService,
+    onSuccess: () => {
+      Alert.alert("Thành công", "Đăng ký thành công");
+      router.push("/auth/login");
+    },
+    onError: (error: any) => {
+      console.error("Lỗi khi đăng ký:", error);
+      const errorMessage =
+        error.response?.data?.message || "Có lỗi xảy ra. Vui lòng thử lại.";
+      Alert.alert("Lỗi", errorMessage);
+    },
+  });
 
   // Hàm xử lý khi người dùng đăng ký
   const handleRegister = async () => {
     // Kiểm tra tất cả các trường có được nhập đúng hay không
     if (!name || !email || !phone || !password || !confirmPassword) {
-      Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin');
+      Alert.alert("Lỗi", "Vui lòng điền đầy đủ thông tin");
       return;
     }
 
     // Kiểm tra mật khẩu và xác nhận mật khẩu có khớp không
     if (password !== confirmPassword) {
-      Alert.alert('Lỗi', 'Mật khẩu và xác nhận mật khẩu không khớp');
+      Alert.alert("Lỗi", "Mật khẩu và xác nhận mật khẩu không khớp");
       return;
     }
 
-    try {
-      const response = await axios.post('http://197.187.3.101:8080/api/register', {
-        name,
-        email,
-        phone,
-        password,
-      });
-
-      // Kiểm tra trạng thái phản hồi từ backend
-      if (response.status === 201) {
-        Alert.alert('Đăng ký thành công!');
-        router.push('/auth/login'); // Điều hướng đến trang đăng nhập
-      } else {
-        Alert.alert('Lỗi', 'Thông tin đăng ký không hợp lệ');
-      }
-    } catch (error: any) {
-      console.error('Lỗi khi đăng ký:', error);
-      const errorMessage = error.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại.';
-      Alert.alert('Lỗi', errorMessage);
-    }
+    registerMutation.mutate({
+      name,
+      email,
+      phone,
+      password,
+    });
   };
 
   return (
@@ -112,7 +114,7 @@ const RegisterScreen = () => {
       <View style={styles.linksContainer}>
         <Text
           style={styles.linkText}
-          onPress={() => router.push('/auth/login')}
+          onPress={() => router.push("/auth/login")}
         >
           Đã có tài khoản? Đăng nhập
         </Text>
@@ -125,42 +127,36 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
   },
   LogoImage: {
-    width: 250,
-    height: 250,
-    marginTop: -60,
-    marginBottom: -30,
+    width: 150,
+    height: 150,
+    alignSelf: "center",
+    marginBottom: 20,
   },
   title: {
-    fontSize: 30,
-    fontWeight: 'bold',
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 20,
-    color: '#333',
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-    backgroundColor: '#fff',
-    borderRadius: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    paddingHorizontal: 10,
     marginBottom: 15,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 5,
-  },
-  inputIcon: {
-    marginRight: 10,
   },
   input: {
     flex: 1,
     fontSize: 16,
     color: '#333',
+  },
+  inputIcon: {
+    marginRight: 10,
   },
   regisButton: {
     backgroundColor: '#0099CC',
@@ -177,12 +173,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   linksContainer: {
-    marginTop: 5,
-    alignItems: 'center',
+    marginTop: 15,
+    alignItems: "center",
   },
   linkText: {
-    color: '#00BFAE',
-    textDecorationLine: 'underline',
+    color: "blue",
+    textDecorationLine: "underline",
   },
 });
 
