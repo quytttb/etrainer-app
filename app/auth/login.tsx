@@ -13,6 +13,7 @@ import { FontAwesome } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
+import { makeRedirectUri } from "expo-auth-session";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -30,9 +31,7 @@ const LoginScreen = () => {
     responseType: "token",
   });
 
-  const params = useLocalSearchParams();
-  console.log(request?.url);
-  console.log("🚀 352 ~ LoginScreen ~ params:", params);
+  console.log(makeRedirectUri({ path: "/" }));
 
   // States để lưu thông tin đăng nhập
   const [email, setEmail] = useState<string>("");
