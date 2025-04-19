@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   View,
   Text,
@@ -11,22 +11,32 @@ import {
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import * as WebBrowser from "expo-web-browser";
+import * as Google from "expo-auth-session/providers/google";
 
-GoogleSignin.configure({
-  webClientId:
-    "773784725105-567pu4tnkktfbk59phipvbmen8kfh70u.apps.googleusercontent.com",
-  iosClientId:
-    "773784725105-lkfnha638ntavoek5r2cdovf49ptka3p.apps.googleusercontent.com",
-  scopes: ["profile", "email"],
-});
+WebBrowser.maybeCompleteAuthSession();
 
 const LoginScreen = () => {
   const router = useRouter();
 
+  const [request, response, promS] = Google.useAuthRequest({
+    // androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
+    clientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
+    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+    scopes: ["profile", "email"],
+    redirectUri: process.env.EXPO_PUBLIC_REDIRECT_URI,
+    selectAccount: true,
+    responseType: "token",
+  });
+
+  const params = useLocalSearchParams();
+  console.log(request?.url);
+  console.log("🚀 352 ~ LoginScreen ~ params:", params);
+
   // States để lưu thông tin đăng nhập
-  const [email, setEmail] = useState<string>(""); // Email
-  const [password, setPassword] = useState<string>(""); // Mật khẩu
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
 
   // Hàm xử lý đăng nhập
   /*const handleLogin = async () => {
@@ -135,17 +145,7 @@ const LoginScreen = () => {
       <View style={styles.socialLoginContainer}>
         <Button
           title="Đăng nhập bằng Google"
-          onPress={async () => {
-            console.log(123);
-            try {
-              await GoogleSignin.hasPlayServices();
-              const userInfo = await GoogleSignin.signIn();
-              console.log(userInfo);
-            } catch (error) {
-              console.log("🚀 352 ~ onPress={ ~ error:", error);
-            }
-            /* Logic Google Login */
-          }}
+          onPress={() => promS()}
           color="#DB4437"
         />
         <Button
