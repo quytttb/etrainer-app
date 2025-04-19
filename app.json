@@ -3,7 +3,7 @@
     "name": "my-app",
     "slug": "my-app",
     "version": "1.0.0",
-    "entryPoint": "./app/index.tsx", 
+    "entryPoint": "./app/index.tsx",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -24,7 +24,7 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router",  
+      "expo-router",
       [
         "expo-splash-screen",
         {
@@ -36,7 +36,7 @@
       ]
     ],
     "experiments": {
-      "typedRoutes": true  
+      "typedRoutes": true
     }
   }
 }
