@@ -14,6 +14,7 @@ interface IProfile {
   registrationMethod: "EMAIL" | "GOOGLE";
   createdAt: string;
   updatedAt: string;
+  gender: "MALE" | "FEMALE" | "OTHER";
 }
 
 const useProfile = () => {

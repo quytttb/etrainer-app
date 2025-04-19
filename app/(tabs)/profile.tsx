@@ -18,9 +18,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import useAuth from "@/hooks/useAuth";
+import useProfile from "@/hooks/useProfile";
 
 export default function SettingsScreen() {
   const { onLogout } = useAuth();
+  const { profile } = useProfile();
 
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isReminderEnabled, setIsReminderEnabled] = useState(false);
@@ -29,25 +31,6 @@ export default function SettingsScreen() {
   const [userName, setUserName] = useState("");
   const [avatar, setAvatar] = useState("");
   const router = useRouter();
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const userData = await AsyncStorage.getItem("user");
-        if (userData) {
-          const parsedData = JSON.parse(userData);
-          setUserName(parsedData.name || "User");
-          setAvatar(
-            parsedData.avatar || "https://example.com/default-avatar.png"
-          ); // Default avatar
-        }
-      } catch (error) {
-        console.error("Lỗi khi lấy thông tin người dùng:", error);
-      }
-    };
-
-    fetchUserData();
-  }, []);
 
   // Chức năng thay đổi avatar
   const pickImage = async () => {
@@ -100,9 +83,16 @@ export default function SettingsScreen() {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={pickImage}>
-          <Image source={{ uri: avatar }} style={styles.avatar} />
+          <Image
+            source={
+              profile?.avatarUrl
+                ? { uri: profile?.avatarUrl }
+                : require("../../assets/images/default_avatar.png")
+            }
+            style={styles.avatar}
+          />
         </TouchableOpacity>
-        <Text style={styles.username}>{userName}</Text>
+        <Text style={styles.username}>{profile?.name}</Text>
         <TouchableOpacity style={styles.logoutButton} onPress={onLogout}>
           <Text style={styles.logoutText}>Đăng xuất</Text>
         </TouchableOpacity>

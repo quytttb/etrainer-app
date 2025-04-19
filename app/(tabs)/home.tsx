@@ -22,41 +22,33 @@ export default function HomeScreen() {
   const [activeTab, setActiveTab] = useState("practice"); // Tab trạng thái mặc định
 
   useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        // Kiểm tra token trong AsyncStorage
-        const token = await AsyncStorage.getItem("token");
-        if (!token) {
-          // Nếu không có token, điều hướng về trang đăng nhập
-          router.replace("/auth/login");
-          return;
-        }
-        setIsLoggedIn(true); // Nếu có token, người dùng đã đăng nhập
-
-        // Lấy tên người dùng từ AsyncStorage
-        const storedName = await AsyncStorage.getItem("name");
-        setUsername(storedName || "Guest"); // Nếu không có tên, đặt là 'Guest'
-
-        // Gọi API để lấy dữ liệu bài luyện nghe và luyện đọc
-        const response = await axios.get<any[]>(
-          "http://197.187.3.101:8080/api/lessons"
-        );
-        setLessons(response.data); // Lưu dữ liệu bài học vào state
-      } catch (error) {
-        console.error(
-          "Error checking login status or fetching lessons:",
-          error
-        );
-      }
-    };
-
-    checkLoginStatus();
+    // const checkLoginStatus = async () => {
+    //   try {
+    //     // Kiểm tra token trong AsyncStorage
+    //     const token = await AsyncStorage.getItem("token");
+    //     if (!token) {
+    //       // Nếu không có token, điều hướng về trang đăng nhập
+    //       router.replace("/auth/login");
+    //       return;
+    //     }
+    //     setIsLoggedIn(true); // Nếu có token, người dùng đã đăng nhập
+    //     // Lấy tên người dùng từ AsyncStorage
+    //     const storedName = await AsyncStorage.getItem("name");
+    //     setUsername(storedName || "Guest"); // Nếu không có tên, đặt là 'Guest'
+    //     // Gọi API để lấy dữ liệu bài luyện nghe và luyện đọc
+    //     const response = await axios.get<any[]>(
+    //       "http://197.187.3.101:8080/api/lessons"
+    //     );
+    //     setLessons(response.data); // Lưu dữ liệu bài học vào state
+    //   } catch (error) {
+    //     console.error(
+    //       "Error checking login status or fetching lessons:",
+    //       error
+    //     );
+    //   }
+    // };
+    // checkLoginStatus();
   }, []);
-
-  // Kiểm tra điều hướng nếu chưa đăng nhập
-  if (!isLoggedIn) {
-    return null; // Không hiển thị gì nếu chưa đăng nhập
-  }
 
   const handlePartPress = (partId: string): void => {
     router.push(`/exam/list/${partId}`);
@@ -70,11 +62,6 @@ export default function HomeScreen() {
     router.push(`/grammar`);
   };
 
-  if (!isLoggedIn) {
-    // Nếu chưa đăng nhập, không hiển thị nội dung
-    return null;
-  }
-
   function handleTabChange(tab: string) {
     setActiveTab(tab);
   }
@@ -87,6 +74,7 @@ export default function HomeScreen() {
           <Text style={styles.headerTitle}>ETRAINER</Text>
           <Text style={styles.headerSubtitle}>Hello! {profile?.name}</Text>
         </View>
+
         <View style={styles.headerRight}>
           <TouchableOpacity style={styles.notificationIcon}>
             <Text style={styles.notificationText}>🔔</Text>
@@ -303,6 +291,7 @@ const styles = StyleSheet.create({
   },
   headerLeft: {
     flexDirection: "column",
+    flex: 1,
   },
   headerRight: {
     flexDirection: "row",
