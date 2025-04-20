@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, Modal, Dimensions } from 'react-native';
-import { BookKey, Heart, PenLine } from 'lucide-react-native';  
+import { BookKey, Heart, PenLine, ChevronLeft, ChevronRight } from 'lucide-react-native'; // Import icons for navigation
 
 interface NavigationButtonsProps {
   currentQuestionIndex: number; 
@@ -29,9 +29,9 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
 
   return (
     <View style={styles.footer}>
-      {/* Previous button with < */}
+      {/* Previous button with icon */}
       <TouchableOpacity onPress={onPrevious} disabled={isPrevDisabled}>
-        <Text style={styles.navigationText}>{`<`}</Text>
+        <ChevronLeft size={24} color={isPrevDisabled ? '#d3d3d3' : '#2196F3'} />
       </TouchableOpacity>
 
       {/* Icons in the center */}
@@ -47,9 +47,9 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
         </TouchableOpacity>
       </View>
 
-      {/* Next button with > */}
+      {/* Next button with icon */}
       <TouchableOpacity onPress={onNext} disabled={isNextDisabled}>
-        <Text style={styles.navigationText}>{`>`}</Text>
+        <ChevronRight size={24} color={isNextDisabled ? '#d3d3d3' : '#2196F3'} />
       </TouchableOpacity>
 
       {/* Modal cho BookKey click */}
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10, // Tăng khoảng cách giữa footer và phần trên
+    marginTop: 10, 
     alignItems: 'center',
   },
   iconContainer: {
@@ -111,9 +111,9 @@ const styles = StyleSheet.create({
   },
   modalBackground: {
     flex: 1,
-    justifyContent: 'flex-end', // Đặt modal ở dưới cùng
+    justifyContent: 'flex-end', 
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Nền trong suốt
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', 
   },
   modalContent: {
     width: '100%',
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   activeTab: {
-    borderColor: '#4CAF50', // Highlight active tab with a green border
+    borderColor: '#4CAF50', 
   },
   tabText: {
     fontSize: 18,

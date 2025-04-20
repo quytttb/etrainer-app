@@ -7,14 +7,19 @@ import PropTypes from 'prop-types';
 
 interface HeaderProps {
   title: string;
+  onBackPress?: () => void; 
 }
 
-const Header: React.FC<HeaderProps> = ({ title }) => {
+const Header: React.FC<HeaderProps> = ({ title, onBackPress }) => {
   const router = useRouter();
 
-  // Hàm quay lại trang trước
+  // Handle back press
   const handleBackPress = () => {
-    router.back();  
+    if (onBackPress) {
+      onBackPress(); 
+    } else {
+      router.back(); 
+    }
   };
 
   return (
@@ -23,12 +28,12 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
         <FontAwesome name="chevron-left" size={20} color="#FFFFFF" /> 
       </TouchableOpacity>
 
-      {/* Tiêu đề */}
+      {/* Title */}
       <View style={styles.titleContainer}>
         <Text style={styles.title}>{title}</Text> 
       </View>
 
-      {/* Biểu tượng thông tin (i) */}
+      {/* Info Button */}
       <TouchableOpacity style={styles.infoButton}>
         <Text style={styles.infoText}>i</Text> 
       </TouchableOpacity>
@@ -43,7 +48,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 10,
-    backgroundColor: '#00BFAE',
+    backgroundColor: '#0099CC',
     width: '100%',  
     position: 'absolute', 
     top: 0, 
@@ -75,6 +80,7 @@ const styles = StyleSheet.create({
 
 Header.propTypes = {
   title: PropTypes.string.isRequired, 
+  onBackPress: PropTypes.func, // Optional custom back navigation handler
 };
 
 export default Header;

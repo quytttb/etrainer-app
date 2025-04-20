@@ -13,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getNotificationService } from "./service";
 import { HOME_CONFIG } from "./const";
 import { LESSON_TYPE } from "@/constants/lesson-types";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function HomeScreen() {
   const { profile } = useProfile();
@@ -60,7 +61,10 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.notificationIcon}>
+          <TouchableOpacity
+            style={styles.notificationIcon}
+            // onPress={() => router.push('/notifis')}
+          >
             <Text style={styles.notificationText}>🔔</Text>
           </TouchableOpacity>
           <Image
@@ -75,12 +79,17 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.greenBox}>
-        <Text style={styles.studyTime}>Let's study with Etrainer!</Text>
-        <Text style={styles.studyTime}>45 minutes</Text>
-        <Image
-          source={require("../../assets/images/diary.png")}
-          style={styles.boxImage}
-        />
+        <LinearGradient
+          colors={["#7BD5F5", "#1CA7EC"]}
+          style={styles.gradientBackground}
+        >
+          <Text style={styles.studyTime}>Let's study with Etrainer!</Text>
+          <Text style={styles.studyTime}>45 minutes</Text>
+          <Image
+            source={require("../../assets/images/diary.png")}
+            style={styles.boxImage}
+          />
+        </LinearGradient>
       </View>
 
       {/* Luyện nghe Section */}
@@ -118,10 +127,19 @@ export default function HomeScreen() {
 
         {/* Tab buttons for switching between "Luyện tập" and "Thi" */}
         <View style={styles.tabContainer}>
-          <TouchableOpacity onPress={() => setActiveTab("practice")}>
+          <TouchableOpacity
+            style={[
+              styles.tabButton,
+              activeTab === "practice" && styles.activeTab,
+            ]}
+            onPress={() => setActiveTab("practice")}
+          >
             <Text style={styles.tabText}>Luyện tập</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setActiveTab("exam")}>
+          <TouchableOpacity
+            style={[styles.tabButton, activeTab === "exam" && styles.activeTab]}
+            onPress={() => setActiveTab("exam")}
+          >
             <Text style={styles.tabText}>Thi</Text>
           </TouchableOpacity>
         </View>
@@ -193,15 +211,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   greenBox: {
-    backgroundColor: "#E8F5E9",
     marginTop: 10,
-    padding: 50,
+    marginBottom: -30,
+    padding: 0, // Remove padding from greenBox
     borderRadius: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 5,
+  },
+  gradientBackground: {
+    padding: 50, // Add padding inside the gradient
+    borderRadius: 20,
   },
   boxImage: {
     width: 200,
@@ -227,12 +249,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "#333",
-    marginBottom: 10,
   },
   headerSubtitle: {
     marginTop: 10,
     fontSize: 38,
-    color: "#009999",
+    color: "#0099CC",
     fontWeight: "bold",
     marginBottom: 5,
   },
@@ -243,8 +264,8 @@ const styles = StyleSheet.create({
     marginTop: 70,
   },
   studyTime: {
-    fontSize: 16,
-    color: "#666",
+    fontSize: 18,
+    color: "#000",
     marginBottom: 10,
   },
   sectionTitle: {
@@ -317,7 +338,7 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     borderBottomWidth: 3,
-    borderColor: "#4CAF50",
+    borderColor: "#0099CC",
   },
   tabText: {
     fontSize: 16,
@@ -353,6 +374,6 @@ const styles = StyleSheet.create({
   },
   historyProgress: {
     fontSize: 14,
-    color: "#4CAF50",
+    color: "#0099CC",
   },
 });

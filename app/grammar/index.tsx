@@ -21,7 +21,7 @@ export default function GrammarListScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <Header title="Ngữ pháp TOIEC" />
+      <Header title="Ngữ pháp TOIEC" onBackPress={() => router.back()} />
 
       {/* Nội dung của trang */}
       <View style={styles.headerContainer}>

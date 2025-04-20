@@ -8,7 +8,7 @@ import NavigationButtons from '../../../components/NavigationButtons';
 import axios from 'axios';
 
 const ExamDetailScreen = () => {
-  const { examId } = useLocalSearchParams(); // Lấy examId từ URL
+  const { examId } = useLocalSearchParams(); 
   const router = useRouter();
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({}); // Lưu câu trả lời
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -18,12 +18,10 @@ const ExamDetailScreen = () => {
   const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
   const [questions, setQuestions] = useState<any[]>([]); // Dữ liệu câu hỏi
 
-  // Fake data with both image and text questions
   const mockData = [
     {
       id: '1',
       image: 'https://via.placeholder.com/200', 
-      question: 'Who is in the photo?',
       options: ['A', 'B', 'C'],
       correctAnswer: 'A',
       audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
@@ -74,7 +72,7 @@ const ExamDetailScreen = () => {
 
   const getOptionStyle = (questionId: string, option: string) => {
     if (selectedAnswers[questionId] === option) {
-      return { backgroundColor: '#4CAF50', color: '#fff' };
+      return { backgroundColor: '#0099CC', color: '#fff' };
     }
     return { backgroundColor: '#f2f2f2', color: '#000' };
   };
@@ -115,17 +113,18 @@ const ExamDetailScreen = () => {
       <NavigationButtons
         currentQuestionIndex={currentQuestionIndex}
         totalQuestions={questions.length}
-        onPrevious={() => setCurrentQuestionIndex(currentQuestionIndex - 1)}
+        onPrevious={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))} 
         onNext={() => {
-          if (isLastQuestion) {
-            openSubmitModal();
+          if (currentQuestionIndex < questions.length - 1) {
+            setCurrentQuestionIndex(currentQuestionIndex + 1); 
           } else {
-            setCurrentQuestionIndex(currentQuestionIndex + 1);
+            openSubmitModal(); 
           }
         }}
         isPrevDisabled={currentQuestionIndex === 0}
-        isNextDisabled={isLastQuestion}
+        isNextDisabled={currentQuestionIndex === questions.length - 1}
         isLastQuestion={isLastQuestion}
+        // Removed renderPrevButton and renderNextButton as they are not part of NavigationButtonsProps
       />
 
       {/* Modal cho câu hỏi */}
@@ -185,35 +184,155 @@ const ExamDetailScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', padding: 20 },
-  resultContainer: { padding: 20, alignItems: 'center' },
-  resultTitle: { fontSize: 24, fontWeight: 'bold' },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
-  sectionBorder: { borderWidth: 1, borderColor: '#ccc', padding: 10, borderRadius: 8 },
-  closeButtonContainer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 },
-  optionContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginVertical: 10 },
-  questionItem: { padding: 10, borderBottomWidth: 1, borderBottomColor: '#ccc' },
-  pictureSection: { marginVertical: 10, alignItems: 'center' },
-  submitModalButtons: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 },
-  questionImage: { width: 200, height: 200, resizeMode: 'contain', marginVertical: 10 },
-  resultText: { fontSize: 18, marginVertical: 5 },
-  scrollView: { flexGrow: 1, marginVertical: 10 },
-  resultSubtitle: { fontSize: 18, fontWeight: 'bold', marginTop: 15 },
-  continueButton: { marginTop: 20, backgroundColor: '#4CAF50', padding: 10, borderRadius: 8, width: '100%', alignItems: 'center' },
-  continueText: { color: '#fff', fontWeight: 'bold' },
-  modalBackground: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' },
-  modalContent: { backgroundColor: 'white', padding: 20, borderRadius: 10, width: '80%' },
-  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10, textAlign: 'center' },
-  submitModalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10, textAlign: 'center', color: '#000' },
-  buttonCancel: { backgroundColor: 'white', borderColor: '#4CAF50', borderWidth: 2, padding: 10, borderRadius: 8, flex: 1, marginHorizontal: 5 },
-  buttonSubmit: { backgroundColor: '#4CAF50', padding: 10, borderRadius: 8, flex: 1, marginHorizontal: 5 },
-  closeText: { color: '#4CAF50', fontWeight: 'bold' },
-  closeSubmitText: { color: '#fff', fontWeight: 'bold' },
-  optionButton: { padding: 10, backgroundColor: '#f2f2f2', margin: 5, borderRadius: 8, borderWidth: 1, borderColor: '#ccc' },
-  optionText: { fontSize: 14, color: '#000' },
-  modalScrollView: { marginBottom: 20 },
-  textSection: { marginVertical: 10 },
-  questionText: { fontSize: 16, color: '#000', marginBottom: 10 },
+  container: { 
+    flex: 1, 
+    backgroundColor: '#fff', 
+    padding: 20 },
+  resultContainer: { 
+    padding: 20, 
+    alignItems: 'center' 
+  },
+  resultTitle: { 
+    fontSize: 24, 
+    fontWeight: 'bold' 
+  },
+  sectionTitle: { 
+    fontSize: 18, 
+    fontWeight: 'bold', 
+    marginBottom: 10 
+  },
+  sectionBorder: { 
+    borderWidth: 1, 
+    borderColor: '#ccc', 
+    padding: 10, 
+    borderRadius: 8 
+  },
+  closeButtonContainer: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between',
+    marginTop: 20 
+  },
+  optionContainer: { 
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    justifyContent: 'space-between', 
+    marginVertical: 10 
+  },
+  questionItem: { 
+    padding: 10, 
+    borderBottomWidth: 1, 
+    borderBottomColor: '#ccc' 
+  },
+  pictureSection: { 
+    marginVertical: 10, 
+    alignItems: 'center'
+  },
+  submitModalButtons: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    marginTop: 20 
+  },
+  questionImage: { 
+    width: 200, 
+    height: 200, 
+    resizeMode: 'contain', 
+    marginVertical: 10 
+  },
+  resultText: { 
+    fontSize: 18,
+     marginVertical: 5 
+    },
+  scrollView: { 
+    flexGrow: 1, 
+    marginVertical: 10 
+  },
+  resultSubtitle: { 
+    fontSize: 18, 
+    fontWeight: 'bold', 
+    marginTop: 15 
+  },
+  continueButton: { 
+    marginTop: 20, 
+    backgroundColor: '#0099CC', 
+    padding: 10, 
+    borderRadius: 8, 
+    width: '100%',
+    alignItems: 'center' 
+  },
+  continueText: { 
+    color: '#fff', 
+    fontWeight: 'bold' 
+  },
+  modalBackground: { 
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    backgroundColor: 'rgba(0, 0, 0, 0.5)' 
+  },
+  modalContent: { 
+    backgroundColor: 'white', 
+    padding: 20, 
+    borderRadius: 10, 
+    width: '80%' 
+  },
+  modalTitle: { 
+    fontSize: 18, 
+    fontWeight: 'bold', 
+    marginBottom: 10, 
+    textAlign: 'center' 
+  },
+  submitModalTitle: { 
+    fontSize: 18, 
+    fontWeight: 'bold', 
+    marginBottom: 10, 
+    textAlign: 'center', 
+    color: '#000' 
+  },
+  buttonCancel: { 
+    backgroundColor: 'white', 
+    borderColor: '#0099CC', 
+    borderWidth: 2, padding: 10, 
+    borderRadius: 8, 
+    flex: 1, 
+    marginHorizontal: 5, 
+    alignItems: 'center',
+  },
+  buttonSubmit: { 
+    backgroundColor: '#0099CC', 
+    alignItems: 'center',
+    padding: 10, 
+    borderRadius: 8, 
+    flex: 1, 
+    marginHorizontal: 5 
+  },
+  closeText: { 
+    color: '#0099CC', 
+    fontWeight: 'bold' 
+  },
+  closeSubmitText: { 
+    color: '#fff', 
+    fontWeight: 'bold' },
+  optionButton: { 
+    padding: 10, 
+    backgroundColor: '#0099CC', 
+    margin: 5, 
+    borderRadius: 8, 
+    borderWidth: 1, 
+    borderColor: '#ccc' },
+  optionText: { 
+    fontSize: 14, 
+    color: '#000' 
+  },
+  modalScrollView: { 
+    marginBottom: 20 
+  },
+  textSection: { 
+    marginVertical: 10 
+  },
+  questionText: {
+     fontSize: 16, 
+     color: '#000', 
+     marginBottom: 10 },
 });
 
 export default ExamDetailScreen;

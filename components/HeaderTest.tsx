@@ -6,14 +6,15 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 interface HeaderCardProps {
   onMenuPress: () => void;
   onBackPress: () => void;
+  currentQuestion?: number; 
 }
 
-const HeaderCard: React.FC<HeaderCardProps> = ({ onMenuPress }) => {
+const HeaderCard: React.FC<HeaderCardProps> = ({ onMenuPress, currentQuestion = 1 }) => { 
   const router = useRouter();
   const { partId } = useLocalSearchParams(); // Lấy tham số 'partId' từ URL
-  const [timeLeft, setTimeLeft] = useState(0); // Bắt đầu từ 0 giây
-  const [timerRunning, setTimerRunning] = useState(true); // Điều khiển việc đếm ngược
-  const [isModalVisible, setIsModalVisible] = useState(false); // Quản lý trạng thái modal
+  const [timeLeft, setTimeLeft] = useState(0); 
+  const [timerRunning, setTimerRunning] = useState(true); 
+  const [isModalVisible, setIsModalVisible] = useState(false); 
 
   // Thực hiện đếm ngược thời gian
   useEffect(() => {
@@ -21,33 +22,33 @@ const HeaderCard: React.FC<HeaderCardProps> = ({ onMenuPress }) => {
 
     const interval = setInterval(() => {
       setTimeLeft((prevTime) => prevTime + 1); // Tăng thời gian mỗi giây
-    }, 1000); // 1000 ms = 1 giây
+    }, 1000); 
 
     return () => clearInterval(interval); // Dọn dẹp khi component bị unmount hoặc khi timerRunning thay đổi
   }, [timerRunning]);
 
   const formatTime = (timeInSeconds: number) => {
-    const minutes = Math.floor(timeInSeconds / 60); // Phút
-    const seconds = timeInSeconds % 60; // Giây
+    const minutes = Math.floor(timeInSeconds / 60); 
+    const seconds = timeInSeconds % 60; 
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   };
 
   // Xử lý quay lại trang partId với modal xác nhận
   const handleBackPress = () => {
-    setIsModalVisible(true); // Mở modal xác nhận khi nhấn "Back"
+    setIsModalVisible(true); 
   };
 
   const handleConfirmExit = () => {
-    setIsModalVisible(false); // Đóng modal
+    setIsModalVisible(false); 
     if (partId) {
-      router.push(`/exam/detail/${partId}`); // Điều hướng đến trang partId (sử dụng tham số partId trong URL)
+      router.push(`/exam/detail/${partId}`); 
     } else {
-      router.back(); // Quay lại trang trước nếu không có partId
+      router.back(); 
     }
   };
 
   const handleCancelExit = () => {
-    setIsModalVisible(false); // Đóng modal và không làm gì thêm
+    setIsModalVisible(false); 
   };
 
   return (
@@ -56,7 +57,9 @@ const HeaderCard: React.FC<HeaderCardProps> = ({ onMenuPress }) => {
         <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <ChevronLeft size={24} color="black" />
         </TouchableOpacity>
-        <Text style={styles.questionTitle}>Question</Text>
+        <Text style={styles.questionTitle}>
+          Question {currentQuestion} {/* Ensure the current question is displayed */}
+        </Text>
       </View>
 
       <View style={styles.timerContainer}>
@@ -132,7 +135,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Nền mờ cho modal
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', 
   },
   modalContent: {
     width: '80%',
@@ -140,10 +143,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 10,
     alignItems: 'center',
-    position: 'absolute', // Giúp modal có thể di chuyển
+    position: 'absolute', 
     left: 40,
     top: '35%',
-    transform: [{ translateX: -400 }], // Modal sẽ bắt đầu ở ngoài màn hình
+    transform: [{ translateX: -400 }], 
   },
   modalTitle: {
     fontSize: 20,
@@ -162,10 +165,10 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#0099CC',
     paddingVertical: 15,
     marginHorizontal: 5,
-    borderRadius: 10,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
