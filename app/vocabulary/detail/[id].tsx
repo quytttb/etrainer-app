@@ -1,109 +1,49 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { useLocalSearchParams } from 'expo-router';
-import Header from '../../../components/Header';
-import { useRouter } from 'expo-router';
+import React from "react";
+import { View, Text, ScrollView, StyleSheet } from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
+import Header from "../../../components/Header";
+import { useQuery } from "@tanstack/react-query";
+import { getVocabularyByIdService } from "../service";
+import PlaySoundButton from "./PlaySoundButton";
 
 export default function VocabularyDetailScreen() {
-  const { id } = useLocalSearchParams();  // Lấy id của bài học từ URL (id sẽ được truyền khi nhấn vào bài học trong màn hình trước)
-  const parsedId = Number(id);  // Chuyển đổi id từ string sang number
-  const router = useRouter();
+  const { id } = useLocalSearchParams();
 
-  // Dữ liệu mô phỏng cho các bài học
-  const vocabularyData: { [key: number]: { word: string; pronunciation: string; meaning: string; }[] } = {
-    1: [
-      { word: "New", pronunciation: "/ˈnjuː/", meaning: "Mới" },
-      { word: "Company", pronunciation: "/ˈkʌmpəni/", meaning: "Công ty" },
-      { word: "Mr.", pronunciation: "/ˈmɪstər/", meaning: "Ông" },
-      { word: "Year", pronunciation: "/jɪər/", meaning: "Năm" },
-      { word: "Service", pronunciation: "/ˈsɜːvɪs/", meaning: "Dịch vụ" },
-      { word: "Travel", pronunciation: "/ˈtrævl/", meaning: "Du lịch" },
-      { word: "Flight", pronunciation: "/flaɪt/", meaning: "Chuyến bay" },
-      { word: "Airport", pronunciation: "/ˈɛəpɔːt/", meaning: "Sân bay" },
-      { word: "Hotel", pronunciation: "/həʊˈtɛl/", meaning: "Khách sạn" },
-      { word: "Tourist", pronunciation: "/ˈtʊərɪst/", meaning: "Du khách" },
-    ],
-    2: [
-      { word: "Travel", pronunciation: "/ˈtrævl/", meaning: "Du lịch" },
-      { word: "Flight", pronunciation: "/flaɪt/", meaning: "Chuyến bay" },
-      { word: "Airport", pronunciation: "/ˈɛəpɔːt/", meaning: "Sân bay" },
-      { word: "Hotel", pronunciation: "/həʊˈtɛl/", meaning: "Khách sạn" },
-      { word: "Tourist", pronunciation: "/ˈtʊərɪst/", meaning: "Du khách" },
-    ],
-  };
-
-  const lessonData = vocabularyData[parsedId];  // Dựa vào id bài học lấy dữ liệu từ vựng
-
-  const handleCheckPress = () => {
-    console.log('Check button pressed');
-  };
-
-  // Hàm xử lý khi nhấn vào một box (nút)
-  const handleBoxPress = (boxName: string) => {
-    console.log(`${boxName} clicked`);
-    // Điều hướng tới trang graft/[id] khi nhấn vào "Ghép từ"
-    if (boxName === "Ghép từ") {
-      router.push(`vocabulary/graft/${id}` as any);
-    }
-    // Điều hướng tới trang select-words/[id] khi nhấn vào "Chọn từ"
-    if (boxName === "Chọn từ") {
-      router.push(`vocabulary/select-words/${id}` as any);
-    }
-    // Điều hướng tới trang flash-card/[id] khi nhấn vào "FlashCard"
-    if (boxName === "FlashCard") {
-      router.push(`/vocabulary/flash-card/${id}` as any); // Đảm bảo đường dẫn chính xác
-    }
-  };
+  const { data } = useQuery({
+    queryKey: ["VOCABULARY", id],
+    queryFn: () => getVocabularyByIdService(id as string),
+    enabled: !!id,
+  });
 
   return (
     <View style={styles.container}>
       <Header
-        title={`Từ vựng ${id}`}
-        onBackPress={() => router.push('/vocabulary' as any)} // Always navigate to the vocabulary index page
+        title={`Từ vựng ${data?.topicName ?? "-"}`}
+        onBackPress={() => router.push("/vocabulary")}
       />
 
-      {/* Nội dung chính cuộn xuống */}
       <ScrollView style={styles.content}>
-        {/* Các hộp "Ghép từ", "Chọn từ", và "Flatcase" */}
-        <View style={styles.buttonsContainer}>
-          <TouchableOpacity
-            style={styles.box}
-            onPress={() => handleBoxPress("Ghép từ")}
-          >
-            <Text style={styles.boxText}>Ghép từ</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.box}
-            onPress={() => handleBoxPress("Chọn từ")}
-          >
-            <Text style={styles.boxText}>Chọn từ</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.box}
-            onPress={() => handleBoxPress("FlashCard")}
-          >
-            <Text style={styles.boxText}>FlashCard</Text>
-          </TouchableOpacity>
-        </View>
-
         {/* Nội dung từ vựng */}
-        {lessonData ? (
+        {data?.words ? (
           <View style={styles.vocabularyList}>
-            {lessonData.map((item, index) => (
+            {data.words.map((item, index) => (
               <View key={index} style={styles.wordItemContainer}>
                 {/* Biểu tượng loa bên trái */}
-                <FontAwesome name="volume-up" size={20} color="#fff" style={styles.iconLeft} />
-                
+                <PlaySoundButton audioUrl={item.audio.url} />
+
                 {/* Từ vựng */}
                 <Text style={styles.vocabularyItem}>{item.word}</Text>
 
                 {/* Phát âm dưới từ vựng */}
-                <Text style={styles.pronunciation}>{item.pronunciation}</Text>
+                <Text style={styles.pronunciation}>/{item.pronunciation}/</Text>
 
                 {/* Biểu tượng sao ở góc trên bên phải */}
-                <AntDesign name="staro" size={20} color="#FFD700" style={styles.iconRight} />
+                {/* <AntDesign
+                  name="staro"
+                  size={20}
+                  color="#FFD700"
+                  style={styles.iconRight}
+                /> */}
 
                 {/* Nghĩa của từ */}
                 <Text style={styles.meaning}>{item.meaning}</Text>
@@ -113,11 +53,6 @@ export default function VocabularyDetailScreen() {
         ) : (
           <Text style={styles.noDataText}>Không có dữ liệu bài học này.</Text>
         )}
-
-        {/* Nút "Kiểm tra" */}
-        <TouchableOpacity style={styles.checkButton} onPress={handleCheckPress}>
-          <Text style={styles.checkButtonText}>Kiểm tra</Text>
-        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -126,101 +61,93 @@ export default function VocabularyDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9F9F9',
+    backgroundColor: "#F9F9F9",
   },
   content: {
     flex: 1,
-    paddingTop: 60, // Thêm khoảng cách cho phần cuộn xuống
+    paddingTop: 60,
   },
   vocabularyList: {
     marginTop: 20,
     padding: 20,
   },
   wordItemContainer: {
-    backgroundColor: '#FFF',
+    backgroundColor: "#FFF",
     padding: 15,
     marginBottom: 15,
     borderRadius: 8,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 5,
-    alignItems: 'center',
-    position: 'relative',
+    alignItems: "center",
+    position: "relative",
   },
   vocabularyItem: {
     fontSize: 20,
-    color: '#333',
-    fontWeight: 'bold',
-    textAlign: 'center',
+    color: "#333",
+    fontWeight: "bold",
+    textAlign: "center",
   },
   pronunciation: {
     fontSize: 16,
-    color: '#888',
-    textAlign: 'center',
-  },
-  iconLeft: {
-    position: 'absolute',
-    left: 15,  
-    top: 30,  
-    backgroundColor: '#00BFAE',  
-    borderRadius: 25,  
-    padding: 8,  
+    color: "#888",
+    textAlign: "center",
   },
   iconRight: {
-    position: 'absolute',
-    right: 10,  
-    top: 10, 
+    position: "absolute",
+    right: 10,
+    top: 10,
   },
   meaning: {
     fontSize: 16,
-    color: '#555',
-    textAlign: 'center',
+    color: "#555",
+    textAlign: "center",
     marginTop: 5,
   },
   noDataText: {
     fontSize: 18,
-    color: '#f00',
-    textAlign: 'center',
-    marginTop: 20,
+    color: "#f00",
+    textAlign: "center",
+    marginVertical: 100,
   },
   checkButton: {
-    backgroundColor: '#00BFAE',
+    backgroundColor: "#00BFAE",
     paddingVertical: 15,
     marginHorizontal: 50,
     borderRadius: 30,
     marginTop: 5,
     marginBottom: 100,
-    alignItems: 'center',
+    alignItems: "center",
   },
   checkButtonText: {
     fontSize: 18,
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
   },
   buttonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20, 
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
     marginHorizontal: 20,
   },
   box: {
-    backgroundColor: '#FFF',
+    backgroundColor: "#FFF",
     borderRadius: 10,
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderWidth: 1,
-    borderColor: '#00BFAE',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '30%',
+    borderColor: "#00BFAE",
+    justifyContent: "center",
+    alignItems: "center",
+    width: "30%",
   },
   boxText: {
     fontSize: 14,
-    color: '#00BFAE',
-    fontWeight: 'bold',
-    width: '150%',
-    textAlign: 'center',
+    color: "#00BFAE",
+    fontWeight: "bold",
+    width: "150%",
+    textAlign: "center",
   },
 });
