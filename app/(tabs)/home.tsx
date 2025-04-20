@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,48 +7,23 @@ import {
   ScrollView,
   Image,
 } from "react-native";
-import axios from "axios";
 import { useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
 import useProfile from "@/hooks/useProfile";
+import { useQuery } from "@tanstack/react-query";
+import { getNotificationService } from "./service";
 
 export default function HomeScreen() {
   const { profile } = useProfile();
 
   const router = useRouter();
-  const [username, setUsername] = useState<string>(""); // Tên người dùng
-  const [lessons, setLessons] = useState<any[]>([]); // Danh sách bài luyện nghe và luyện đọc
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Trạng thái đăng nhập
-  const [activeTab, setActiveTab] = useState("practice"); // Tab trạng thái mặc định
+  const [activeTab, setActiveTab] = useState("practice");
 
-  useEffect(() => {
-    // const checkLoginStatus = async () => {
-    //   try {
-    //     // Kiểm tra token trong AsyncStorage
-    //     const token = await AsyncStorage.getItem("token");
-    //     if (!token) {
-    //       // Nếu không có token, điều hướng về trang đăng nhập
-    //       router.replace("/auth/login");
-    //       return;
-    //     }
-    //     setIsLoggedIn(true); // Nếu có token, người dùng đã đăng nhập
-    //     // Lấy tên người dùng từ AsyncStorage
-    //     const storedName = await AsyncStorage.getItem("name");
-    //     setUsername(storedName || "Guest"); // Nếu không có tên, đặt là 'Guest'
-    //     // Gọi API để lấy dữ liệu bài luyện nghe và luyện đọc
-    //     const response = await axios.get<any[]>(
-    //       "http://197.187.3.101:8080/api/lessons"
-    //     );
-    //     setLessons(response.data); // Lưu dữ liệu bài học vào state
-    //   } catch (error) {
-    //     console.error(
-    //       "Error checking login status or fetching lessons:",
-    //       error
-    //     );
-    //   }
-    // };
-    // checkLoginStatus();
-  }, []);
+  const { data } = useQuery({
+    queryKey: ["NOTIFICATION"],
+    queryFn: getNotificationService,
+  });
+
+  console.log("Notification count", data?.length);
 
   const handlePartPress = (partId: string): void => {
     router.push(`/exam/list/${partId}`);

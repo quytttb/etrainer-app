@@ -14,3 +14,7 @@ export const setStudyReminderService = async (
     expoPushToken: await getExpoPushToken(),
   });
 };
+
+export const getNotificationService = () => {
+  return request.get("/notification");
+};
