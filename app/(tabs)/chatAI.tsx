@@ -1,192 +1,207 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Keyboard, ScrollView } from 'react-native';
-import Voice from '@react-native-community/voice'; // Import thư viện Voice
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import Voice from '@react-native-community/voice'; 
+import { Ionicons } from '@expo/vector-icons'; 
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router'; 
 
 const ChatScreen = () => {
+  const router = useRouter(); 
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [message, setMessage] = useState("");
   const [isListening, setIsListening] = useState(false);
+  const [messages, setMessages] = useState<string[]>([]); 
 
-  // Khi nhận diện giọng nói và trả về kết quả
   const onSpeechResults = (e: any) => {
-    const text = e.value[0]; // Lấy văn bản nhận diện từ giọng nói
-    setMessage(text); // Cập nhật nội dung tin nhắn
+    const text = e.value[0];
+    setMessage(text);
   };
 
-  // Bắt đầu ghi âm giọng nói
   const handleStartListening = () => {
-    Voice.start('en-US'); // Ngôn ngữ tiếng Anh
+    Voice.start('en-US');
     setIsListening(true);
   };
 
-  // Dừng ghi âm
   const handleStopListening = () => {
     Voice.stop();
     setIsListening(false);
   };
 
-  // Cài đặt `useEffect` để lắng nghe các sự kiện từ Voice
   useEffect(() => {
-    // Đăng ký sự kiện
-    Voice.onSpeechResults = onSpeechResults;
-
-    // Dọn dẹp các listener khi component bị unmount
+    if (Voice) {
+      Voice.onSpeechResults = onSpeechResults;
+    }
     return () => {
-      Voice.removeAllListeners();  // Đây là cách dọn dẹp đúng
+      if (Voice) {
+        Voice.removeAllListeners();
+      }
     };
   }, []);
 
-  // Hàm gửi tin nhắn
   const handleSendMessage = () => {
     if (message.trim() !== "") {
-      console.log("Gửi tin nhắn:", message);
-      setMessage(""); // Xóa tin nhắn sau khi gửi
+      setMessages((prev) => [...prev, message]); 
+      setMessage("");
       setIsKeyboardVisible(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.chatContainer}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerText}>MOEWW AI</Text>
+    <LinearGradient
+      colors={['#7DB5F5', '#FFFFFF']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.container}
+    >
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.closeButton} onPress={() => router.push('/home')}>
+          <Ionicons name="close" size={24} color="#fff" />
+        </TouchableOpacity>
+        <View style={styles.headerContent}>
+          <Ionicons name="person-circle" size={40} color="#fff" />
+          <Text style={styles.headerText}>ChatAI</Text>
         </View>
-
-        {/* Chatbot intro */}
-        <View style={styles.introBox}>
-          <Text style={styles.introText}>Hi! Welcome to MEWW AI.</Text>
-        </View>
-      </ScrollView>
-
-      {/* Footer with icons and input */}
-      <View style={[styles.footer, isKeyboardVisible && styles.hiddenFooter]}>
-        <TouchableOpacity style={styles.iconButton} onPress={() => setIsKeyboardVisible(true)}>
-          <Text style={styles.iconText}>Start Listening</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.speechButton}
-          onPress={isListening ? handleStopListening : handleStartListening}
-        >
-          <Text style={styles.iconText}>{isListening ? "Stop" : "Microphone"}</Text>
-        </TouchableOpacity>
-
-        {/* Biểu tượng gửi tin nhắn */}
-        <TouchableOpacity onPress={handleSendMessage} style={styles.sendButton}>
-          <Text style={styles.iconText}>Send</Text>
-        </TouchableOpacity>
       </View>
 
-      {/* Hiển thị TextInput khi bàn phím được kích hoạt */}
-      {isKeyboardVisible && (
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Nhập tin nhắn..."
-            placeholderTextColor="#888"
-            value={message}
-            onChangeText={setMessage}
-            autoFocus={true}
-            onBlur={() => setIsKeyboardVisible(false)} // Khi mất focus thì ẩn bàn phím
-          />
+      {/* Chat container */}
+      <ScrollView style={styles.chatContainer}>
+        <View style={styles.introBox}>
+          <Text style={styles.introText}>Hi! Welcome to ChatAI.</Text>
         </View>
-      )}
-    </View>
+        {messages.map((msg, index) => (
+          <View key={index} style={styles.messageBox}>
+            <Text style={styles.messageText}>{msg}</Text>
+          </View>
+        ))}
+      </ScrollView>
+
+      {/* Footer */}
+      <View style={[styles.footer, isKeyboardVisible && styles.hiddenFooter]}>
+        <LinearGradient
+          colors={['#4CAF50', '#81C784']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.voiceButton}
+        >
+          <TouchableOpacity
+            onPress={isListening ? handleStopListening : handleStartListening}
+          >
+            <Ionicons
+              name={isListening ? "stop-circle-outline" : "mic-outline"}
+              size={30}
+              color="#fff"
+            />
+          </TouchableOpacity>
+        </LinearGradient>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Type a message..."
+          placeholderTextColor="#888"
+          value={message}
+          onChangeText={setMessage}
+          onFocus={() => setIsKeyboardVisible(true)}
+          onBlur={() => setIsKeyboardVisible(false)}
+        />
+
+        <TouchableOpacity onPress={handleSendMessage} style={styles.sendButton}>
+          <Ionicons name="send" size={30} color="#fff" />
+        </TouchableOpacity>
+      </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#222',
-    paddingHorizontal: 20,
-    paddingTop: 50,
-  },
-  iconText: {
-    color: '#fff',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  chatContainer: {
-    flex: 1,
-    marginBottom: 20,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    justifyContent: 'space-between',
+    backgroundColor: 'transparent',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+  },
+  closeButton: {
+    padding: 5,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 10,
   },
   headerText: {
     color: '#fff',
     fontSize: 20,
     fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  chatContainer: {
+    flex: 1,
+    paddingHorizontal: 20,
+    marginBottom: 80,
   },
   introBox: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: '#FFFFFF',
     padding: 15,
-    borderRadius: 15,
+    borderRadius: 10,
     marginBottom: 20,
   },
   introText: {
-    color: '#fff',
+    color: '#000',
     fontSize: 16,
+  },
+  messageBox: {
+    backgroundColor: '#E0E0E0',
+    padding: 10,
+    borderRadius: 10,
     marginBottom: 10,
+    alignSelf: 'flex-start',
+  },
+  messageText: {
+    color: '#000',
+    fontSize: 16,
   },
   footer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     position: 'absolute',
-    bottom: 30,
-    left: 20,
-    right: 20,
-  },
-  hiddenFooter: {
-    display: 'none', // Ẩn footer khi bàn phím xuất hiện
-  },
-  iconButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 50,
-    width: 50,
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  speechButton: {
-    backgroundColor: '#4CAF50',
-    borderRadius: 50,
-    width: 70,
-    height: 70,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  sendButton: {
-    backgroundColor: '#4CAF50',
-    borderRadius: 50,
-    width: 70,
-    height: 70,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  inputContainer: {
-    position: 'absolute',
-    bottom: 90,
+    bottom: 20,
     left: 20,
     right: 20,
     backgroundColor: '#333',
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    marginTop: 20,
-    flexDirection: 'row',
+    borderRadius: 30,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+  },
+  hiddenFooter: {
+    display: 'none',
+  },
+  voiceButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 10,
   },
   input: {
-    color: '#fff',
-    fontSize: 16,
-    height: 40,
     flex: 1,
+    color: '#000',
+    fontSize: 16,
+    paddingHorizontal: 10,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    height: 40,
+  },
+  sendButton: {
+    marginLeft: 10,
+    backgroundColor: '#4CAF50',
+    borderRadius: 20,
+    padding: 10,
   },
 });
 

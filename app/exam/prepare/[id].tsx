@@ -12,6 +12,9 @@ const PrepareTestScreen = () => {
     "1": { name: "Test 1", year: "ETS 2024", time: "120 phút", questions: "200 câu" },
     "2": { name: "Test 2", year: "ETS 2024", time: "120 phút", questions: "200 câu" },
     "3": { name: "Test 3", year: "ETS 2024", time: "120 phút", questions: "200 câu" },
+    "10": { name: "Test 10", year: "ETS 2024", time: "120 phút", questions: "200 câu" },
+    "9": { name: "Test 9", year: "ETS 2024", time: "120 phút", questions: "200 câu" },
+    "8": { name: "Test 8", year: "ETS 2024", time: "120 phút", questions: "200 câu" },
     // Thêm các bài kiểm tra khác nếu cần
   };
 

@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Image, Animated } from 'react-native'; // Import Animated for shake effect
 import { FontAwesome } from '@expo/vector-icons';
-import { useRouter } from 'expo-router'; // Import useRouter for navigation
+import { useRouter } from 'expo-router'; 
 
 const GraftScreen = () => {
-  const router = useRouter(); // Initialize router for navigation
+  const router = useRouter(); 
   const [selectedWord, setSelectedWord] = useState<number | null>(null);
   const [selectedMeaning, setSelectedMeaning] = useState<number | null>(null);
   const [matchedPairs, setMatchedPairs] = useState<{ id: number; word: string; meaning: string }[]>([]);
   const [shuffledMeanings, setShuffledMeanings] = useState<{ id: number; word: string; meaning: string }[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0); // Track the current index of the vocabulary list
-  const [currentSet, setCurrentSet] = useState(1); // Track the current set number
-  const [isPaused, setIsPaused] = useState(false); // Track if the game is paused
-  const [shakeAnimation] = useState(new Animated.Value(0)); // Shake animation value
+  const [currentIndex, setCurrentIndex] = useState(0); 
+  const [currentSet, setCurrentSet] = useState(1);
+  const [isPaused, setIsPaused] = useState(false); 
+  const [shakeAnimation] = useState(new Animated.Value(0)); 
   const [incorrectCards, setIncorrectCards] = useState<{ word: number | null; meaning: number | null }>({
     word: null,
     meaning: null,

@@ -33,7 +33,7 @@ export default function ExamListScreen() {
   }, [partId]);
 
   const handleExamPress = (examId: string) => {
-    router.push(`/exam/detail/${examId}`);  // Điều hướng tới chi tiết bài thi
+    router.push(`/exam/detail/${examId}`);  
   };
 
   return (
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#00BFAE',
+    backgroundColor: '#0099cc',
     marginBottom: 20,
   },
   backButton: {
