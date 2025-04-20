@@ -1,5 +1,5 @@
 import request from "@/api/request";
-import { getExpoPushToken } from "@/hooks/useExpoPushToken";
+import { getExpoPushToken } from "@/utils/getExpoPushToken";
 
 interface ICreateStudyReminder {
   hour: number;
