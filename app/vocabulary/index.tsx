@@ -29,7 +29,7 @@ export default function VocabularyListScreen() {
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
     >
-      <Header title="Từ vựng TOIEC" />
+      <Header title="Từ vựng TOIEC" onBackPress={() => router.push("/home")} />
 
       {/* Nội dung của trang */}
       <View style={styles.headerContainer}>

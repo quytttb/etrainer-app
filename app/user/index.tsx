@@ -13,7 +13,7 @@ import {
 import { useRouter } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { RadioButton } from "react-native-paper";
-import * as ImagePicker from "expo-image-picker"; // Import expo-image-picker
+import * as ImagePicker from "expo-image-picker"; 
 import useProfile from "@/hooks/useProfile";
 import dayjs from "dayjs";
 import { useMutation } from "@tanstack/react-query";
@@ -92,7 +92,6 @@ export default function EditProfileScreen() {
     });
   };
 
-  // Chức năng hủy
   const handleCancel = () => {
     router.push("/profile");
   };
@@ -163,7 +162,7 @@ export default function EditProfileScreen() {
           style={styles.input}
           value={email}
           onChangeText={setEmail}
-          readOnly
+          editable={false}
         />
       </View>
 
@@ -285,9 +284,9 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   button: {
-    backgroundColor: "#00BFAE",
+    backgroundColor: "#0099CC",
     paddingVertical: 12,
-    borderRadius: 5,
+    borderRadius: 20,
     width: "48%",
   },
   cancelButton: {

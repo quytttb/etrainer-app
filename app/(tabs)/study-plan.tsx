@@ -27,22 +27,22 @@ const PlanScreen: React.FC = () => {
       {/* Các lựa chọn lộ trình */}
       <View style={styles.options}>
         <TouchableOpacity
-          style={[styles.optionButton, selectedScore === '500' && styles.selectedOption]}  // Thêm điều kiện thay đổi màu khi chọn
-          onPress={() => handlePathPrepare('500')} // Truyền tham số điểm 500
+          style={[styles.optionButton, selectedScore === '500' && styles.selectedOption]}  
+          onPress={() => handlePathPrepare('500')} 
         >
           <Text style={styles.optionText}>500 Toeic</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.optionButton, selectedScore === '700' && styles.selectedOption]}  // Thêm điều kiện thay đổi màu khi chọn
-          onPress={() => handlePathPrepare('700')} // Truyền tham số điểm 700
+          style={[styles.optionButton, selectedScore === '700' && styles.selectedOption]}  
+          onPress={() => handlePathPrepare('700')} 
         >
           <Text style={styles.optionText}>700 Toeic</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.optionButton, selectedScore === '900' && styles.selectedOption]}  // Thêm điều kiện thay đổi màu khi chọn
-          onPress={() => handlePathPrepare('900')} // Truyền tham số điểm 900
+          style={[styles.optionButton, selectedScore === '900' && styles.selectedOption]} 
+          onPress={() => handlePathPrepare('900')} 
         >
           <Text style={styles.optionText}>900 Toeic</Text>
         </TouchableOpacity>
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   selectedOption: {
-    backgroundColor: '#4CAF50',  // Màu khi chọn
+    backgroundColor: '#4CAF50',  
     color: '#fff',
   },
   imageContainer: {

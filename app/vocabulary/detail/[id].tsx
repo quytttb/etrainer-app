@@ -1,6 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { View, Text, ScrollView, StyleSheet } from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
 import Header from "../../../components/Header";
 import { useQuery } from "@tanstack/react-query";
 import { getVocabularyByIdService } from "../service";
@@ -17,7 +17,10 @@ export default function VocabularyDetailScreen() {
 
   return (
     <View style={styles.container}>
-      <Header title={`Từ vựng ${data?.topicName ?? "-"}`} />
+      <Header
+        title={`Từ vựng ${data?.topicName ?? "-"}`}
+        onBackPress={() => router.push("/vocabulary")}
+      />
 
       <ScrollView style={styles.content}>
         {/* Nội dung từ vựng */}

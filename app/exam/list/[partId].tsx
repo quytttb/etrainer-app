@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router'; 
-
+import { FontAwesome } from '@expo/vector-icons'; 
 
 export default function ExamListScreen() {
   const router = useRouter();
@@ -14,13 +14,13 @@ export default function ExamListScreen() {
       try {
         // Dữ liệu ảo
         const mockData = [
-          { id: '1', title: 'Photographs 01', progress: '6/6', isLocked: false },
-          { id: '2', title: 'Photographs 02', progress: '5/6', isLocked: false },
-          { id: '3', title: 'Photographs 03', progress: 'Chưa làm', isLocked: false },
-          { id: '4', title: 'Photographs 04', progress: 'Chưa làm', isLocked: false },
-          { id: '5', title: 'Photographs 05', progress: 'Chưa làm', isLocked: false },
-          { id: '6', title: 'Photographs 06', progress: 'Chưa làm', isLocked: true },
-          { id: '7', title: 'Photographs 07', progress: 'Chưa làm', isLocked: true },
+          { id: '1', title: 'Photographs 01', progress: '6/6', isLocked: false, format: '2024 Format' },
+          { id: '2', title: 'Photographs 02', progress: '5/6', isLocked: false, format: '2024 Format' },
+          { id: '3', title: 'Photographs 03', progress: 'Chưa làm', isLocked: false, format: '2024 Format' },
+          { id: '4', title: 'Photographs 04', progress: 'Chưa làm', isLocked: false, format: '2024 Format' },
+          { id: '5', title: 'Photographs 05', progress: 'Chưa làm', isLocked: false, format: '2024 Format' },
+          { id: '6', title: 'Photographs 06', progress: 'Chưa làm', isLocked: true, format: '2024 Format' },
+          { id: '7', title: 'Photographs 07', progress: 'Chưa làm', isLocked: true, format: '2024 Format' },
         ];
 
         setExams(mockData);  // Lưu bài thi vào state
@@ -33,27 +33,44 @@ export default function ExamListScreen() {
   }, [partId]);
 
   const handleExamPress = (examId: string) => {
-    router.push(`/exam/detail/${examId}`);  // Điều hướng tới chi tiết bài thi
+    router.push(`/exam/detail/${examId}`);  
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{partId}</Text>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.push('/home')} style={styles.backButton}>
+          <FontAwesome name="chevron-left" size={20} color="#FFFFFF" />
+        </TouchableOpacity>
+        <Text style={styles.headerText}> {partId}</Text>
+      </View>
       <FlatList
         data={exams}  // Dữ liệu bài thi
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity 
             style={[styles.examItem, item.isLocked && styles.lockedTest]} 
-            onPress={() => !item.isLocked && handleExamPress(item.id)}  // Kiểm tra xem bài kiểm tra có bị khóa không trước khi xử lý nhấn
-            disabled={item.isLocked}  // Vô hiệu hóa nút nếu bài kiểm tra bị khóa
+            onPress={() => !item.isLocked && handleExamPress(item.id)}  // Điều hướng khi nhấn vào toàn bộ mục
+            disabled={item.isLocked}  // Vô hiệu hóa nếu bài kiểm tra bị khóa
           >
-            <Text style={styles.examTitle}>{item.title}</Text>
-            <Text style={styles.examProgress}>{item.progress}</Text>
+            <View style={styles.row}>
+              <Text style={styles.examTitle}>{item.title}</Text>
+              {item.isLocked && (
+                <Image 
+                  source={require('../../../assets/images/cup.png')} 
+                  style={styles.crownIcon} 
+                />
+              )}
+            </View>
+            <View style={styles.row}>
+              <View style={styles.formatLabel}>
+                <Text style={styles.formatText}>
+                  {item.format || 'Default Format'} {/* Hiển thị format từ CSDL hoặc giá trị mặc định */}
+                </Text>
+              </View>
+              <Text style={styles.examProgress}>{item.progress}</Text>
+            </View>
             {item.isLocked && <Text style={styles.lockedText}>Locked</Text>}
-            <TouchableOpacity style={styles.continueButton}>
-              <Text style={styles.continueText}>Tiếp tục làm</Text>
-            </TouchableOpacity>
           </TouchableOpacity>
         )}
       />
@@ -64,8 +81,26 @@ export default function ExamListScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f2f2f2',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#0099cc',
+    marginBottom: 20,
+  },
+  backButton: {
+    marginRight: 10,
+  },
+  backIcon: {
+    width: 20,
+    height: 20,
+  },
+  headerText: {
+    color: '#fff',
+    fontSize: 25,
+    fontWeight: 'bold',
   },
   title: {
     fontSize: 24,
@@ -73,14 +108,15 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   examItem: {
-    padding: 15,
-    backgroundColor: '#f2f2f2',
+    padding: 25,
+    backgroundColor: '#fff',
+    marginHorizontal: 20,
     marginBottom: 15,
-    borderRadius: 10,
+    borderRadius: 20,
     position: 'relative',
   },
   lockedTest: {
-    backgroundColor: '#d3d3d3',  // Gray color for locked tests
+    backgroundColor: '#d3d3d3',  
   },
   examTitle: {
     fontSize: 16,
@@ -95,16 +131,25 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 5,
   },
-  continueButton: {
-    backgroundColor: '#007bff',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    marginTop: 10,
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  continueText: {
-    color: 'white',
+  formatLabel: {
+    backgroundColor: '#CCFFFF',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  formatText: {
+    color: '#00BFAE',
     fontWeight: 'bold',
+    fontSize: 12,
+  },
+  crownIcon: {
+    width: 20,
+    height: 20,
+    marginLeft: 45,
   },
 });

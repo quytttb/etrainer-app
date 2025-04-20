@@ -12,6 +12,9 @@ const PrepareTestScreen = () => {
     "1": { name: "Test 1", year: "ETS 2024", time: "120 phút", questions: "200 câu" },
     "2": { name: "Test 2", year: "ETS 2024", time: "120 phút", questions: "200 câu" },
     "3": { name: "Test 3", year: "ETS 2024", time: "120 phút", questions: "200 câu" },
+    "10": { name: "Test 10", year: "ETS 2024", time: "120 phút", questions: "200 câu" },
+    "9": { name: "Test 9", year: "ETS 2024", time: "120 phút", questions: "200 câu" },
+    "8": { name: "Test 8", year: "ETS 2024", time: "120 phút", questions: "200 câu" },
     // Thêm các bài kiểm tra khác nếu cần
   };
 
@@ -103,7 +106,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
   },
   startButton: {
-    backgroundColor: '#00BFAE', 
+    backgroundColor: '#0099CC', 
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 20,
@@ -120,7 +123,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
   },
-  // Style cho nút back
   backButton: {
     position: 'absolute',
     top: 20,
