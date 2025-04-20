@@ -3,7 +3,6 @@
     "name": "my-app",
     "slug": "my-app",
     "version": "1.0.0",
-    "entryPoint": "./app/index.tsx",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -16,7 +15,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.etrainer.myapp"
     },
     "web": {
       "bundler": "metro",
@@ -33,10 +33,25 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/diary.png",
+          "color": "#ffffff"
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "bb8d919a-3b3f-4ef6-a29f-150f2ebd9d0b"
+      }
     }
   }
 }
