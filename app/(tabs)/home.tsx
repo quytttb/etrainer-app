@@ -11,6 +11,8 @@ import { useRouter } from "expo-router";
 import useProfile from "@/hooks/useProfile";
 import { useQuery } from "@tanstack/react-query";
 import { getNotificationService } from "./service";
+import { HOME_CONFIG } from "./const";
+import { LESSON_TYPE } from "@/constants/lesson-types";
 
 export default function HomeScreen() {
   const { profile } = useProfile();
@@ -25,21 +27,23 @@ export default function HomeScreen() {
 
   console.log("Notification count", data?.length);
 
-  const handlePartPress = (partId: string): void => {
-    router.push(`/exam/list/${partId}`);
-  };
-
-  const handleVocaPress = (Id: string): void => {
-    router.push(`/vocabulary`);
-  };
-
-  const handleGramPress = (Id: string): void => {
-    router.push(`/grammar`);
-  };
-
   function handleTabChange(tab: string) {
     setActiveTab(tab);
   }
+
+  const handlePress = (lessonType: LESSON_TYPE) => {
+    switch (lessonType) {
+      case LESSON_TYPE.IMAGE_DESCRIPTION: {
+        router.push("/vocabulary");
+        break;
+      }
+
+      case LESSON_TYPE.VOCABULARY: {
+        router.push("/vocabulary");
+        break;
+      }
+    }
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -75,122 +79,33 @@ export default function HomeScreen() {
       </View>
 
       {/* Luyện nghe Section */}
-      <View style={styles.lessonSection}>
-        <Text style={styles.sectionTitle}>Luyện nghe</Text>
-      </View>
-      <View style={styles.lessonList}>
-        <TouchableOpacity
-          style={styles.lessonCard}
-          onPress={() => handlePartPress("part1")}
-        >
-          <Image
-            source={require("../../assets/images/image_icon.png")}
-            style={styles.lessonIcon}
-          />
-          <Text style={styles.lessonText}>Part 1</Text>
-          <Text style={styles.lessonText2}>Mô tả hình ảnh</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.lessonCard}
-          onPress={() => handlePartPress("part2")}
-        >
-          <Image
-            source={require("../../assets/images/qa.png")}
-            style={styles.lessonIcon}
-          />
-          <Text style={styles.lessonText}>Part 2</Text>
-          <Text style={styles.lessonText2}>Hỏi và đáp</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.lessonCard}
-          onPress={() => handlePartPress("part3")}
-        >
-          <Image
-            source={require("../../assets/images/chat.png")}
-            style={styles.lessonIcon}
-          />
-          <Text style={styles.lessonText}>Part 3</Text>
-          <Text style={styles.lessonText2}>Đoạn hội thoại</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.lessonCard}
-          onPress={() => handlePartPress("part4")}
-        >
-          <Image
-            source={require("../../assets/images/headphones.png")}
-            style={styles.lessonIcon}
-          />
-          <Text style={styles.lessonText}>Part 4</Text>
-          <Text style={styles.lessonText2}>Bài nói chuyện ngắn</Text>
-        </TouchableOpacity>
-      </View>
+      {HOME_CONFIG.map((section, index) => (
+        <View key={index}>
+          <View style={styles.lessonSection}>
+            <Text style={styles.sectionTitle}>{section.title}</Text>
+          </View>
+          <View style={styles.lessonList}>
+            {section.data.map((lesson, idx) => (
+              <TouchableOpacity
+                style={styles.lessonCard}
+                key={idx}
+                onPress={() => handlePress(lesson.type)}
+              >
+                <Image source={lesson.icon} style={styles.lessonIcon} />
+                <Text style={styles.lessonText}>
+                  {lesson?.partNumber
+                    ? `Part ${lesson.partNumber}`
+                    : lesson.partName}
+                </Text>
 
-      {/* Luyện đọc Section */}
-      <View style={styles.lessonSection}>
-        <Text style={styles.sectionTitle}>Luyện đọc</Text>
-      </View>
-      <View style={styles.lessonList}>
-        <TouchableOpacity
-          style={styles.lessonCard}
-          onPress={() => handlePartPress("part5")}
-        >
-          <Image
-            source={require("../../assets/images/vocabulary.png")}
-            style={styles.lessonIcon}
-          />
-          <Text style={styles.lessonText}>Part 5</Text>
-          <Text style={styles.lessonText2}>Điền vào câu</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.lessonCard}
-          onPress={() => handlePartPress("part6")}
-        >
-          <Image
-            source={require("../../assets/images/form.png")}
-            style={styles.lessonIcon}
-          />
-          <Text style={styles.lessonText}>Part 6</Text>
-          <Text style={styles.lessonText2}>Điền vào đoạn văn</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.lessonCard}
-          onPress={() => handlePartPress("part7")}
-        >
-          <Image
-            source={require("../../assets/images/voca_icon.png")}
-            style={styles.lessonIcon}
-          />
-          <Text style={styles.lessonText}>Part 7</Text>
-          <Text style={styles.lessonText2}>Đọc hiểu đoạn văn</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Lý thuyết Section */}
-      <View style={styles.lessonSection}>
-        <Text style={styles.sectionTitle}>Lý thuyết</Text>
-      </View>
-      <View style={styles.lessonList}>
-        <TouchableOpacity
-          style={styles.lessonCard}
-          onPress={() => handleVocaPress("Từ vựng")}
-        >
-          <Image
-            source={require("../../assets/images/vocabulary.png")}
-            style={styles.lessonIcon}
-          />
-          <Text style={styles.lessonText}>Từ vựng</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.lessonCard}
-          onPress={() => handleGramPress("Ngữ pháp")}
-        >
-          <Image
-            source={require("../../assets/images/form.png")}
-            style={styles.lessonIcon}
-          />
-          <Text style={styles.lessonText}>Ngữ pháp</Text>
-        </TouchableOpacity>
-      </View>
+                {lesson.partNumber && (
+                  <Text style={styles.lessonText2}>{lesson.partName}</Text>
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      ))}
 
       {/* Lịch sử Section */}
       <View style={styles.historySection}>
