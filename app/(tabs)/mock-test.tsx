@@ -31,7 +31,7 @@ export default function TestScreen() {
     name: string;
     isLocked: boolean;
     type: 'mini' | 'full';
-    year?: string; // Optional for mini tests
+    year?: string; 
   }
 
   const handleTestSelect = (testId: number, testType: 'mini' | 'full'): void => {
@@ -42,6 +42,13 @@ export default function TestScreen() {
       // Navigate to the full test page
       router.push(`/exam/prepare/${testId}?type=full`);
     }
+  };
+
+  const handleViewMoreFullTests = () => {
+    router.push('list-fulltest/[full-test].tsx'); 
+  };
+  const handleViewMoreMiniTests = () => {
+    router.push('list-minitest/[mini-test].tsx'); 
   };
 
   // Hàm kiểm tra có bài kiểm tra hợp lệ không (không bị khóa)
@@ -55,16 +62,18 @@ export default function TestScreen() {
       {fulltests.length > 0 && (
         <View style={styles.categoryContainer}>
           <Text style={styles.category}>TOEIC Listening & Reading Fulltest | {fulltests.length}</Text>
-          <Text style={styles.categoryLink}>Xem thêm</Text>
+          <TouchableOpacity onPress={() => router.push('/list-fulltest/full-test')}>
+            <Text style={styles.full_testLink}>Xem thêm</Text>
+          </TouchableOpacity>
         </View>
       )}
       <View style={styles.testList}>
         {fulltests.map((test) => (
           <TouchableOpacity 
-            key={test.id} 
+            key={test.id}
             style={[styles.testCard, test.isLocked && styles.lockedTest]} 
-            onPress={() => !test.isLocked && handleTestSelect(test.id, test.type)}  // Kiểm tra xem bài kiểm tra có bị khóa không trước khi xử lý nhấn
-            disabled={test.isLocked}  // Vô hiệu hóa nút nếu bài kiểm tra bị khóa
+            onPress={() => !test.isLocked && handleTestSelect(test.id, test.type)}  
+            disabled={test.isLocked}  
           >
             <Image
               source={require('../../assets/images/test.png')}
@@ -74,7 +83,7 @@ export default function TestScreen() {
               <Fontisto name="locked" size={10} color="black" style={styles.lockIcon} />
             )}
             <Text style={styles.testText}>{test.name}</Text>
-            <Text style={styles.yearText}>{test.year}</Text> {/* Hiển thị năm */}
+            <Text style={styles.yearText}>{test.year}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -83,7 +92,9 @@ export default function TestScreen() {
       {minitests.length > 0 && (
         <View style={styles.categoryContainer}>
           <Text style={styles.category}>TOEIC Listening & Reading Minitests | {minitests.length}</Text>
-          <Text style={styles.categoryLink}>Xem thêm</Text>
+          <TouchableOpacity onPress={() => router.push('/list-minitest/mini-test')}>
+            <Text style={styles.mini_testLink}>Xem thêm</Text>
+          </TouchableOpacity>
         </View>
       )}
       <View style={styles.testList}>
@@ -91,7 +102,7 @@ export default function TestScreen() {
           <TouchableOpacity 
             key={test.id} 
             style={[styles.testCard, test.isLocked && styles.lockedTest]} 
-            onPress={() => !test.isLocked && handleTestSelect(test.id, test.type)}  // Kiểm tra xem bài kiểm tra có bị khóa không trước khi xử lý nhấn
+            onPress={() => !test.isLocked && handleTestSelect(test.id, test.type)}  
             disabled={test.isLocked}  
           >
             <Image
@@ -128,8 +139,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
-
-  categoryLink: {
+  full_testLink: {
+    fontSize: 14,
+    color: '#FF8C00',
+  },
+  mini_testLink: {
     fontSize: 14,
     color: '#FF8C00',
   },

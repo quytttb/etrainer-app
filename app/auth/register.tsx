@@ -1,19 +1,19 @@
 import React, { useState } from "react";
 import { Button, Alert, View, TextInput, StyleSheet, Text, Image, TouchableOpacity } from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import { registerService } from "./service";
+import { FontAwesome } from "@expo/vector-icons";
 
 const RegisterScreen = () => {
   const router = useRouter();
 
   // States để lưu thông tin đăng ký
-  const [name, setName] = useState<string | undefined>("");
-  const [email, setEmail] = useState<string | undefined>(""); // Email
-  const [phone, setPhone] = useState<string | undefined>(""); // Số điện thoại
-  const [password, setPassword] = useState<string | undefined>(""); // Mật khẩu
-  const [confirmPassword, setConfirmPassword] = useState<string | undefined>(""); // Xác nhận mật khẩu
+  const [name, setName] = useState<string>("" as string); // Họ và tên
+  const [email, setEmail] = useState<string>(""); // Email
+  const [phone, setPhone] = useState<string>("" as string); // Số điện thoại
+  const [password, setPassword] = useState<string>("" as string); // Mật khẩu
+  const [confirmPassword, setConfirmPassword] = useState<string>("" as string); // Xác nhận mật khẩu
 
   const registerMutation = useMutation({
     mutationFn: registerService,
@@ -44,10 +44,10 @@ const RegisterScreen = () => {
     }
 
     registerMutation.mutate({
-      name,
-      email,
-      phone,
-      password,
+      name: name,
+      email: email,
+      phone: phone,
+      password: password,
     });
   };
 
@@ -135,6 +135,9 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginBottom: 20,
   },
+  inputIcon: {
+    marginRight: 10,
+  },
   title: {
     fontSize: 24,
     fontWeight: "bold",
@@ -146,7 +149,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderColor: "#ccc",
-    borderRadius: 8,
+    borderRadius: 10,
     paddingHorizontal: 10,
     marginBottom: 15,
   },
@@ -154,9 +157,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: '#333',
-  },
-  inputIcon: {
-    marginRight: 10,
   },
   regisButton: {
     backgroundColor: '#0099CC',

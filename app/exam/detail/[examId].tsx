@@ -72,7 +72,7 @@ const ExamDetailScreen = () => {
 
   const getOptionStyle = (questionId: string, option: string) => {
     if (selectedAnswers[questionId] === option) {
-      return { backgroundColor: '#4CAF50', color: '#fff' };
+      return { backgroundColor: '#0099CC', color: '#fff' };
     }
     return { backgroundColor: '#f2f2f2', color: '#000' };
   };
@@ -124,6 +124,7 @@ const ExamDetailScreen = () => {
         isPrevDisabled={currentQuestionIndex === 0}
         isNextDisabled={currentQuestionIndex === questions.length - 1}
         isLastQuestion={isLastQuestion}
+        // Removed renderPrevButton and renderNextButton as they are not part of NavigationButtonsProps
       />
 
       {/* Modal cho câu hỏi */}
@@ -252,7 +253,7 @@ const styles = StyleSheet.create({
   },
   continueButton: { 
     marginTop: 20, 
-    backgroundColor: '#4CAF50', 
+    backgroundColor: '#0099CC', 
     padding: 10, 
     borderRadius: 8, 
     width: '100%',
@@ -289,14 +290,16 @@ const styles = StyleSheet.create({
   },
   buttonCancel: { 
     backgroundColor: 'white', 
-    borderColor: '#4CAF50', 
+    borderColor: '#0099CC', 
     borderWidth: 2, padding: 10, 
     borderRadius: 8, 
     flex: 1, 
-    marginHorizontal: 5 
+    marginHorizontal: 5, 
+    alignItems: 'center',
   },
   buttonSubmit: { 
     backgroundColor: '#0099CC', 
+    alignItems: 'center',
     padding: 10, 
     borderRadius: 8, 
     flex: 1, 
@@ -311,7 +314,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold' },
   optionButton: { 
     padding: 10, 
-    backgroundColor: '#f2f2f2', 
+    backgroundColor: '#0099CC', 
     margin: 5, 
     borderRadius: 8, 
     borderWidth: 1, 
