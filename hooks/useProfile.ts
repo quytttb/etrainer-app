@@ -2,6 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import request from "../api/request";
 import useAuth from "./useAuth";
 
+interface IReminderSetting {
+  hour: number;
+  minute: number;
+}
+
 interface IProfile {
   _id: string;
   name: string;
@@ -15,6 +20,7 @@ interface IProfile {
   createdAt: string;
   updatedAt: string;
   gender: "MALE" | "FEMALE" | "OTHER";
+  reminder: IReminderSetting | null;
 }
 
 const useProfile = () => {
@@ -37,6 +43,7 @@ const useProfile = () => {
   return {
     profile: r.data,
     isLoading: r.isLoading,
+    refresh: r.refetch,
   };
 };
 

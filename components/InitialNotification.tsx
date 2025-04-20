@@ -1,14 +1,20 @@
+import useExpoPushToken from "@/hooks/useExpoPushToken";
 import * as Notifications from "expo-notifications";
 import { useEffect } from "react";
 import { Alert, Platform } from "react-native";
 
 const InitialNotification = () => {
+  const { setExpoPushToken } = useExpoPushToken();
+
   useEffect(() => {
     registerForPushNotificationsAsync();
 
     const receivedListener = Notifications.addNotificationReceivedListener(
       (notification) => {
-        console.log("📥 Notification received:", notification);
+        Alert.alert(
+          notification.request.content.title ?? "Thông báo",
+          notification.request.content.body ?? "Nội dung thông báo"
+        );
       }
     );
 
@@ -22,8 +28,6 @@ const InitialNotification = () => {
       let token;
 
       if (Platform.OS !== "android") return;
-
-      await Notifications.cancelAllScheduledNotificationsAsync();
 
       const { status: existingStatus } =
         await Notifications.getPermissionsAsync();
@@ -48,8 +52,6 @@ const InitialNotification = () => {
         })
       ).data;
 
-      console.log("Expo Push Token:", token);
-
       if (Platform.OS === "android") {
         await Notifications.setNotificationChannelAsync("default", {
           name: "default",
@@ -57,6 +59,8 @@ const InitialNotification = () => {
           vibrationPattern: [0, 250, 250, 250],
           lightColor: "#FF231F7C",
         });
+
+        await setExpoPushToken(token);
       }
     } catch (error: any) {
       Alert.alert(

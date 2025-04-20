@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
+import { removeExpoPushToken } from "./useExpoPushToken";
 
 export const getAccessToken = async () => {
   try {
@@ -34,6 +35,7 @@ export const removeAccessToken = async () => {
 
 const onLogout = async () => {
   await removeAccessToken();
+  await removeExpoPushToken();
 
   router.push("/auth/login");
 };
