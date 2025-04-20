@@ -42,6 +42,11 @@ export default function HomeScreen() {
         router.push("/vocabulary");
         break;
       }
+
+      case LESSON_TYPE.GRAMMAR: {
+        router.push("/grammar");
+        break;
+      }
     }
   };
 
