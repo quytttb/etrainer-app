@@ -108,9 +108,10 @@ export default function GrammarDetailScreen() {
                 </Text>
 
                 {selectedLesson?.examples.map((example, index) => (
-                  <Text key={index} style={styles.exampleTxt}>
-                    {index + 1}. {example}
-                  </Text>
+                  <View key={index} style={styles.exampleContainer}>
+                    <Text style={styles.bulletPoint}>•</Text>
+                    <Text>{example}</Text>
+                  </View>
                 ))}
               </View>
 
@@ -253,8 +254,8 @@ const styles = StyleSheet.create({
     color: "#555",
     textAlign: "left",
     fontWeight: "600",
+    lineHeight: 24,
   },
-  exampleTxt: {},
   closeButton: {
     position: "absolute",
     top: 15,
@@ -264,5 +265,13 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 10,
     top: 20,
+  },
+  exampleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  bulletPoint: {
+    marginRight: 5,
+    fontSize: 22,
   },
 });
