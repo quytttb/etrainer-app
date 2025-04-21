@@ -12,7 +12,7 @@ import useProfile from "@/hooks/useProfile";
 import { useQuery } from "@tanstack/react-query";
 import { getNotificationService } from "./service";
 import { HOME_CONFIG } from "./const";
-import { LESSON_TYPE } from "@/constants/lesson-types";
+import { LESSON_TYPE, LESSON_TYPE_MAPPING } from "@/constants/lesson-types";
 import { LinearGradient } from "expo-linear-gradient";
 
 export default function HomeScreen() {
@@ -34,11 +34,6 @@ export default function HomeScreen() {
 
   const handlePress = (lessonType: LESSON_TYPE) => {
     switch (lessonType) {
-      case LESSON_TYPE.IMAGE_DESCRIPTION: {
-        router.push("/vocabulary");
-        break;
-      }
-
       case LESSON_TYPE.VOCABULARY: {
         router.push("/vocabulary");
         break;
@@ -47,6 +42,13 @@ export default function HomeScreen() {
       case LESSON_TYPE.GRAMMAR: {
         router.push("/grammar");
         break;
+      }
+
+      default: {
+        router.push({
+          pathname: "/practice",
+          params: { lessonType },
+        });
       }
     }
   };
@@ -109,11 +111,13 @@ export default function HomeScreen() {
                 <Text style={styles.lessonText}>
                   {lesson?.partNumber
                     ? `Part ${lesson.partNumber}`
-                    : lesson.partName}
+                    : LESSON_TYPE_MAPPING[lesson.type]}
                 </Text>
 
                 {lesson.partNumber && (
-                  <Text style={styles.lessonText2}>{lesson.partName}</Text>
+                  <Text style={styles.lessonText2}>
+                    {LESSON_TYPE_MAPPING[lesson.type]}
+                  </Text>
                 )}
               </TouchableOpacity>
             ))}
