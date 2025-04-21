@@ -11,7 +11,7 @@ export enum LESSON_TYPE {
   GRAMMAR = "GRAMMAR", // ngữ pháp
 }
 
-export const LESSON_TYPE_MAPPING = {
+export const LESSON_TYPE_MAPPING: Record<string, string> = {
   [LESSON_TYPE.IMAGE_DESCRIPTION]: "Mô tả hình ảnh",
   [LESSON_TYPE.ASK_AND_ANSWER]: "Hỏi & đáp",
   [LESSON_TYPE.CONVERSATION_PIECE]: "Đoạn hội thoại",
@@ -19,6 +19,8 @@ export const LESSON_TYPE_MAPPING = {
   [LESSON_TYPE.FILL_IN_THE_BLANK_QUESTION]: "Điền vào câu",
   [LESSON_TYPE.FILL_IN_THE_PARAGRAPH]: "Điền vào đoạn văn",
   [LESSON_TYPE.READ_AND_UNDERSTAND]: "Đọc hiểu đoạn văn",
+  [LESSON_TYPE.VOCABULARY]: "Từ vựng",
+  [LESSON_TYPE.GRAMMAR]: "Ngữ pháp",
 };
 
 export type LessonType = keyof typeof LESSON_TYPE;
