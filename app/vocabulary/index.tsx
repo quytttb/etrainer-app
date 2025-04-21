@@ -61,7 +61,7 @@ export default function VocabularyListScreen() {
           })}
         </View>
       ) : (
-        <Text style={styles.emptyTxt}>Không có bài học nào</Text>
+        <Text style={styles.emptyTxt}>Không có bài học từ vựng nào!</Text>
       )}
     </ScrollView>
   );
