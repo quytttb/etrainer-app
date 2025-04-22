@@ -1,3 +1,5 @@
+import PracticeType1 from "@/components/Practice/PracticeType1/PracticeType1";
+import PracticeType2 from "@/components/Practice/PracticeType2/PracticeType2";
 import Prepare from "@/components/Prepare";
 import { LESSON_TYPE } from "@/constants/lesson-types";
 import { useLocalSearchParams } from "expo-router";
@@ -25,11 +27,27 @@ const Practice = () => {
     return { type1, type2, type3, type4, type5 };
   }, [type]);
 
+  const onStart = () => {
+    setStep("PRACTICE");
+  };
+
   if (step === "PREPARE") {
-    return <Prepare type={type} />;
+    return <Prepare type={type} onStart={onStart} />;
   }
 
-  return <></>;
+  if (type1) {
+    return (
+      <PracticeType1
+        onSubmit={(values) => {
+          console.log("Submitted values:", values);
+        }}
+      />
+    );
+  }
+
+  if (type2) {
+    return <PracticeType2 />;
+  }
 };
 
 export default Practice;

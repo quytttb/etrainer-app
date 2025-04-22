@@ -13,13 +13,12 @@ import { useRouter } from "expo-router";
 import { LESSON_TYPE, LESSON_TYPE_MAPPING } from "@/constants/lesson-types";
 
 interface PrepareProps {
-  onStart?: () => void;
-  onBack?: () => void;
+  onStart: () => void;
   icon?: string;
   type: LESSON_TYPE;
 }
 
-const Prepare = ({ onStart, onBack, type }: PrepareProps) => {
+const Prepare = ({ onStart, type }: PrepareProps) => {
   const router = useRouter();
 
   const data = useMemo(() => {
@@ -110,13 +109,8 @@ const Prepare = ({ onStart, onBack, type }: PrepareProps) => {
     <ScrollView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={onBack}>
-          <AntDesign
-            name="left"
-            size={24}
-            color="white"
-            onPress={router.back}
-          />
+        <TouchableOpacity onPress={router.back}>
+          <AntDesign name="left" size={24} color="white" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{data.title}</Text>
         <View style={{ width: 24 }}></View>
