@@ -38,7 +38,9 @@ const PracticeResult = () => {
     percentage,
     encouragementMessage,
   } = useMemo(() => {
-    const partName = LESSON_TYPE_MAPPING[params.lessonType as string];
+    const partName = data?.lessonType
+      ? LESSON_TYPE_MAPPING[data?.lessonType]
+      : "-";
     const totalQuestions = data?.totalQuestions || 0;
     const correctAnswers = data?.correctAnswers || 0;
     const percentage = data?.accuracyRate || 0;
@@ -51,7 +53,7 @@ const PracticeResult = () => {
       percentage,
       encouragementMessage,
     };
-  }, [data, params.lessonType]);
+  }, [data]);
 
   const router = useRouter();
 
@@ -95,7 +97,10 @@ const PracticeResult = () => {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.retryButton}>
+      <TouchableOpacity
+        style={styles.retryButton}
+        onPress={() => router.push(`/practice/result/review/${params.id}`)}
+      >
         <Text style={styles.retryButtonText}>Xem kết quả</Text>
       </TouchableOpacity>
     </View>
