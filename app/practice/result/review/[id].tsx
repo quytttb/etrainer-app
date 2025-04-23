@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
   View,
@@ -165,6 +165,13 @@ const PracticeResultReview = () => {
           </View>
         ))}
       </ScrollView>
+
+      <TouchableOpacity
+        style={styles.continueButton}
+        onPress={() => router.back()}
+      >
+        <Text style={styles.continueButtonText}>Quay lại</Text>
+      </TouchableOpacity>
     </View>
   );
 };
