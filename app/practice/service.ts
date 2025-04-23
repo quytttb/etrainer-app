@@ -23,3 +23,21 @@ export interface ISubmitPractice {
 export const submitPracticeService = (payload: ISubmitPractice) => {
   return request.post("/practice/submit", payload);
 };
+
+interface IPracticeHistory {
+  _id: string;
+  user: string;
+  startTime: string;
+  endTime: string;
+  lessonType: LESSON_TYPE;
+  totalQuestions: number;
+  correctAnswers: number;
+  accuracyRate: number;
+  questionAnswers: any[];
+}
+
+export const getPracticeResultService = (
+  id: string
+): Promise<IPracticeHistory> => {
+  return request.get(`/practice/history/${id}`);
+};
