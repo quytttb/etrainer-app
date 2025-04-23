@@ -1,82 +1,68 @@
-import React from 'react';
-import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
-import Header from '../../components/Header';  
-import { useRouter } from 'expo-router';  
+import React from "react";
+import {
+  View,
+  StyleSheet,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+} from "react-native";
+import Header from "../../components/Header";
+import { useRouter } from "expo-router";
+import { useQuery } from "@tanstack/react-query";
+import { getVocabularyListService } from "./service";
 
 export default function VocabularyListScreen() {
   const router = useRouter();
 
-  // Danh sách mô tả bài học
-  const lessonDescriptions = [
-    "Chủ đề 1",
-    "Chủ đề 2",
-    "Chủ đề 3",
-    "Chủ đề 4",
-    "Chủ đề 5",
-    "Chủ đề 6",
-    "Chủ đề 7",
-    "Chủ đề 8",
-    "Chủ đề 9",
-    "Chủ đề 10",
-    "Chủ đề 11",
-    "Chủ đề 12",
-    "Chủ đề 13",
-    "Chủ đề 14",
-    "Chủ đề 15",
-    "Chủ đề 16",
-    "Chủ đề 17",
-    "Chủ đề 18",
-    "Chủ đề 19",
-    "Chủ đề 20",
-    "Chủ đề 21",
-    "Chủ đề 22",
-    "Chủ đề 23",
-    "Chủ đề 24",
-    "Chủ đề 25",
-    "Chủ đề 26",
-    "Chủ đề 27",
-    "Chủ đề 28",
-    "Chủ đề 29",
-    "Chủ đề 30",
-    "Chủ đề 31",
-    "Chủ đề 32",
-  ];
+  const { data } = useQuery({
+    queryKey: ["VOCABULARY"],
+    queryFn: getVocabularyListService,
+  });
 
-  // Hàm điều hướng đến trang chi tiết bài học
-  const handleVocabularyPress = (lessonId: number) => {
-    router.push(`/vocabulary/detail/${lessonId}`);  // Điều hướng tới trang chi tiết của bài học
+  const handleVocabularyPress = (lessonId: string) => {
+    router.push(`/vocabulary/detail/${lessonId}`);
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <Header
-        title="Từ vựng TOIEC"
-        onBackPress={() => router.push('/home')} 
-      />
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+    >
+      <Header title="Từ vựng TOIEC" onBackPress={() => router.push("/home")} />
 
       {/* Nội dung của trang */}
       <View style={styles.headerContainer}>
-        <Image source={require('../../assets/images/vocabulary.png')} style={styles.headerImage} />
+        <Image
+          source={require("../../assets/images/vocabulary.png")}
+          style={styles.headerImage}
+        />
         <Text style={styles.headerText}>Từ vựng TOIEC theo các chủ đề</Text>
       </View>
 
       {/* Danh sách bài học */}
-      <View style={styles.lessonGrid}>
-        {[...Array(36)].map((_, index) => {
-          const lessonId = index + 1;
-          return (
-            <TouchableOpacity
-              key={lessonId}
-              style={styles.lessonCard}
-              onPress={() => handleVocabularyPress(lessonId)}  // Gọi hàm và truyền lessonId
-            >
-              <Image source={require('../../assets/images/vocabulary.png')} style={styles.lessonIcon} />
-              <Text style={styles.lessonText}>Bài {lessonId}</Text>
-              <Text style={styles.lessonSubText}>{lessonDescriptions[lessonId - 1]}</Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+      {data && data?.length > 0 ? (
+        <View style={styles.lessonGrid}>
+          {data.map((item, index) => {
+            return (
+              <TouchableOpacity
+                key={index}
+                style={styles.lessonCard}
+                onPress={() => handleVocabularyPress(item._id)}
+              >
+                <Image
+                  source={require("../../assets/images/vocabulary.png")}
+                  style={styles.lessonIcon}
+                />
+                <Text style={styles.lessonText}>Bài {index + 1}</Text>
+                <Text style={styles.lessonSubText}>{item.topicName}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      ) : (
+        <Text style={styles.emptyTxt}>Không có bài học từ vựng nào!</Text>
+      )}
     </ScrollView>
   );
 }
@@ -84,31 +70,30 @@ export default function VocabularyListScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9F9F9',
+    backgroundColor: "#F9F9F9",
   },
   contentContainer: {
     flexGrow: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
-    paddingTop: 80,  
-    
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+    paddingTop: 80,
   },
   headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginStart: 19,
     marginBottom: 25,
     padding: 20,
-    backgroundColor: '#ffffff',  
+    backgroundColor: "#ffffff",
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#00BFAE',  
-    shadowColor: '#000',
+    borderColor: "#00BFAE",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 5,
-    position: 'relative',
+    position: "relative",
   },
   headerImage: {
     width: 40,
@@ -117,28 +102,28 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   lessonGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
     paddingHorizontal: 20,
   },
   lessonCard: {
-    backgroundColor: '#FFF',
+    backgroundColor: "#FFF",
     padding: 20,
     borderRadius: 10,
-    alignItems: 'center',
-    width: '21%',
+    alignItems: "center",
+    width: "21%",
     marginBottom: 70,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 5,
-    position: 'relative',
+    position: "relative",
   },
   lessonIcon: {
     width: 30,
@@ -147,23 +132,28 @@ const styles = StyleSheet.create({
   lessonText: {
     marginTop: 5,
     fontSize: 14,
-    fontWeight: 'bold',
-    position: 'absolute',
-    width: '150%',
+    fontWeight: "bold",
+    position: "absolute",
+    width: "150%",
     top: 70,
-    left: '220%',
-    transform: [{ translateX: -50 }], 
-    color: '#000000',
+    left: "220%",
+    transform: [{ translateX: -50 }],
+    color: "#000000",
   },
   lessonSubText: {
     marginTop: 5,
     fontSize: 14,
-    position: 'absolute',
-    width: '200%',
+    position: "absolute",
+    width: "200%",
     top: 90,
-    left: '170%',
-    transform: [{ translateX: -50 }], 
-    color: '#000000',
-    textAlign: 'center',
+    left: "170%",
+    transform: [{ translateX: -50 }],
+    color: "#000000",
+    textAlign: "center",
+  },
+  emptyTxt: {
+    textAlign: "center",
+    marginTop: 20,
+    width: "100%",
   },
 });

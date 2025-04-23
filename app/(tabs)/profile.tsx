@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -19,18 +19,39 @@ import * as ImagePicker from "expo-image-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import useAuth from "@/hooks/useAuth";
 import useProfile from "@/hooks/useProfile";
+import { useMutation } from "@tanstack/react-query";
+import { setStudyReminderService } from "./service";
+import dayjs from "dayjs";
 
 export default function SettingsScreen() {
   const { onLogout } = useAuth();
-  const { profile } = useProfile();
+  const { profile, refresh } = useProfile();
+
+  const setReminderMutation = useMutation({
+    mutationFn: setStudyReminderService,
+    onSuccess: refresh,
+  });
 
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isReminderEnabled, setIsReminderEnabled] = useState(false);
-  const [reminderTime, setReminderTime] = useState(new Date());
+  const [reminderTime, setReminderTime] = useState<Date>(new Date());
   const [showDateTimePicker, setShowDateTimePicker] = useState(false);
   const [userName, setUserName] = useState("");
   const [avatar, setAvatar] = useState("");
   const router = useRouter();
+
+  useEffect(() => {
+    if (profile?.reminder) {
+      setReminderTime(
+        dayjs()
+          .hour(profile.reminder.hour)
+          .minute(profile.reminder.minute)
+          .toDate()
+      );
+    } else {
+      setReminderTime(new Date());
+    }
+  }, [profile?.reminder]);
 
   // Chức năng thay đổi avatar
   const pickImage = async () => {
@@ -71,7 +92,10 @@ export default function SettingsScreen() {
   const handleDateChange = (event: any, selectedDate?: Date) => {
     setShowDateTimePicker(false);
     if (selectedDate) {
-      setReminderTime(selectedDate); // Lưu thời gian nhắc nhở
+      setReminderMutation.mutate({
+        hour: selectedDate.getHours(),
+        minute: selectedDate.getMinutes(),
+      });
     }
   };
 

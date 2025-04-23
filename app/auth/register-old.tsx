@@ -1,14 +1,5 @@
 import React, { useState } from "react";
-import {
-  Button,
-  Alert,
-  View,
-  TextInput,
-  StyleSheet,
-  Text,
-  Image,
-  TouchableOpacity,
-} from "react-native";
+import { Button, Alert, View, TextInput, StyleSheet, Text, Image, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import { registerService } from "./service";
@@ -62,90 +53,62 @@ const RegisterScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Image
-        source={require("../../assets/images/Etrainer_LOGO.png")}
-        style={styles.LogoImage}
+      <Image source={require('../../assets/images/Etrainer_LOGO.png')} style={styles.LogoImage} />
+        <Text style={styles.title}>Register</Text>
+    <View style={styles.inputContainer}>
+      <FontAwesome name="user" size={20} color="#333" style={styles.inputIcon} />
+      <TextInput
+        placeholder="Họ và tên"
+        value={name}
+        onChangeText={setName}
+        style={styles.input}
       />
-      <Text style={styles.title}>Register</Text>
-      <View style={styles.inputContainer}>
-        <FontAwesome
-          name="user"
-          size={20}
-          color="#333"
-          style={styles.inputIcon}
-        />
-        <TextInput
-          placeholder="Họ và tên"
-          value={name}
-          onChangeText={setName}
-          style={styles.input}
-        />
-      </View>
-      <View style={styles.inputContainer}>
-        <FontAwesome
-          name="envelope"
-          size={20}
-          color="#333"
-          style={styles.inputIcon}
-        />
-        <TextInput
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          style={styles.input}
-          keyboardType="email-address"
-        />
-      </View>
-      <View style={styles.inputContainer}>
-        <FontAwesome
-          name="phone"
-          size={20}
-          color="#333"
-          style={styles.inputIcon}
-        />
-        <TextInput
-          placeholder="Số điện thoại"
-          value={phone}
-          onChangeText={setPhone}
-          style={styles.input}
-          keyboardType="phone-pad"
-        />
-      </View>
-      <View style={styles.inputContainer}>
-        <FontAwesome
-          name="lock"
-          size={20}
-          color="#333"
-          style={styles.inputIcon}
-        />
-        <TextInput
-          placeholder="Mật khẩu"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          style={styles.input}
-        />
-      </View>
-      <View style={styles.inputContainer}>
-        <FontAwesome
-          name="lock"
-          size={20}
-          color="#333"
-          style={styles.inputIcon}
-        />
-        <TextInput
-          placeholder="Xác nhận mật khẩu"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          secureTextEntry
-          style={styles.input}
-        />
-      </View>
+    </View>
+    <View style={styles.inputContainer}>
+      <FontAwesome name="envelope" size={20} color="#333" style={styles.inputIcon} />
+      <TextInput
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        style={styles.input}
+        keyboardType="email-address"
+      />
+    </View>
+    <View style={styles.inputContainer}>
+      <FontAwesome name="phone" size={20} color="#333" style={styles.inputIcon} />
+      <TextInput
+        placeholder="Số điện thoại"
+        value={phone}
+        onChangeText={setPhone}
+        style={styles.input}
+        keyboardType="phone-pad"
+      />
+    </View>
+    <View style={styles.inputContainer}>
+      <FontAwesome name="lock" size={20} color="#333" style={styles.inputIcon} />
+      <TextInput
+        placeholder="Mật khẩu"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        style={styles.input}
+      />
+    </View>
+    <View style={styles.inputContainer}>
+      <FontAwesome name="lock" size={20} color="#333" style={styles.inputIcon} />
+      <TextInput
+        placeholder="Xác nhận mật khẩu"
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+        secureTextEntry
+        style={styles.input}
+      />
+    </View>
 
       {/* Nút đăng ký */}
 
       <TouchableOpacity onPress={handleRegister} style={styles.regisButton}>
-        <Text style={styles.regisButtonText}>Register</Text>
+              <Text style={styles.regisButtonText}>Register</Text>
       </TouchableOpacity>
 
       <View style={styles.linksContainer}>
@@ -193,10 +156,10 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: "#333",
+    color: '#333',
   },
   regisButton: {
-    backgroundColor: "#0099CC",
+    backgroundColor: '#0099CC',
     borderRadius: 20,
     paddingVertical: 15,
     paddingHorizontal: 90,
@@ -204,10 +167,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   regisButtonText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   linksContainer: {
     marginTop: 15,
