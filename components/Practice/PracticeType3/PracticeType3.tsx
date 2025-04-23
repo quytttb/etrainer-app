@@ -5,20 +5,28 @@ import { AudioPlayerRef } from "@/components/AudioPlayer/AudioPlayer";
 import QuestionRenderer from "./QuestionRenderer";
 import { Question } from "../type";
 
-interface PracticeType1Props {
+interface PracticeType3Props {
   questions: Question[];
   onBack?: () => void;
   onSubmit: (questionAnswers: any[]) => void;
 }
 
-const PracticeType1 = ({ questions, onBack, onSubmit }: PracticeType1Props) => {
+const PracticeType3 = ({ questions, onBack, onSubmit }: PracticeType3Props) => {
   const questionList = questions;
   const audioPlayerRef = useRef<AudioPlayerRef>(null);
   const navigation = useNavigation();
 
   const initialValues: Record<string, string> = {};
   questionList.forEach((q) => {
-    initialValues[`question_${q._id}`] = "";
+    if (q.questions && q.questions.length > 0) {
+      // Handle nested questions
+      q.questions.forEach((subQ) => {
+        initialValues[`question_${q._id}_${subQ._id}`] = "";
+      });
+    } else {
+      // Handle direct answers
+      initialValues[`question_${q._id}`] = "";
+    }
   });
 
   // const validationSchema = Yup.object().shape(
@@ -30,26 +38,53 @@ const PracticeType1 = ({ questions, onBack, onSubmit }: PracticeType1Props) => {
   //   }, {})
   // );
 
-  const handleBack = async () => {
-    await audioPlayerRef.current?.reset();
-
+  const handleBack = () => {
     if (onBack) onBack();
     else navigation.goBack();
   };
 
   const onFormSubmit = async (values: Record<string, string>) => {
     const payload = questionList.map((it) => {
-      const userAnswer = values[`question_${it._id}`];
-      const correctAnswer = it.answers.find((ans) => ans.isCorrect);
-      const isCorrect = userAnswer === correctAnswer?._id;
-      const isNotAnswer = !userAnswer;
+      if (it.questions && it.questions.length > 0) {
+        // Handle nested questions
+        const subQuestionsResults = it.questions.map((subQ) => {
+          const userAnswer = values[`question_${it._id}_${subQ._id}`];
+          const correctAnswer = subQ.answers.find((ans) => ans.isCorrect);
+          const isCorrect = userAnswer === correctAnswer?._id;
+          const isNotAnswer = !userAnswer;
 
-      return {
-        ...it,
-        userAnswer,
-        isCorrect,
-        isNotAnswer,
-      };
+          return {
+            question: subQ.question,
+            userAnswer,
+            isCorrect,
+            isNotAnswer,
+          };
+        });
+
+        // Determine if the entire question is correct (all sub-questions are correct)
+        const isAllCorrect = subQuestionsResults.every((q) => q.isCorrect);
+        const hasAllAnswers = subQuestionsResults.every((q) => !q.isNotAnswer);
+
+        return {
+          ...it,
+          subQuestionsResults,
+          isCorrect: isAllCorrect,
+          isNotAnswer: !hasAllAnswers,
+        };
+      } else {
+        // Handle direct answers
+        const userAnswer = values[`question_${it._id}`];
+        const correctAnswer = it.answers?.find((ans) => ans.isCorrect);
+        const isCorrect = userAnswer === correctAnswer?._id;
+        const isNotAnswer = !userAnswer;
+
+        return {
+          ...it,
+          userAnswer,
+          isCorrect,
+          isNotAnswer,
+        };
+      }
     });
 
     onSubmit(payload);
@@ -86,8 +121,15 @@ const PracticeType1 = ({ questions, onBack, onSubmit }: PracticeType1Props) => {
           }
         };
 
-        const handleSelectAnswer = (option: string) => {
-          setFieldValue(`question_${currentQuestion._id}`, option);
+        const handleSelectAnswer = (option: string, subQuestionId?: string) => {
+          if (subQuestionId) {
+            setFieldValue(
+              `question_${currentQuestion._id}_${subQuestionId}`,
+              option
+            );
+          } else {
+            setFieldValue(`question_${currentQuestion._id}`, option);
+          }
         };
 
         return (
@@ -108,4 +150,4 @@ const PracticeType1 = ({ questions, onBack, onSubmit }: PracticeType1Props) => {
   );
 };
 
-export default PracticeType1;
+export default PracticeType3;
