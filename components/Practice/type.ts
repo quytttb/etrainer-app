@@ -16,7 +16,11 @@ export interface Question {
   question: string | null;
   imageUrl: string;
   answers: IAnswer[];
-  questions: string | null;
+  questions: {
+    question: string;
+    answers: IAnswer[];
+    _id: string;
+  }[];
   createdAt: string;
   updatedAt: string;
   questionNumber: number;
