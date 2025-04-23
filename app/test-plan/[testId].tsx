@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import HeaderCard from '../../../components/HeaderTest';
-import QuestionCard from '../../../components/QuestionCard';
-import AudioControls from '../../../components/AudioControls';
-import NavigationButtons from '../../../components/NavigationButtons';
+import HeaderCard from '../../components/HeaderTest'; 
+import QuestionCard from '../../components/QuestionCard'; 
+import AudioControls from '../../components/AudioControls'; 
+import NavigationButtons from '../../components/NavigationButtons'; 
 import axios from 'axios';
 
 const ExamDetailScreen = () => {
@@ -60,15 +60,19 @@ const ExamDetailScreen = () => {
     closeSubmitModal();
     closeModal();
 
-    // Navigate to T_result if all answers are correct, otherwise navigate to F_result
-    const allCorrect = correctCount === questions.length;
+    // Navigate to test-plan/detail/[id].tsx
     router.push({
-      pathname: allCorrect ? '/T_result' : '/F_result',
+      pathname: `/test-plan/detail/${examId}`, // Use the current examId for navigation
       params: {
         selectedAnswers: JSON.stringify(selectedAnswers),
         questionData: JSON.stringify(questions),
       },
     });
+  };
+
+  const handleScorePress = () => {
+    // Navigate to test-plan/[testID].tsx
+    router.push(`/test-plan/${examId}`); // Use the current examId for navigation
   };
 
   const openModal = () => setIsModalVisible(true);

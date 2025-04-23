@@ -12,9 +12,9 @@ export default function UserLayout() {
         headerShown: true,
         headerTitleAlign: 'center',
         headerStyle: {
-          backgroundColor: '#0099cc', // Màu nền của Header
+          backgroundColor: '#0099cc', 
         },
-        headerTintColor: '#fff', // Màu chữ và nút trên Header
+        headerTintColor: '#fff', 
         headerTitleStyle: {
           fontWeight: 'bold',
         },

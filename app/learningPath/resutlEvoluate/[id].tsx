@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import Header from '../../components/Header'; 
+import Header from '../../../components/Header';
 
 const QuestionScreen = () => {
   const router = useRouter();
   const isTestPlan = false; 
+  const evaluationName = "Tên bài đánh giá"; // Dynamic subtitle
+  const correctAnswers = 3; // Example correct answers
+  const totalQuestions = 6; // Example total questions
+  const score = 3; // Example score
 
   // Mock data for questions
   const questions = [
@@ -29,14 +33,20 @@ const QuestionScreen = () => {
     return true; // 'all'
   });
 
-  const handleContinuePress = () => {
-    router.push('/next-screen'); // Navigate to the next screen (replace '/next-screen' with your desired route)
-  };
-
   return (
     <View style={styles.container}>
-      {/* Use the existing Header component */}
-      <Header title="Hiển thị đáp án" onBackPress={() => router.push('/home')} />
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>Đánh giá</Text>
+        <Text style={styles.subtitle}>{evaluationName}</Text> {/* Dynamic subtitle */}
+        <View style={styles.scoreContainer}>
+          <Text style={styles.scoreText}>
+            {correctAnswers}/{totalQuestions} Trả lời đúng
+          </Text>
+          <View style={styles.separator} /> {/* Add separator */}
+          <Text style={styles.scoreText}>{score} điểm</Text>
+        </View>
+      </View>
 
       {/* Filters */}
       <View style={styles.filterContainer}>
@@ -62,7 +72,7 @@ const QuestionScreen = () => {
 
       {/* Scrollable Question List */}
       <ScrollView style={styles.scrollView}>
-        {filteredQuestions.map((q, index) => (
+        {filteredQuestions.map((q) => (
           <View key={q.id} style={styles.questionItem}>
             <View style={styles.questionHeader}>
               <Text style={q.selected === q.correct ? styles.correctIcon : styles.incorrectIcon}>
@@ -100,12 +110,13 @@ const QuestionScreen = () => {
         ))}
       </ScrollView>
 
-      {/* Render the Continue Button only if isTestPlan is true */}
-      {isTestPlan && (
-        <TouchableOpacity style={styles.continueButton} onPress={handleContinuePress}>
-          <Text style={styles.continueButtonText}>Tiếp tục</Text>
-        </TouchableOpacity>
-      )}
+      {/* Continue Button */}
+      <TouchableOpacity
+        style={styles.continueButton}
+        onPress={() => router.push('/learningPath')}
+      >
+        <Text style={styles.continueButtonText}>Tiếp tục</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -115,6 +126,39 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F5F5F5',
   },
+  header: {
+    backgroundColor: '#0099CC',
+    padding: 20,
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#CCC',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 18,
+    color: '#fff',
+    marginBottom: 16,
+  },
+  scoreContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  scoreText: {
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  separator: {
+    width: 1,
+    height: 20,
+    backgroundColor: '#fff',
+    marginHorizontal: 10,
+  },
   filterContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -122,7 +166,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#CCC',
-    marginTop: 70,
   },
   filterButton: {
     paddingHorizontal: 20,

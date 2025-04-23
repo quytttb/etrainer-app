@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';  // Import to read the URL parameters
+import { useLocalSearchParams, useRouter } from 'expo-router';  // Import to read the URL parameters and useRouter for navigation
 
 const GoalScreen = () => {
   const { score } = useLocalSearchParams();  // Get the score parameter from URL
+  const router = useRouter(); // Initialize router for navigation
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
 
   const handleSelectGoal = (goal: string) => {
@@ -14,7 +15,7 @@ const GoalScreen = () => {
     <View style={styles.container}>
       {/* Left Side: Display Band Score */}
       <View style={styles.bandContainer}>
-        <Text style={styles.bandText}>{score || '500/700/900'}</Text>  {/* Display current band score */}
+        <Text style={styles.bandText}>{score ? `${score}` : '500/700/900'}</Text>  {/* Ensure score is wrapped in <Text> */}
       </View>
 
       {/* Header Section */}
@@ -80,7 +81,16 @@ const GoalScreen = () => {
       </ScrollView>
 
       {/* Start Button */}
-      <TouchableOpacity style={styles.startButton}>
+      <TouchableOpacity
+        style={styles.startButton}
+        onPress={() => {
+          try {
+            router.push('/learningPath');
+          } catch (error) {
+            console.error('Navigation error occurred:', error);
+          }
+        }}
+      >
         <Text style={styles.startButtonText}>Bắt đầu</Text>
       </TouchableOpacity>
     </View>
@@ -97,7 +107,7 @@ const styles = StyleSheet.create({
     top: 40, 
     left: 20,
     padding: 10,
-    backgroundColor: '#00C4B4',
+    backgroundColor: '#0099CC',
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
@@ -109,7 +119,7 @@ const styles = StyleSheet.create({
     color: '#FFF',
   },
   header: {
-    backgroundColor: '#00C4B4',
+    backgroundColor: '#0099CC',
     padding: 20,
     borderRadius: 10,
     marginBottom: 30,
@@ -179,7 +189,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   startButton: {
-    backgroundColor: '#00C4B4',
+    backgroundColor: '#0099CC',
     paddingVertical: 15,
     borderRadius: 30,
     alignItems: 'center',
