@@ -1,7 +1,6 @@
 import React, { useRef, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Formik } from "formik";
-import * as Yup from "yup";
 import { AudioPlayerRef } from "@/components/AudioPlayer/AudioPlayer";
 import QuestionRenderer from "./QuestionRenderer";
 import { Question } from "../type";
@@ -9,7 +8,7 @@ import { Question } from "../type";
 interface PracticeType1Props {
   questions: Question[];
   onBack?: () => void;
-  onSubmit: (values: Record<string, string>) => void;
+  onSubmit: (questionAnswers: any[]) => void;
 }
 
 const PracticeType1 = ({ questions, onBack, onSubmit }: PracticeType1Props) => {
@@ -22,25 +21,43 @@ const PracticeType1 = ({ questions, onBack, onSubmit }: PracticeType1Props) => {
     initialValues[`question_${q._id}`] = "";
   });
 
-  const validationSchema = Yup.object().shape(
-    questionList.reduce((schema, q) => {
-      return {
-        ...schema,
-        [`question_${q._id}`]: Yup.string().required("Please select an answer"),
-      };
-    }, {})
-  );
+  // const validationSchema = Yup.object().shape(
+  //   questionList.reduce((schema, q) => {
+  //     return {
+  //       ...schema,
+  //       [`question_${q._id}`]: Yup.string().required("Please select an answer"),
+  //     };
+  //   }, {})
+  // );
 
   const handleBack = () => {
     if (onBack) onBack();
     else navigation.goBack();
   };
 
+  const onFormSubmit = async (values: Record<string, string>) => {
+    const payload = questionList.map((it) => {
+      const userAnswer = values[`question_${it._id}`];
+      const correctAnswer = it.answers.find((ans) => ans.isCorrect);
+      const isCorrect = userAnswer === correctAnswer?._id;
+      const isNotAnswer = !userAnswer;
+
+      return {
+        ...it,
+        userAnswer,
+        isCorrect,
+        isNotAnswer,
+      };
+    });
+
+    onSubmit(payload);
+  };
+
   return (
     <Formik
       initialValues={initialValues}
-      validationSchema={validationSchema}
-      onSubmit={onSubmit}
+      // validationSchema={validationSchema}
+      onSubmit={onFormSubmit}
       enableReinitialize
     >
       {({ values, setFieldValue, handleSubmit }) => {

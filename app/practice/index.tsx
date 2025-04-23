@@ -5,14 +5,16 @@ import { LESSON_TYPE } from "@/constants/lesson-types";
 import { useMutation } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import React, { useMemo, useState } from "react";
-import { startPracticeService } from "./service";
+import { startPracticeService, submitPracticeService } from "./service";
 import { Alert } from "react-native";
+import dayjs from "dayjs";
 
 const Practice = () => {
   const params = useLocalSearchParams();
   const type = params.lessonType as LESSON_TYPE;
 
   const [step, setStep] = useState<"PREPARE" | "PRACTICE">("PREPARE");
+  const [startTime, setStartTime] = useState<string | null>(null);
 
   const { type1, type2, type3, type4, type5 } = useMemo(() => {
     const type1 = [LESSON_TYPE.IMAGE_DESCRIPTION].includes(type);
@@ -39,9 +41,21 @@ const Practice = () => {
         return;
       }
       setStep("PRACTICE");
+      setStartTime(dayjs().toISOString());
     },
     onError: () => {
       Alert.alert("Lỗi", "Có lỗi xảy ra khi bắt đầu luyện tập");
+    },
+  });
+
+  const submitPracticeMutation = useMutation({
+    mutationKey: ["SUBMIT_PRACTICE"],
+    mutationFn: submitPracticeService,
+    onSuccess: (r) => {
+      console.log("3521 ~ r:", r);
+    },
+    onError: () => {
+      Alert.alert("Lỗi", "Có lỗi xảy ra khi gửi bài luyện tập");
     },
   });
 
@@ -52,6 +66,15 @@ const Practice = () => {
     });
   };
 
+  const onSubmit = (questionAnswers: any) => {
+    submitPracticeMutation.mutate({
+      startTime: startTime as string,
+      endTime: dayjs().toISOString(),
+      lessonType: type,
+      questionAnswers: questionAnswers,
+    });
+  };
+
   if (step === "PREPARE") {
     return <Prepare type={type} onStart={onStart} />;
   }
@@ -59,9 +82,7 @@ const Practice = () => {
   if (type1) {
     return (
       <PracticeType1
-        onSubmit={(values) => {
-          console.log("Submitted values:", values);
-        }}
+        onSubmit={onSubmit}
         questions={startPracticeMutation.data}
         onBack={() => setStep("PREPARE")}
       />
