@@ -1,46 +1,109 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
-import Header from '../../components/Header';
+import React from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  StatusBar,
+  RefreshControl,
+} from "react-native";
+import { useRouter } from "expo-router";
+import Header from "../../components/Header";
+import { useQuery } from "@tanstack/react-query";
+import { getNotificationService } from "./service";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import { Ionicons } from "@expo/vector-icons";
+
+dayjs.extend(relativeTime);
 
 const NotificationScreen = () => {
   const router = useRouter();
-  const [notifications, setNotifications] = useState([
-    { id: 1, avatar: 'https://randomuser.me/api/portraits/women/1.jpg', title: 'Tố Uyên!', description: '🌻🎯😔☁️ Thời gian trôi qua nhanh quá! Quay lại ngay để tiếp tục hành trình học tập nhé! 🌈📚', time: '1 ngày trước' },
-    { id: 2, avatar: 'https://randomuser.me/api/portraits/men/2.jpg', title: 'Tố Uyên!', description: '😭😭😭🌈💥 Chúng tôi rất nhớ bạn! Quay lại học tập ngay nhé! 🎉', time: '2 ngày trước' },
-    { id: 3, avatar: 'https://randomuser.me/api/portraits/women/3.jpg', title: 'Tố Uyên!', description: '😭😭😭⏰ Đã 2 ngày không học! Hãy quay lại ngay để tiếp tục nhé! 💪🚀', time: '1 tuần trước' },
-    { id: 4, avatar: 'https://randomuser.me/api/portraits/men/4.jpg', title: 'Tố Uyên!', description: '🌻🎯😔🏃‍♀️ Ba ngày không học, chúng tôi rất nhớ bạn! Quay lại ngay để không bỏ lỡ cơ hội phát triển! 🌟📚', time: '2 tuần trước' },
-    { id: 5, avatar: 'https://randomuser.me/api/portraits/women/5.jpg', title: 'Tố Uyên!', description: '😭😭😭⏰ Thời gian không đợi ai! Quay lại ngay để học tiếp! 🌈🎉', time: '2 tuần trước' },
-  ]);
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const { data, refetch, isLoading } = useQuery({
+    queryKey: ["NOTIFICATION"],
+    queryFn: getNotificationService,
+  });
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    refetch().finally(() => setRefreshing(false));
+  }, [refetch]);
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f7f9fc" />
       <Header
         title="Thông báo"
-        onBackPress={() => router.push('/home' as any)}
+        onBackPress={() => router.push("/home" as any)}
       />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <View style={styles.content}>
-          {notifications.length > 0 ? (
-            notifications.map((notif) => (
-              <View key={notif.id} style={styles.notificationItem}>
-                <Image source={{ uri: notif.avatar }} style={styles.avatar} />
-                <View style={styles.notificationTextContainer}>
-                  <Text style={styles.notificationTitle}>{notif.title}</Text>
-                  <Text style={styles.notificationDescription}>{notif.description}</Text>
-                  <Text style={styles.notificationTime}>{notif.time}</Text>
-                </View>
-              </View>
-            ))
+          {data && data?.length > 0 ? (
+            <>
+              {data.map((item) => (
+                <TouchableOpacity
+                  key={item._id}
+                  style={styles.notificationItem}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.notificationIcon}>
+                    <View style={styles.iconCircle}>
+                      <Ionicons
+                        name="notifications"
+                        size={20}
+                        color="#2FC095"
+                      />
+                    </View>
+                  </View>
+                  <View style={styles.notificationTextContainer}>
+                    <Text style={styles.notificationTitle} numberOfLines={1}>
+                      {item.title}
+                    </Text>
+                    <Text
+                      style={styles.notificationDescription}
+                      numberOfLines={2}
+                    >
+                      {item.message}
+                    </Text>
+                    <Text style={styles.notificationTime}>
+                      {dayjs(item.createdAt).fromNow()}
+                    </Text>
+                  </View>
+
+                  {/* {!item.isRead && <View style={styles.unreadDot} />} */}
+                </TouchableOpacity>
+              ))}
+            </>
           ) : (
             <View style={styles.emptyState}>
               <Image
-                source={{ uri: 'https://img.icons8.com/ios/50/000000/folder-invoices--v1.png' }}
-                style={styles.icon}
+                source={{
+                  uri: "https://img.icons8.com/ios/50/000000/folder-invoices--v1.png",
+                }}
+                style={styles.emptyIcon}
               />
-              <Text style={styles.message}>Chưa có dữ liệu!</Text>
-              <TouchableOpacity style={styles.retryButton} onPress={() => router.reload()}>
-                <Text style={styles.retryButtonText}>Thử lại</Text>
+
+              <Text style={styles.emptyTitle}>Chưa có thông báo</Text>
+              <Text style={styles.emptyMessage}>
+                Bạn sẽ nhận được thông báo khi có hoạt động mới.
+              </Text>
+              <TouchableOpacity
+                style={styles.refreshButton}
+                onPress={() => refetch()}
+              >
+                <Ionicons name="refresh" size={16} color="#fff" />
+                <Text style={styles.refreshButtonText}>Làm mới</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -53,80 +116,114 @@ const NotificationScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f7f9fc",
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 24,
   },
   content: {
-    flexGrow: 1, 
-    alignItems: 'center',
-    paddingBottom: 20, 
-    paddingTop: 60,
+    paddingTop: 16,
+    paddingHorizontal: 16,
+    marginTop: 80,
   },
-  icon: {
-    width: 50,
-    height: 50,
-    marginBottom: 16,
-  },
-  message: {
-    fontSize: 16,
-    color: '#555',
-    marginBottom: 16,
-  },
-  retryButton: {
-    backgroundColor: '#0099CC',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
+
   notificationItem: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
+    flexDirection: "row",
+    backgroundColor: "#fff",
     padding: 16,
-    marginTop: 5,
-    borderRadius: 8,
-    shadowColor: '#000',
+    marginBottom: 12,
+    borderRadius: 12,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    width: '90%',
-    alignSelf: 'center',
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
+    position: "relative",
   },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginTop: 10,
-    marginRight: 10,
+  notificationIcon: {
+    marginRight: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "rgba(47, 192, 149, 0.1)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   notificationTextContainer: {
     flex: 1,
+    paddingRight: 10,
   },
   notificationTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "700",
+    color: "#333",
+    marginBottom: 6,
   },
   notificationDescription: {
     fontSize: 14,
-    color: '#555',
-    marginVertical: 4,
+    color: "#666",
+    lineHeight: 20,
+    marginBottom: 8,
   },
   notificationTime: {
     fontSize: 12,
-    color: '#999',
-    textAlign: 'right',
+    color: "#999",
   },
-  scrollContent: {
-    paddingVertical: 10,
-    alignItems: 'center',
+  unreadDot: {
+    position: "absolute",
+    top: 16,
+    right: 16,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#2FC095",
   },
   emptyState: {
-    alignItems: 'center',
-    marginTop: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 80,
+    paddingHorizontal: 24,
+  },
+  emptyIcon: {
+    width: 120,
+    height: 120,
+    marginBottom: 24,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#333",
+    marginBottom: 8,
+  },
+  emptyMessage: {
+    fontSize: 15,
+    color: "#666",
+    textAlign: "center",
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  refreshButton: {
+    flexDirection: "row",
+    backgroundColor: "#2FC095",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    shadowColor: "#2FC095",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  refreshButtonText: {
+    color: "#fff",
+    fontWeight: "600",
+    marginLeft: 8,
   },
 });
 
