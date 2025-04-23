@@ -24,7 +24,7 @@ export const submitPracticeService = (payload: ISubmitPractice) => {
   return request.post("/practice/submit", payload);
 };
 
-interface IPracticeHistory {
+export interface IPracticeHistory {
   _id: string;
   user: string;
   startTime: string;
@@ -34,6 +34,7 @@ interface IPracticeHistory {
   correctAnswers: number;
   accuracyRate: number;
   questionAnswers: any[];
+  createdAt: string;
 }
 
 export const getPracticeResultService = (
