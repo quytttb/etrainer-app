@@ -4,12 +4,16 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  Image,
   StatusBar,
   SafeAreaView,
   ScrollView,
 } from "react-native";
-import { Ionicons, AntDesign } from "@expo/vector-icons";
+import {
+  Ionicons,
+  MaterialIcons,
+  Feather,
+  AntDesign,
+} from "@expo/vector-icons";
 import AudioPlayer, {
   AudioPlayerRef,
 } from "@/components/AudioPlayer/AudioPlayer";
@@ -39,76 +43,86 @@ const QuestionRenderer = ({
   handleSelectAnswer,
 }: QuestionRendererProps) => {
   const currentAudioUri = currentQuestion.audio.url;
-  const currentImageUri = currentQuestion.imageUrl;
-  const hasSubQuestions =
-    currentQuestion.questions && currentQuestion.questions.length > 0;
 
-  const combineStyles = (
-    ...styles: (object | boolean | null | undefined)[]
-  ) => {
-    return styles.filter(Boolean) as object[];
+  // Hiển thị các câu hỏi con nếu có, nếu không hiển thị câu hỏi chính
+  const renderQuestions = () => {
+    return currentQuestion.questions.map((subQuestion, index) => (
+      <View key={subQuestion._id} style={styles.questionBox}>
+        <View style={styles.questionHeader}>
+          <View style={styles.questionNumberBox}>
+            <Text style={styles.questionNumber}>{index + 1}</Text>
+          </View>
+          <Text style={styles.questionTitle}>{subQuestion.question}</Text>
+        </View>
+        {renderAnswerOptionsNew(subQuestion.answers)}
+        {renderCircleOptions(subQuestion.answers, subQuestion._id)}
+      </View>
+    ));
   };
 
-  const getAnswerButtonStyle = (option: IAnswer, subQuestionId?: string) => {
-    const fieldName = subQuestionId
-      ? `question_${currentQuestion._id}_${subQuestionId}`
-      : `question_${currentQuestion._id}`;
-    const isSelected = values[fieldName] === option._id;
-    const showCorrectAnswer =
-      !!values[fieldName] &&
-      option.isCorrect &&
-      values[fieldName] !== option._id;
+  // Hiển thị các tùy chọn trả lời dưới dạng danh sách
+  const renderAnswerOptionsNew = (answers: IAnswer[]) => {
+    if (!answers) return null;
 
-    return combineStyles(
-      styles.answerButton,
-      isSelected && styles.selectedAnswer,
-      showCorrectAnswer && {
-        backgroundColor: "red",
-        borderColor: "red",
-      }
+    return (
+      <View style={styles.answersList}>
+        {answers.map((option, index) => {
+          const optionLetter = String.fromCharCode(65 + index); // A, B, C, D...
+          return (
+            <View key={option._id} style={styles.answerItem}>
+              <Text style={styles.answerLetter}>{optionLetter}.</Text>
+              <Text style={styles.answerText}>{option.answer}</Text>
+            </View>
+          );
+        })}
+      </View>
     );
   };
 
-  const renderAnswerOptions = (answers: IAnswer[], subQuestionId?: string) => {
+  // Hiển thị các nút tròn để chọn đáp án
+  const renderCircleOptions = (answers: IAnswer[], subQuestionId?: string) => {
+    if (!answers) return null;
+
+    const fieldName = subQuestionId
+      ? `question_${currentQuestion._id}_${subQuestionId}`
+      : `question_${currentQuestion._id}`;
+
     return (
-      <View style={styles.answerOptionsContainer}>
+      <View style={styles.circleOptionsContainer}>
         {answers.map((option, index) => {
-          const optionLetter = String.fromCharCode(65 + index); // A, B, C, etc.
-          const fieldName = subQuestionId
-            ? `question_${currentQuestion._id}_${subQuestionId}`
-            : `question_${currentQuestion._id}`;
+          const optionLetter = String.fromCharCode(65 + index);
           const isSelected = values[fieldName] === option._id;
-          const showCorrectAnswer =
-            !!values[fieldName] &&
-            option.isCorrect &&
-            values[fieldName] !== option._id;
+
+          const isCorrectAnswer = option.isCorrect;
+          const userHasAnswered = !!values[fieldName];
+
+          const showCorrectAnswer = userHasAnswered && isCorrectAnswer;
+          const isWrongAnswer =
+            userHasAnswered && isSelected && !isCorrectAnswer;
 
           return (
             <TouchableOpacity
               key={option._id}
-              style={getAnswerButtonStyle(option, subQuestionId)}
+              style={styles.circleOptionWrapper}
               onPress={() => handleSelectAnswer(option._id, subQuestionId)}
             >
-              <View style={styles.answerContent}>
-                <View style={styles.letterContainer}>
-                  <Text
-                    style={[
-                      styles.letterText,
-                      isSelected && styles.selectedLetterText,
-                      showCorrectAnswer && { color: "#2FC095" },
-                    ]}
-                  >
-                    {optionLetter}
-                  </Text>
-                </View>
+              <View
+                style={[
+                  styles.circleOption,
+                  showCorrectAnswer && styles.selectedCircleOption,
+                  isWrongAnswer && styles.selectedWrongAnswer,
+                ]}
+              >
                 <Text
                   style={[
-                    styles.answerText,
-                    isSelected && styles.selectedAnswerText,
-                    showCorrectAnswer && { color: "#2FC095" },
+                    styles.circleOptionText,
+                    showCorrectAnswer && styles.selectedCircleOptionText,
+                    isWrongAnswer && {
+                      color: "white",
+                    },
                   ]}
                 >
-                  {option.answer}
+                  {optionLetter}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -128,9 +142,7 @@ const QuestionRenderer = ({
           <Ionicons name="chevron-back" size={28} color="white" />
         </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>
-          Câu {currentQuestionIndex + 1} / {questionList.length}
-        </Text>
+        <Text style={styles.headerTitle}>Câu {currentQuestionIndex + 1}</Text>
       </View>
 
       {/* Audio Player */}
@@ -138,41 +150,12 @@ const QuestionRenderer = ({
         audioUri={currentAudioUri}
         ref={audioPlayerRef}
         key={`audio-player-${currentQuestionIndex}`}
+        autoPlay
       />
 
-      {/* Question Content */}
+      {/* Questions Content */}
       <ScrollView style={styles.content}>
-        <View style={styles.contentInner}>
-          <View style={styles.instructionBar}>
-            <Text style={styles.instructionText}>Select the answer</Text>
-          </View>
-
-          {currentImageUri && (
-            <Image
-              source={{ uri: currentImageUri }}
-              style={styles.questionImage}
-              resizeMode="cover"
-            />
-          )}
-
-          {hasSubQuestions ? (
-            // Render sub-questions
-            <View style={styles.subQuestionsContainer}>
-              {currentQuestion.questions.map((subQ, index) => (
-                <View key={subQ._id} style={styles.subQuestionItem}>
-                  <Text style={styles.questionText}>
-                    {index + 1}. {subQ.question}
-                  </Text>
-                  {renderAnswerOptions(subQ.answers, subQ._id)}
-                </View>
-              ))}
-            </View>
-          ) : (
-            // Render main question answers
-            currentQuestion.answers &&
-            renderAnswerOptions(currentQuestion.answers)
-          )}
-        </View>
+        <View style={styles.contentInner}>{renderQuestions()}</View>
       </ScrollView>
 
       <View style={styles.navigationButtons}>
@@ -234,7 +217,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F5F5F5",
   },
-
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -251,82 +233,112 @@ const styles = StyleSheet.create({
     color: "white",
     marginLeft: 32,
   },
-
-  content: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  contentInner: {
-    backgroundColor: "#FFF",
-    borderRadius: 10,
-    marginHorizontal: 10,
-    marginVertical: 10,
-  },
-  instructionBar: {
-    backgroundColor: "#E4C767",
-    padding: 15,
-    alignItems: "center",
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    marginBottom: 10,
-  },
-  instructionText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
-  },
-  questionImage: {
-    width: "100%",
-    height: 200,
-    marginBottom: 15,
-  },
-
-  answerOptionsContainer: {
-    flexDirection: "column",
-    marginVertical: 10,
-    paddingHorizontal: 15,
-  },
-  answerButton: {
-    borderWidth: 1,
-    borderColor: "#DDD",
-    borderRadius: 8,
-    marginBottom: 10,
-    backgroundColor: "white",
-    overflow: "hidden",
-  },
-  selectedAnswer: {
-    backgroundColor: "#2FC095",
-    borderColor: "#2FC095",
-  },
-  answerContent: {
+  headerRight: {
     flexDirection: "row",
     alignItems: "center",
   },
-  letterContainer: {
-    backgroundColor: "#F0F0F0",
-    paddingVertical: 12,
-    paddingHorizontal: 15,
+  headerIcon: {
+    marginHorizontal: 8,
+  },
+  explainButton: {
+    marginLeft: 10,
+  },
+  explainButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  content: {
+    flex: 1,
+    backgroundColor: "#fff",
+    padding: 10,
+    borderTopColor: "#EEE",
+    borderTopWidth: 1,
+  },
+  contentInner: {
+    padding: 0,
+  },
+  questionBox: {
+    marginBottom: 15,
+  },
+  questionHeader: {
+    backgroundColor: "#E4C767",
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
+  questionNumberBox: {
+    width: 24,
+    height: 24,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 4,
+    marginRight: 10,
+    borderColor: "black",
+    borderWidth: 1,
   },
-  letterText: {
+  questionNumber: {
+    fontWeight: "bold",
+    color: "#333",
+  },
+  questionTitle: {
+    flex: 1,
     fontSize: 16,
     fontWeight: "600",
     color: "#333",
   },
-  selectedLetterText: {
-    color: "white",
+  answersList: {
+    padding: 15,
+    backgroundColor: "#FFFFFF",
+  },
+  answerItem: {
+    flexDirection: "row",
+    marginBottom: 15,
+  },
+  answerLetter: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
+    width: 30,
   },
   answerText: {
-    paddingVertical: 12,
-    paddingHorizontal: 15,
     fontSize: 16,
     color: "#333",
     flex: 1,
   },
-  selectedAnswerText: {
-    color: "white",
+  circleOptionsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    paddingVertical: 10,
+    backgroundColor: "#F5F5F5",
+  },
+  circleOptionWrapper: {
+    alignItems: "center",
+  },
+  circleOption: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#CCCCCC",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  selectedCircleOption: {
+    backgroundColor: "#2FC095",
+    borderColor: "#2FC095",
+  },
+  circleOptionText: {
+    fontSize: 16,
     fontWeight: "500",
+    color: "#333",
+  },
+  selectedCircleOptionText: {
+    color: "#FFFFFF",
   },
 
   navigationButtons: {
@@ -371,6 +383,11 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginBottom: 10,
     color: "#333",
+  },
+
+  selectedWrongAnswer: {
+    backgroundColor: "red",
+    borderColor: "red",
   },
 });
 

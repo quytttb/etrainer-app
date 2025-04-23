@@ -102,13 +102,12 @@ const Practice = () => {
     );
   }
 
-  if (type3) {
+  if (type3 || type4) {
     return (
       <PracticeType3
         questions={startPracticeMutation.data}
-        onSubmit={(values) => {
-          console.log("3521 ~ Practice ~ values:", values);
-        }}
+        onSubmit={onSubmit}
+        onBack={() => setStep("PREPARE")}
       />
     );
   }

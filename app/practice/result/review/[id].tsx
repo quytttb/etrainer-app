@@ -58,6 +58,29 @@ const PracticeResultReview = () => {
         }));
       }
 
+      case LESSON_TYPE.CONVERSATION_PIECE:
+      case LESSON_TYPE.SHORT_TALK: {
+        const questions = data.questionAnswers.reduce((acc, item, index) => {
+          const questions = item.questions.map((it: any, idx: number) => ({
+            ...it,
+            question: `${index + 1}.${idx + 1}`,
+          }));
+
+          acc.push(...questions);
+
+          return acc;
+        }, []);
+
+        return questions.map((item: any, idx: number) => ({
+          _id: item._id,
+          question: item.question,
+          answers: item.answers,
+          isCorrect: item.isCorrect,
+          isNotAnswer: item.isNotAnswer,
+          userAnswer: item.userAnswer,
+        }));
+      }
+
       default: {
         return [];
       }

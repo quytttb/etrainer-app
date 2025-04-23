@@ -52,7 +52,7 @@ const Prepare = ({ onStart, type }: PrepareProps) => {
         correctAnswers,
         avgAccuracyRateString,
       };
-    }, []);
+    }, [practiceHistories]);
 
   const data = useMemo(() => {
     const partNumber = Object.keys(LESSON_TYPE).findIndex(
