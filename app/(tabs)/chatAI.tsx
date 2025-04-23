@@ -8,14 +8,14 @@ import { useRouter } from 'expo-router';
 const ChatScreen = () => {
   const router = useRouter(); 
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
-  const [message, setMessage] = useState("");
+  const [message, setMess] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [messages, setMessages] = useState<string[]>([]); 
   const textInputRef = useRef<TextInput>(null); // Ref for the hidden TextInput
 
   const onSpeechResults = (e: any) => {
     const text = e.value[0];
-    setMessage(text);
+    setMess(text);
   };
 
   const handleStartListening = async () => {
@@ -61,7 +61,7 @@ const ChatScreen = () => {
   const handleSendMessage = () => {
     if (message.trim() !== "") {
       setMessages((prev) => [...prev, message]); 
-      setMessage("");
+      setMess("");
       setIsKeyboardVisible(false);
     }
   };
@@ -128,7 +128,7 @@ const ChatScreen = () => {
             placeholder="Type a message..."
             placeholderTextColor="#888"
             value={message}
-            onChangeText={setMessage}
+            onChangeText={setMess}
             ref={textInputRef}
           />
           <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage}>
