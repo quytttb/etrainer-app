@@ -61,7 +61,7 @@ const HistorySection = () => {
 
   const { data: practiceHistories } = useQuery({
     queryKey: ["PRACTICE_HISTORY"],
-    queryFn: getPracticeHistoryService,
+    queryFn: () => getPracticeHistoryService(),
   });
 
   const defaultExamHistory: ExamHistory[] = [

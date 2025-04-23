@@ -46,7 +46,8 @@ const PracticeResultReview = () => {
     if (!data) return [];
 
     switch (data.lessonType) {
-      case LESSON_TYPE.IMAGE_DESCRIPTION: {
+      case LESSON_TYPE.IMAGE_DESCRIPTION:
+      case LESSON_TYPE.ASK_AND_ANSWER: {
         return data.questionAnswers.map((item, idx) => ({
           _id: item._id,
           question: idx + 1,
