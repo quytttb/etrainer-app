@@ -14,13 +14,11 @@ import { getNotificationService } from "./service";
 import { HOME_CONFIG } from "./const";
 import { LESSON_TYPE, LESSON_TYPE_MAPPING } from "@/constants/lesson-types";
 import { LinearGradient } from "expo-linear-gradient";
+import HistorySection from "@/components/Home/HistorySection";
 
 export default function HomeScreen() {
   const { profile } = useProfile();
-
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("practice");
-  const [isModalVisible, setIsModalVisible] = useState(false); // State for modal visibility
 
   const { data } = useQuery({
     queryKey: ["NOTIFICATION"],
@@ -28,18 +26,6 @@ export default function HomeScreen() {
   });
 
   console.log("Notification count", data?.length);
-
-  function handleTabChange(tab: string) {
-    setActiveTab(tab);
-  }
-
-  const handleModalToggle = () => {
-    setIsModalVisible(!isModalVisible); // Toggle modal visibility
-  };
-
-  const handleTestResultPress = (testId: string): void => {
-    router.push(`/exam/result/${testId}`);
-  };
 
   const handlePress = (lessonType: LESSON_TYPE) => {
     switch (lessonType) {
@@ -134,136 +120,7 @@ export default function HomeScreen() {
         </View>
       ))}
 
-      {/* Lịch sử Section */}
-      <View style={styles.historySection}>
-        <Text style={styles.sectionTitle}>Lịch sử</Text>
-
-        {/* Tab buttons for switching between "Luyện tập" and "Thi" */}
-        <View style={styles.tabContainer}>
-          <TouchableOpacity
-            style={[
-              styles.tabButton,
-              activeTab === "practice" && styles.activeTab,
-            ]}
-            onPress={() => setActiveTab("practice")}
-          >
-            <Text style={styles.tabText}>Luyện tập</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tabButton, activeTab === "exam" && styles.activeTab]}
-            onPress={() => setActiveTab("exam")}
-          >
-            <Text style={styles.tabText}>Thi</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Content for each tab */}
-        {activeTab === "practice" && (
-          <View style={styles.historyCard}>
-            <View style={styles.historyColumn}>
-              <Text style={styles.historySubTitle}>Luyện tập</Text>
-              <View style={styles.historyItem}>
-                <Text style={styles.historyText}>Mô tả hình ảnh</Text>
-                <Text style={styles.historyProgress}>0/990</Text>
-              </View>
-              <View style={styles.historyItem}>
-                <Text style={styles.historyText}>Hỏi và Đáp</Text>
-                <Text style={styles.historyProgress}>0/990</Text>
-              </View>
-              <TouchableOpacity
-                style={styles.historyItem}
-                onPress={() => router.push("/reviewResults")}
-              >
-                <Text style={styles.historyText}>Bài đánh giá</Text>
-                <Text style={styles.historyProgress}>100/990</Text>
-              </TouchableOpacity>
-            </View>
-            {/* "Xem thêm" Text Link for Luyện tập */}
-            <TouchableOpacity onPress={handleModalToggle}>
-              <Text style={styles.viewMoreText}>Xem thêm</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {activeTab === "exam" && (
-          <View style={styles.historyCard}>
-            <View style={styles.historyColumn}>
-              <Text style={styles.historySubTitle}>Thi</Text>
-              <View style={styles.historyItem}>
-                <Text style={styles.historyText}>Test 1</Text>
-                <Text style={styles.historyProgress}>20/990</Text>
-              </View>
-              <View style={styles.historyItem}>
-                <Text style={styles.historyText}>Test 2</Text>
-                <Text style={styles.historyProgress}>40/990</Text>
-              </View>
-              <View style={styles.historyItem}>
-                <Text style={styles.historyText}>Test 3</Text>
-                <Text style={styles.historyProgress}>10/990</Text>
-              </View>
-            </View>
-            {/* "Xem thêm" Text Link for Thi */}
-            <TouchableOpacity onPress={handleModalToggle}>
-              <Text style={styles.viewMoreText}>Xem thêm</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-
-      {/* Modal for History Details */}
-      {isModalVisible && (
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            {/* Modal Header Box */}
-            <View style={styles.modalHeaderBox}>
-              <Text style={styles.modalTitle}>
-                {activeTab === "practice" ? "Lịch sử luyện tập" : "Lịch sử thi"}
-              </Text>
-              <TouchableOpacity onPress={handleModalToggle}>
-                <Text style={styles.modalClose}>✕</Text>
-              </TouchableOpacity>
-            </View>
-            <ScrollView>
-              {activeTab === "practice" && (
-                <>
-                  <View style={styles.modalItem}>
-                    <Text style={styles.modalItemTitle}>Mô Tả Hình Ảnh</Text>
-                    <Text style={styles.modalItemDetails}>Số câu hỏi: 10</Text>
-                    <Text style={styles.modalItemDetails}>30%</Text>
-                  </View>
-                  <View style={styles.modalItem}>
-                    <Text style={styles.modalItemTitle}>
-                      Bài đánh giá ngày 1
-                    </Text>
-                    <Text style={styles.modalItemDetails}>Số câu hỏi: 6</Text>
-                    <Text style={styles.modalItemDetails}>50%</Text>
-                  </View>
-                </>
-              )}
-              {activeTab === "exam" && (
-                <>
-                  <TouchableOpacity
-                    onPress={() => handleTestResultPress("test1")}
-                    style={styles.modalItem}
-                  >
-                    <Text style={styles.modalItemTitle}>Test 1</Text>
-                    <Text style={styles.modalItemDetails}>Số câu hỏi: 20</Text>
-                    <Text style={styles.modalItemDetails}>40%</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => handleTestResultPress("test2")}
-                    style={styles.modalItem}
-                  >
-                    <Text style={styles.modalItemTitle}>Test 2</Text>
-                    <Text style={styles.modalItemDetails}>Số câu hỏi: 15</Text>
-                    <Text style={styles.modalItemDetails}>60%</Text>
-                  </TouchableOpacity>
-                </>
-              )}
-            </ScrollView>
-          </View>
-        </View>
-      )}
+      <HistorySection />
 
       {/* Ôn tập Section */}
       <View style={styles.notebookSection}>
@@ -285,6 +142,7 @@ export default function HomeScreen() {
   );
 }
 
+// Giữ lại các styles liên quan đến các phần khác của HomeScreen
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -416,158 +274,6 @@ const styles = StyleSheet.create({
     left: "150%",
     transform: [{ translateX: -50 }],
     color: "#000000",
-  },
-  historySection: {
-    marginTop: 60,
-    marginBottom: 20,
-  },
-  tabContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 10,
-  },
-  tabButton: {
-    padding: 10,
-    width: "50%",
-    alignItems: "center",
-    borderBottomWidth: 2,
-    borderColor: "#ccc",
-  },
-  activeTab: {
-    borderBottomWidth: 3,
-    borderColor: "#0099CC",
-  },
-  tabText: {
-    fontSize: 16,
-    color: "#333",
-  },
-  historyCard: {
-    backgroundColor: "#FFF",
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 80,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 5,
-  },
-  historyColumn: {
-    width: "100%",
-  },
-  historySubTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 30,
-    color: "#333",
-  },
-  historyItem: {
-    marginBottom: 10,
-  },
-  historyText: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  historyProgress: {
-    fontSize: 14,
-    color: "#0099CC",
-  },
-  viewMoreText: {
-    fontSize: 16,
-    color: "#0099CC",
-    textAlign: "center",
-    marginTop: 10,
-    fontWeight: "bold",
-  },
-  modalContainer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    marginStart: -20,
-    marginEnd: -20,
-    height: "40%",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    zIndex: 10,
-  },
-  modalContent: {
-    width: "100%", // Ensure the modal content spans the full width
-    backgroundColor: "#FFF",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    height: "100%",
-    zIndex: 11, // Ensure modal content appears above other elements
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  modalHeaderBox: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#0099CC", // Green background for the header box
-    padding: 15,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#FFF", // White text for contrast
-  },
-  modalClose: {
-    fontSize: 18,
-    color: "#FFF", // White close button
-    fontWeight: "bold",
-  },
-  modalItem: {
-    marginBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#EEE",
-    paddingBottom: 10,
-  },
-  modalItemHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  modalItemIcon: {
-    width: 40,
-    height: 40,
-    marginRight: 10,
-  },
-  modalItemDetails: {
-    flex: 1,
-  },
-  modalItemTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  modalItemSubtitle: {
-    fontSize: 14,
-    color: "#666",
-  },
-  modalItemPercentage: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#0099CC",
-  },
-  progressBarContainer: {
-    height: 10,
-    backgroundColor: "#EEE",
-    borderRadius: 5,
-    overflow: "hidden",
-  },
-  progressBar: {
-    height: "100%",
-    backgroundColor: "#0099CC",
   },
   notebookSection: {
     marginTop: -60,

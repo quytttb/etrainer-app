@@ -55,9 +55,6 @@ const Practice = () => {
     onSuccess: (r) => {
       router.replace({
         pathname: `/practice/result/${r.data._id}`,
-        params: {
-          lessonType: type,
-        },
       });
     },
     onError: () => {
