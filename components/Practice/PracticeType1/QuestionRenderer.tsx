@@ -12,29 +12,7 @@ import { Ionicons, AntDesign } from "@expo/vector-icons";
 import AudioPlayer, {
   AudioPlayerRef,
 } from "@/components/AudioPlayer/AudioPlayer";
-
-interface IAnswer {
-  answer: string;
-  isCorrect: boolean;
-  _id: string;
-}
-
-interface Question {
-  _id: string;
-  audio: {
-    name: string;
-    url: string;
-  };
-  type: string;
-  question: string | null;
-  imageUrl: string;
-  answers: IAnswer[];
-  questions: string | null;
-  createdAt: string;
-  updatedAt: string;
-  questionNumber: number;
-  __v: number;
-}
+import { IAnswer, Question } from "../type";
 
 interface QuestionRendererProps {
   currentQuestionIndex: number;
@@ -63,7 +41,6 @@ const QuestionRenderer = ({
   const currentImageUri = currentQuestion.imageUrl;
   const currentAnswers = currentQuestion.answers;
 
-  // Hàm helper tương tự classnames
   const combineStyles = (
     ...styles: (object | boolean | null | undefined)[]
   ) => {

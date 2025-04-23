@@ -4,34 +4,12 @@ import { Formik } from "formik";
 import * as Yup from "yup";
 import { AudioPlayerRef } from "@/components/AudioPlayer/AudioPlayer";
 import QuestionRenderer from "./QuestionRenderer";
-
-interface IAnswer {
-  answer: string;
-  isCorrect: boolean;
-  _id: string;
-}
-
-interface Question {
-  _id: string;
-  audio: {
-    name: string;
-    url: string;
-  };
-  type: string;
-  question: string | null;
-  imageUrl: string;
-  answers: IAnswer[];
-  questions: string | null;
-  createdAt: string;
-  updatedAt: string;
-  questionNumber: number;
-  __v: number;
-}
+import { Question } from "../type";
 
 interface PracticeType1Props {
   questions: Question[];
   onBack?: () => void;
-  onSubmit?: (values: Record<string, string>) => void;
+  onSubmit: (values: Record<string, string>) => void;
 }
 
 const PracticeType1 = ({ questions, onBack, onSubmit }: PracticeType1Props) => {
@@ -44,7 +22,6 @@ const PracticeType1 = ({ questions, onBack, onSubmit }: PracticeType1Props) => {
     initialValues[`question_${q._id}`] = "";
   });
 
-  // Optional: Create validation schema
   const validationSchema = Yup.object().shape(
     questionList.reduce((schema, q) => {
       return {
@@ -63,9 +40,8 @@ const PracticeType1 = ({ questions, onBack, onSubmit }: PracticeType1Props) => {
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
-      onSubmit={(values) => {
-        if (onSubmit) onSubmit(values);
-      }}
+      onSubmit={onSubmit}
+      enableReinitialize
     >
       {({ values, setFieldValue, handleSubmit }) => {
         const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
