@@ -1,3 +1,5 @@
+import { LESSON_TYPE } from "@/constants/lesson-types";
+
 export interface IAnswer {
   answer: string;
   isCorrect: boolean;
