@@ -8,6 +8,7 @@ import React, { useMemo, useState } from "react";
 import { startPracticeService, submitPracticeService } from "./service";
 import { Alert } from "react-native";
 import dayjs from "dayjs";
+import PracticeType3 from "@/components/Practice/PracticeType3/PracticeType3";
 
 const Practice = () => {
   const params = useLocalSearchParams();
@@ -91,6 +92,17 @@ const Practice = () => {
 
   if (type2) {
     return <PracticeType2 />;
+  }
+
+  if (type3) {
+    return (
+      <PracticeType3
+        questions={startPracticeMutation.data}
+        onSubmit={(values) => {
+          console.log("3521 ~ Practice ~ values:", values);
+        }}
+      />
+    );
   }
 };
 
