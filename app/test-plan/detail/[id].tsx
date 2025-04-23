@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import Header from '../../components/Header'; 
 
 const QuestionScreen = () => {
   const router = useRouter();
-  const isTestPlan = false; 
 
   // Mock data for questions
   const questions = [
@@ -30,13 +28,14 @@ const QuestionScreen = () => {
   });
 
   const handleContinuePress = () => {
-    router.push('/next-screen'); // Navigate to the next screen (replace '/next-screen' with your desired route)
+    router.push('/study-schedule'); // Navigate to the study-schedule/index.tsx page
   };
 
   return (
     <View style={styles.container}>
-      {/* Use the existing Header component */}
-      <Header title="Hiển thị đáp án" onBackPress={() => router.push('/home')} />
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Hiển thị đáp án</Text>
+      </View>
 
       {/* Filters */}
       <View style={styles.filterContainer}>
@@ -100,12 +99,10 @@ const QuestionScreen = () => {
         ))}
       </ScrollView>
 
-      {/* Render the Continue Button only if isTestPlan is true */}
-      {isTestPlan && (
-        <TouchableOpacity style={styles.continueButton} onPress={handleContinuePress}>
-          <Text style={styles.continueButtonText}>Tiếp tục</Text>
-        </TouchableOpacity>
-      )}
+      {/* Continue Button */}
+      <TouchableOpacity style={styles.continueButton} onPress={handleContinuePress}>
+        <Text style={styles.continueButtonText}>Tiếp tục</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -113,7 +110,16 @@ const QuestionScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+  },
+  header: {
+    backgroundColor: '#0099CC',
+    paddingVertical: 20,
+    alignItems: 'center',
+  },
+  headerText: {
+    fontSize: 20,
+    color: '#FFF',
+    fontWeight: 'bold',
   },
   filterContainer: {
     flexDirection: 'row',
@@ -122,7 +128,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#CCC',
-    marginTop: 70,
+    marginTop: 10,
   },
   filterButton: {
     paddingHorizontal: 20,

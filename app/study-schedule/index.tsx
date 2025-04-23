@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router'; // Import useRouter for navigation
 
 const GoalScreen = () => {
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
+  const router = useRouter(); // Initialize router for navigation
 
   const handleSelectGoal = (goal: string) => {
     setSelectedGoal(goal);
+  };
+
+  const handleNextPress = () => {
+    if (selectedGoal) {
+      router.push(`/study-schedule/detail/${selectedGoal}`); // Navigate to the detail page with the selected goal as the ID
+    }
   };
 
   return (
@@ -45,7 +53,14 @@ const GoalScreen = () => {
       </View>
 
       {/* Next Button */}
-      <TouchableOpacity style={styles.nextButton}>
+      <TouchableOpacity
+        style={[
+          styles.nextButton,
+          !selectedGoal && styles.disabledNextButton, 
+        ]}
+        disabled={!selectedGoal} 
+        onPress={handleNextPress} 
+      >
         <Text style={styles.nextButtonText}>Tiếp theo</Text>
       </TouchableOpacity>
     </View>
@@ -58,7 +73,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   header: {
-    backgroundColor: '#00C4B4',
+    backgroundColor: '#0099CC',
     padding: 20,
     borderRadius: 10,
     marginBottom: 30,
@@ -95,7 +110,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   selectedOption: {
-    backgroundColor: '#00C4B4',
+    backgroundColor: '#0099CC', 
   },
   optionText: {
     fontSize: 18,
@@ -103,12 +118,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   nextButton: {
-    backgroundColor: '#00C4B4',
+    backgroundColor: '#0099CC', 
     paddingVertical: 15,
     marginHorizontal: 50,
     marginTop: 200,
     borderRadius: 30,
     alignItems: 'center',
+  },
+  disabledNextButton: {
+    backgroundColor: '#CCCCCC', // Gray color for disabled state
   },
   nextButtonText: {
     fontSize: 18,

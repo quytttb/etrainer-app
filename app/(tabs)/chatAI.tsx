@@ -48,7 +48,7 @@ const ChatScreen = () => {
 
   return (
     <LinearGradient
-      colors={['#7DB5F5', '#FFFFFF']}
+      colors={['#FFFFFF', '#FFFFFF']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.container}
