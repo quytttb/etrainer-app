@@ -30,7 +30,9 @@ const PracticeType1 = ({ questions, onBack, onSubmit }: PracticeType1Props) => {
   //   }, {})
   // );
 
-  const handleBack = () => {
+  const handleBack = async () => {
+    await audioPlayerRef.current?.reset();
+
     if (onBack) onBack();
     else navigation.goBack();
   };

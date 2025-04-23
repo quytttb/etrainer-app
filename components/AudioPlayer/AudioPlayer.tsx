@@ -11,6 +11,7 @@ import { FontAwesome5 } from "@expo/vector-icons";
 
 interface AudioPlayerProps {
   audioUri: string;
+  autoPlay?: boolean;
 }
 
 export interface AudioPlayerRef {
@@ -27,7 +28,7 @@ interface PlaybackStatus {
 }
 
 const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>(
-  ({ audioUri }, ref) => {
+  ({ audioUri, autoPlay }, ref) => {
     const [sound, setSound] = useState<Audio.Sound | null>(null);
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
     const [position, setPosition] = useState<number>(0);
@@ -46,9 +47,12 @@ const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>(
     useEffect(() => {
       const loadSound = async () => {
         try {
-          const { sound } = await Audio.Sound.createAsync({
-            uri: audioUri,
-          });
+          const { sound } = await Audio.Sound.createAsync(
+            {
+              uri: audioUri,
+            },
+            { shouldPlay: autoPlay }
+          );
           setSound(sound);
           sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
         } catch (error) {

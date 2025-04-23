@@ -51,11 +51,12 @@ const QuestionRenderer = ({
     const isSelected = values[`question_${currentQuestion._id}`] === option._id;
     const isCorrectAnswer = option.isCorrect;
     const userHasAnswered = !!values[`question_${currentQuestion._id}`];
-    const showCorrectAnswer = userHasAnswered && isCorrectAnswer && !isSelected;
+    const showCorrectAnswer = userHasAnswered && isCorrectAnswer;
+    const isWrongAnswer = userHasAnswered && isSelected && !isCorrectAnswer;
 
     return combineStyles(
       styles.answerButton,
-      isSelected && styles.selectedAnswer,
+      isWrongAnswer && styles.selectedWrongAnswer,
       showCorrectAnswer && styles.correctAnswer
     );
   };
@@ -80,6 +81,7 @@ const QuestionRenderer = ({
         audioUri={currentAudioUri}
         ref={audioPlayerRef}
         key={`audio-player-${currentQuestionIndex}`}
+        autoPlay
       />
 
       {/* Question Content */}
@@ -108,8 +110,12 @@ const QuestionRenderer = ({
             <Text
               style={[
                 styles.answerText,
-                values[`question_${currentQuestion._id}`] === option._id &&
-                  styles.selectedAnswerText,
+                !!values[`question_${currentQuestion._id}`] &&
+                  option.isCorrect &&
+                  styles.correctAnswerText,
+                values[`question_${currentQuestion._id}`] === option._id && {
+                  color: "white",
+                },
               ]}
             >
               {String.fromCharCode(65 + currentAnswers.indexOf(option))}
@@ -246,17 +252,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "white",
   },
-  selectedAnswer: {
-    backgroundColor: "#2FC095",
-    borderColor: "#2FC095",
+  selectedWrongAnswer: {
+    backgroundColor: "red",
+    borderColor: "red",
   },
   correctAnswer: {
-    backgroundColor: "#ff0",
+    backgroundColor: "#2FC095",
     borderColor: "#2FC095",
   },
   answerText: {
     fontSize: 16,
     fontWeight: "600",
+  },
+  correctAnswerText: {
+    color: "white",
   },
   selectedAnswerText: {
     color: "white",
