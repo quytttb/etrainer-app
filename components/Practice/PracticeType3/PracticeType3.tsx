@@ -45,46 +45,24 @@ const PracticeType3 = ({ questions, onBack, onSubmit }: PracticeType3Props) => {
 
   const onFormSubmit = async (values: Record<string, string>) => {
     const payload = questionList.map((it) => {
-      if (it.questions && it.questions.length > 0) {
-        // Handle nested questions
-        const subQuestionsResults = it.questions.map((subQ) => {
-          const userAnswer = values[`question_${it._id}_${subQ._id}`];
-          const correctAnswer = subQ.answers.find((ans) => ans.isCorrect);
-          const isCorrect = userAnswer === correctAnswer?._id;
-          const isNotAnswer = !userAnswer;
-
-          return {
-            question: subQ.question,
-            userAnswer,
-            isCorrect,
-            isNotAnswer,
-          };
-        });
-
-        // Determine if the entire question is correct (all sub-questions are correct)
-        const isAllCorrect = subQuestionsResults.every((q) => q.isCorrect);
-        const hasAllAnswers = subQuestionsResults.every((q) => !q.isNotAnswer);
-
-        return {
-          ...it,
-          subQuestionsResults,
-          isCorrect: isAllCorrect,
-          isNotAnswer: !hasAllAnswers,
-        };
-      } else {
-        // Handle direct answers
-        const userAnswer = values[`question_${it._id}`];
-        const correctAnswer = it.answers?.find((ans) => ans.isCorrect);
+      const questions = it.questions.map((subQ) => {
+        const userAnswer = values[`question_${it._id}_${subQ._id}`];
+        const correctAnswer = subQ.answers.find((ans) => ans.isCorrect);
         const isCorrect = userAnswer === correctAnswer?._id;
         const isNotAnswer = !userAnswer;
 
         return {
-          ...it,
+          ...subQ,
           userAnswer,
           isCorrect,
           isNotAnswer,
         };
-      }
+      });
+
+      return {
+        ...it,
+        questions,
+      };
     });
 
     onSubmit(payload);

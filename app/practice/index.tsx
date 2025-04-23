@@ -1,5 +1,4 @@
 import PracticeType1 from "@/components/Practice/PracticeType1/PracticeType1";
-import PracticeType2 from "@/components/Practice/PracticeType2/PracticeType2";
 import Prepare from "@/components/Prepare";
 import { LESSON_TYPE } from "@/constants/lesson-types";
 import { useMutation } from "@tanstack/react-query";
@@ -9,6 +8,7 @@ import { startPracticeService, submitPracticeService } from "./service";
 import { Alert } from "react-native";
 import dayjs from "dayjs";
 import PracticeType3 from "@/components/Practice/PracticeType3/PracticeType3";
+import PracticeType2 from "@/components/Practice/PracticeType2/PracticeType2";
 
 const Practice = () => {
   const params = useLocalSearchParams();
@@ -55,9 +55,6 @@ const Practice = () => {
     onSuccess: (r) => {
       router.replace({
         pathname: `/practice/result/${r.data._id}`,
-        params: {
-          lessonType: type,
-        },
       });
     },
     onError: () => {
@@ -96,16 +93,21 @@ const Practice = () => {
   }
 
   if (type2) {
-    return <PracticeType2 />;
+    return (
+      <PracticeType2
+        onSubmit={onSubmit}
+        questions={startPracticeMutation.data}
+        onBack={() => setStep("PREPARE")}
+      />
+    );
   }
 
-  if (type3) {
+  if (type3 || type4) {
     return (
       <PracticeType3
         questions={startPracticeMutation.data}
-        onSubmit={(values) => {
-          console.log("3521 ~ Practice ~ values:", values);
-        }}
+        onSubmit={onSubmit}
+        onBack={() => setStep("PREPARE")}
       />
     );
   }

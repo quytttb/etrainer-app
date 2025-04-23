@@ -11,6 +11,8 @@ import {
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { LESSON_TYPE, LESSON_TYPE_MAPPING } from "@/constants/lesson-types";
+import { useQuery } from "@tanstack/react-query";
+import { getPracticeHistoryService } from "./Home/service";
 
 interface PrepareProps {
   onStart: () => void;
@@ -20,6 +22,37 @@ interface PrepareProps {
 
 const Prepare = ({ onStart, type }: PrepareProps) => {
   const router = useRouter();
+
+  const { data: practiceHistories } = useQuery({
+    queryKey: ["PRACTICE_HISTORY", type],
+    queryFn: () => getPracticeHistoryService({ type }),
+    enabled: !!type,
+  });
+
+  const { totalQuestions, correctAnswers, avgAccuracyRateString } =
+    useMemo(() => {
+      const totalQuestions =
+        practiceHistories?.reduce(
+          (acc, item) => acc + item.totalQuestions,
+          0
+        ) ?? 0;
+      const correctAnswers =
+        practiceHistories?.reduce(
+          (acc, item) => acc + item.correctAnswers,
+          0
+        ) ?? 0;
+
+      const avgAccuracyRate = (correctAnswers / totalQuestions) * 100;
+      const avgAccuracyRateString = avgAccuracyRate
+        ? avgAccuracyRate.toFixed()
+        : 0;
+
+      return {
+        totalQuestions,
+        correctAnswers,
+        avgAccuracyRateString,
+      };
+    }, [practiceHistories]);
 
   const data = useMemo(() => {
     const partNumber = Object.keys(LESSON_TYPE).findIndex(
@@ -121,9 +154,13 @@ const Prepare = ({ onStart, type }: PrepareProps) => {
         <View style={styles.statsLeft}>
           <Image source={iconMapping[type]} style={styles.miniIcon} />
           <View style={styles.statsTextContainer}>
-            <Text style={styles.statsText}>Số câu đã làm: 12</Text>
-            <Text style={styles.statsText}>Số câu đúng: 4</Text>
-            <Text style={styles.statsText}>Hoàn thành: 33%</Text>
+            <Text style={styles.statsText}>
+              Số câu đã làm: {totalQuestions}
+            </Text>
+            <Text style={styles.statsText}>Số câu đúng: {correctAnswers}</Text>
+            <Text style={styles.statsText}>
+              Hoàn thành: {avgAccuracyRateString}%
+            </Text>
           </View>
         </View>
 
