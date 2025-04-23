@@ -8,7 +8,7 @@ const PathPrepareScreen: React.FC = () => {
    // Hàm điều hướng tới trang thi
    const router = useRouter(); // Sử dụng useRouter để điều hướng
    const handleStartTest = () => {
-    router.push(`/exam/detail/examId?score=${score}` as any); // Điều hướng tới trang thi với tham số score
+    router.push(`/test-plan/${score}`);
   };
 
   return (

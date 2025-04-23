@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import Header from '../../components/Header'; // Adjusted the path to locate the Header component
+import Header from '../../../components/Header';
 
 const QuestionScreen = () => {
   const router = useRouter();
+  const isTestPlan = false; 
 
   // Mock data for questions
   const questions = [
@@ -35,7 +36,7 @@ const QuestionScreen = () => {
   return (
     <View style={styles.container}>
       {/* Use the existing Header component */}
-      <Header title="Hiển thị đáp án" onBackPress={() => router.push('/Result' as any)} />
+      <Header title="Hiển thị đáp án" onBackPress={() => router.push('/home')} />
 
       {/* Filters */}
       <View style={styles.filterContainer}>
@@ -99,8 +100,18 @@ const QuestionScreen = () => {
         ))}
       </ScrollView>
 
+      {/* Render the Continue Button only if isTestPlan is true */}
+      {isTestPlan && (
+        <TouchableOpacity style={styles.continueButton} onPress={handleContinuePress}>
+          <Text style={styles.continueButtonText}>Tiếp tục</Text>
+        </TouchableOpacity>
+      )}
+
       {/* Continue Button */}
-      <TouchableOpacity style={styles.continueButton} onPress={handleContinuePress}>
+      <TouchableOpacity
+        style={styles.continueButton}
+        onPress={() => router.push('/learningPath')} // Navigate to the learningPath index
+      >
         <Text style={styles.continueButtonText}>Tiếp tục</Text>
       </TouchableOpacity>
     </View>
