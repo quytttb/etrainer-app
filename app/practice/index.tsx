@@ -3,7 +3,7 @@ import PracticeType2 from "@/components/Practice/PracticeType2/PracticeType2";
 import Prepare from "@/components/Prepare";
 import { LESSON_TYPE } from "@/constants/lesson-types";
 import { useMutation } from "@tanstack/react-query";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useMemo, useState } from "react";
 import { startPracticeService, submitPracticeService } from "./service";
 import { Alert } from "react-native";
@@ -53,7 +53,12 @@ const Practice = () => {
     mutationKey: ["SUBMIT_PRACTICE"],
     mutationFn: submitPracticeService,
     onSuccess: (r) => {
-      console.log("3521 ~ r:", r);
+      router.replace({
+        pathname: `/practice/result/${r.data._id}`,
+        params: {
+          lessonType: type,
+        },
+      });
     },
     onError: () => {
       Alert.alert("Lỗi", "Có lỗi xảy ra khi gửi bài luyện tập");

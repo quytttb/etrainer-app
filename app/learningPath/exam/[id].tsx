@@ -60,13 +60,12 @@ const ExamDetailScreen = () => {
     closeSubmitModal();
     closeModal();
 
-    // Navigate to T_result if all answers are correct, otherwise navigate to F_result
-    const allCorrect = correctCount === questions.length;
+    // Navigate to the resultEvaluate page with the exam ID
     router.push({
-      pathname: allCorrect ? '/T_result' : '/F_result',
+      pathname: `learningPath/result/${examId}`,
       params: {
-        selectedAnswers: JSON.stringify(selectedAnswers),
-        questionData: JSON.stringify(questions),
+        correctAnswers: correctCount,
+        totalQuestions: questions.length,
       },
     });
   };

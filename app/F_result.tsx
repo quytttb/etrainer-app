@@ -101,17 +101,23 @@ const ResultScreen = ({ route }: { route: ResultScreenRouteProp }) => {
         {/* Button to view all answers */}
         <TouchableOpacity
           style={styles.viewAllButton}
-          onPress={() => router.push('/question/index')} 
+          onPress={() => router.push('/question')} 
         >
           <Text style={styles.viewAllButtonText}>Xem toàn bộ đáp án</Text>
         </TouchableOpacity>
       </View>
-
-      {partId === 'lộ trình' && ( // Only show the button for "lộ trình" part
-        <TouchableOpacity style={styles.continueButton} onPress={() => router.push(`/exam/list/${partId}`)}>
-          <Text style={styles.continueText}>Tiếp tục</Text>
+      <TouchableOpacity
+          style={styles.retryButton}
+          onPress={() => {
+            // Reset the test and navigate back to the same test detail page
+            router.push({
+              pathname: '/exam/detail/[examId]', // Navigate to the same test detail page
+              params: { examId: route?.params?.partId || 'defaultId' }, // Use the current partId or a default ID
+            });
+          }}
+        >
+          <Text style={styles.retryButtonText}>Làm lại</Text>
         </TouchableOpacity>
-      )}
     </View>
   );
 };
@@ -184,7 +190,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 5,      
     elevation: 5,  
-    padding: 10, // Added padding for spacing
+    padding: 10, 
   },
   resultScore: {
     fontSize: 18,
@@ -199,7 +205,7 @@ const styles = StyleSheet.create({
   },
   incorrectList: {
     flex: 1,
-    marginBottom: 10, // Space between the list and the button
+    marginBottom: 10,
   },
   incorrectTitle: {
     fontSize: 18,
@@ -238,25 +244,25 @@ const styles = StyleSheet.create({
   },
   detailButton: {
     backgroundColor: '#0099CC',
-    padding: 12, // Increased padding for better visibility
-    borderRadius: 8, // Slightly larger border radius
+    padding: 12, 
+    borderRadius: 8,
     marginTop: 10,
     alignItems: 'center',
-    shadowColor: '#000', // Added shadow for elevation
-    shadowOpacity: 0.3, // Increased shadow opacity
-    shadowOffset: { width: 0, height: 4 }, // Adjusted shadow offset
-    shadowRadius: 6, // Increased shadow radius for a softer effect
-    elevation: 6, // For Android shadow
+    shadowColor: '#000', 
+    shadowOpacity: 0.3, 
+    shadowOffset: { width: 0, height: 4 }, 
+    shadowRadius: 6, 
+    elevation: 6, 
   },
   detailButtonText: {
     color: '#FFF',
-    fontSize: 18, // Increased font size
+    fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
-    textTransform: 'uppercase', // Make text uppercase for emphasis
-    textShadowColor: '#000', // Added text shadow
-    textShadowOffset: { width: 1, height: 1 }, // Offset for text shadow
-    textShadowRadius: 2, // Blur radius for text shadow
+    textTransform: 'uppercase',
+    textShadowColor: '#000', 
+    textShadowOffset: { width: 1, height: 1 }, 
+    textShadowRadius: 2, 
   },
   continueButton: {
     backgroundColor: '#0099CC',
@@ -275,9 +281,23 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 20,
     alignItems: 'center',
-    marginTop: 10, // Space above the button
+    marginTop: 10, 
   },
   viewAllButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  retryButton: {
+    backgroundColor: '#0099CC',
+    padding: 15,
+    borderRadius: 20,
+    alignItems: 'center',
+    marginTop: 150,
+    marginLeft: 25, 
+    marginRight: 25,
+  },
+  retryButtonText: {
     color: '#FFF',
     fontSize: 16,
     fontWeight: 'bold',

@@ -10,6 +10,7 @@ import axios from 'axios';
 const ExamDetailScreen = () => {
   const { examId } = useLocalSearchParams(); 
   const router = useRouter();
+  const [timeLeft, setTimeLeft] = useState(120); // Set initial time in seconds (2 minutes)
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({}); // Lưu câu trả lời
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -39,6 +40,27 @@ const ExamDetailScreen = () => {
     setQuestions(mockData); // Use mock data instead of API call
   }, []);
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          openSubmitModal(); // Show submit modal when time reaches 0
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer); // Cleanup on component unmount
+  }, []);
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+  };
+
   const currentQuestion = questions[currentQuestionIndex];
 
   const handleAnswerSelect = (questionId: string, answer: string) => {
@@ -60,13 +82,11 @@ const ExamDetailScreen = () => {
     closeSubmitModal();
     closeModal();
 
-    // Navigate to T_result if all answers are correct, otherwise navigate to F_result
-    const allCorrect = correctCount === questions.length;
     router.push({
-      pathname: allCorrect ? '/T_result' : '/F_result',
+      pathname: `learningPath/resutlEvoluate/${examId}`,
       params: {
-        selectedAnswers: JSON.stringify(selectedAnswers),
-        questionData: JSON.stringify(questions),
+        correctAnswers: correctCount,
+        totalQuestions: questions.length,
       },
     });
   };
@@ -88,6 +108,11 @@ const ExamDetailScreen = () => {
   return (
     <View style={styles.container}>
       <HeaderCard onBackPress={() => {}} onMenuPress={openModal} />
+
+      {/* Countdown Timer */}
+      <View style={styles.timerContainer}>
+        <Text style={styles.timerText}>Thời gian còn lại: {formatTime(timeLeft)}</Text>
+      </View>
 
       <ScrollView contentContainerStyle={styles.scrollView}>
         {currentQuestion && currentQuestion.image && (
@@ -173,7 +198,7 @@ const ExamDetailScreen = () => {
       <Modal visible={isSubmitModalVisible} transparent={true} animationType="slide" onRequestClose={closeSubmitModal}>
         <View style={styles.modalBackground}>
           <View style={styles.modalContent}>
-            <Text style={styles.submitModalTitle}>Bạn có chắc muốn nộp bài không?</Text>
+            <Text style={styles.submitModalTitle}>Thời gian đã hết! Bạn có muốn nộp bài không?</Text>
             <View style={styles.submitModalButtons}>
               <TouchableOpacity onPress={closeSubmitModal} style={styles.buttonCancel}>
                 <Text style={styles.closeText}>Không</Text>
@@ -339,6 +364,15 @@ const styles = StyleSheet.create({
      fontSize: 16, 
      color: '#000', 
      marginBottom: 10 },
+  timerContainer: {
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  timerText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FF0000', // Red color for urgency
+  },
 });
 
 export default ExamDetailScreen;
