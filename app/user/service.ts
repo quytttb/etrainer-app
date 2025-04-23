@@ -24,5 +24,5 @@ export const updateProfileService = async ({
 };
 
 export const deleteAccountService = async () => {
-  return request.delete("/users/profile/delete-account");
+  return request.delete("/users/delete-account");
 };

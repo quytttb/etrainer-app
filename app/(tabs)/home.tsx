@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,62 +7,27 @@ import {
   ScrollView,
   Image,
 } from "react-native";
-import axios from "axios";
 import { useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage"; 
 import useProfile from "@/hooks/useProfile";
-import { LinearGradient } from "expo-linear-gradient"; 
+import { useQuery } from "@tanstack/react-query";
+import { getNotificationService } from "./service";
+import { HOME_CONFIG } from "./const";
+import { LESSON_TYPE, LESSON_TYPE_MAPPING } from "@/constants/lesson-types";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function HomeScreen() {
   const { profile } = useProfile();
 
   const router = useRouter();
-  const [username, setUsername] = useState<string>(""); 
-  const [lessons, setLessons] = useState<any[]>([]); 
-  const [isLoggedIn, setIsLoggedIn] = useState(false); 
-  const [activeTab, setActiveTab] = useState("practice"); 
+  const [activeTab, setActiveTab] = useState("practice");
   const [isModalVisible, setIsModalVisible] = useState(false); // State for modal visibility
 
-  useEffect(() => {
-    // const checkLoginStatus = async () => {
-    //   try {
-    //     // Kiểm tra token trong AsyncStorage
-    //     const token = await AsyncStorage.getItem("token");
-    //     if (!token) {
-    //       // Nếu không có token, điều hướng về trang đăng nhập
-    //       router.replace("/auth/login");
-    //       return;
-    //     }
-    //     setIsLoggedIn(true); // Nếu có token, người dùng đã đăng nhập
-    //     // Lấy tên người dùng từ AsyncStorage
-    //     const storedName = await AsyncStorage.getItem("name");
-    //     setUsername(storedName || "Guest"); // Nếu không có tên, đặt là 'Guest'
-    //     // Gọi API để lấy dữ liệu bài luyện nghe và luyện đọc
-    //     const response = await axios.get<any[]>(
-    //       "http://197.187.3.101:8080/api/lessons"
-    //     );
-    //     setLessons(response.data); // Lưu dữ liệu bài học vào state
-    //   } catch (error) {
-    //     console.error(
-    //       "Error checking login status or fetching lessons:",
-    //       error
-    //     );
-    //   }
-    // };
-    // checkLoginStatus();
-  }, []);
+  const { data } = useQuery({
+    queryKey: ["NOTIFICATION"],
+    queryFn: getNotificationService,
+  });
 
-  const handlePartPress = (partId: string): void => {
-    router.push(`/exam/list/${partId}`);
-  };
-
-  const handleVocaPress = (Id: string): void => {
-    router.push(`/vocabulary`);
-  };
-
-  const handleGramPress = (Id: string): void => {
-    router.push(`/grammar`);
-  };
+  console.log("Notification count", data?.length);
 
   function handleTabChange(tab: string) {
     setActiveTab(tab);
@@ -73,7 +38,28 @@ export default function HomeScreen() {
   };
 
   const handleTestResultPress = (testId: string): void => {
-    router.push(`/exam/result/${testId}`); // Navigate to the test result page
+    router.push(`/exam/result/${testId}`);
+  };
+
+  const handlePress = (lessonType: LESSON_TYPE) => {
+    switch (lessonType) {
+      case LESSON_TYPE.VOCABULARY: {
+        router.push("/vocabulary");
+        break;
+      }
+
+      case LESSON_TYPE.GRAMMAR: {
+        router.push("/grammar");
+        break;
+      }
+
+      default: {
+        router.push({
+          pathname: "/practice",
+          params: { lessonType },
+        });
+      }
+    }
   };
 
   return (
@@ -88,7 +74,7 @@ export default function HomeScreen() {
         <View style={styles.headerRight}>
           <TouchableOpacity
             style={styles.notificationIcon}
-            onPress={() => router.push('/notifis')}
+            // onPress={() => router.push('/notifis')}
           >
             <Text style={styles.notificationText}>🔔</Text>
           </TouchableOpacity>
@@ -105,7 +91,7 @@ export default function HomeScreen() {
 
       <View style={styles.greenBox}>
         <LinearGradient
-          colors={["#7BD5F5", "#1CA7EC"]} 
+          colors={["#7BD5F5", "#1CA7EC"]}
           style={styles.gradientBackground}
         >
           <Text style={styles.studyTime}>Let's study with Etrainer!</Text>
@@ -118,122 +104,35 @@ export default function HomeScreen() {
       </View>
 
       {/* Luyện nghe Section */}
-      <View style={styles.lessonSection}>
-        <Text style={styles.sectionTitle}>Luyện nghe</Text>
-      </View>
-      <View style={styles.lessonList}>
-        <TouchableOpacity
-          style={styles.lessonCard}
-          onPress={() => handlePartPress("part1")}
-        >
-          <Image
-            source={require("../../assets/images/image_icon.png")}
-            style={styles.lessonIcon}
-          />
-          <Text style={styles.lessonText}>Part 1</Text>
-          <Text style={styles.lessonText2}>Mô tả hình ảnh</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.lessonCard}
-          onPress={() => handlePartPress("part2")}
-        >
-          <Image
-            source={require("../../assets/images/qa.png")}
-            style={styles.lessonIcon}
-          />
-          <Text style={styles.lessonText}>Part 2</Text>
-          <Text style={styles.lessonText2}>Hỏi và đáp</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.lessonCard}
-          onPress={() => handlePartPress("part3")}
-        >
-          <Image
-            source={require("../../assets/images/chat.png")}
-            style={styles.lessonIcon}
-          />
-          <Text style={styles.lessonText}>Part 3</Text>
-          <Text style={styles.lessonText2}>Đoạn hội thoại</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.lessonCard}
-          onPress={() => handlePartPress("part4")}
-        >
-          <Image
-            source={require("../../assets/images/headphones.png")}
-            style={styles.lessonIcon}
-          />
-          <Text style={styles.lessonText}>Part 4</Text>
-          <Text style={styles.lessonText2}>Bài nói chuyện ngắn</Text>
-        </TouchableOpacity>
-      </View>
+      {HOME_CONFIG.map((section, index) => (
+        <View key={index}>
+          <View style={styles.lessonSection}>
+            <Text style={styles.sectionTitle}>{section.title}</Text>
+          </View>
+          <View style={styles.lessonList}>
+            {section.data.map((lesson, idx) => (
+              <TouchableOpacity
+                style={styles.lessonCard}
+                key={idx}
+                onPress={() => handlePress(lesson.type)}
+              >
+                <Image source={lesson.icon} style={styles.lessonIcon} />
+                <Text style={styles.lessonText}>
+                  {lesson?.partNumber
+                    ? `Part ${lesson.partNumber}`
+                    : LESSON_TYPE_MAPPING[lesson.type]}
+                </Text>
 
-      {/* Luyện đọc Section */}
-      <View style={styles.lessonSection}>
-        <Text style={styles.sectionTitle}>Luyện đọc</Text>
-      </View>
-      <View style={styles.lessonList}>
-        <TouchableOpacity
-          style={styles.lessonCard}
-          onPress={() => handlePartPress("part5")}
-        >
-          <Image
-            source={require("../../assets/images/vocabulary.png")}
-            style={styles.lessonIcon}
-          />
-          <Text style={styles.lessonText}>Part 5</Text>
-          <Text style={styles.lessonText2}>Điền vào câu</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.lessonCard}
-          onPress={() => handlePartPress("part6")}
-        >
-          <Image
-            source={require("../../assets/images/form.png")}
-            style={styles.lessonIcon}
-          />
-          <Text style={styles.lessonText}>Part 6</Text>
-          <Text style={styles.lessonText2}>Điền vào đoạn văn</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.lessonCard}
-          onPress={() => handlePartPress("part7")}
-        >
-          <Image
-            source={require("../../assets/images/voca_icon.png")}
-            style={styles.lessonIcon}
-          />
-          <Text style={styles.lessonText}>Part 7</Text>
-          <Text style={styles.lessonText2}>Đọc hiểu đoạn văn</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Lý thuyết Section */}
-      <View style={styles.lessonSection}>
-        <Text style={styles.sectionTitle}>Lý thuyết</Text>
-      </View>
-      <View style={styles.lessonList}>
-        <TouchableOpacity
-          style={styles.lessonCard}
-          onPress={() => handleVocaPress("Từ vựng")}
-        >
-          <Image
-            source={require("../../assets/images/vocabulary.png")}
-            style={styles.lessonIcon}
-          />
-          <Text style={styles.lessonText}>Từ vựng</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.lessonCard}
-          onPress={() => handleGramPress("Ngữ pháp")}
-        >
-          <Image
-            source={require("../../assets/images/form.png")}
-            style={styles.lessonIcon}
-          />
-          <Text style={styles.lessonText}>Ngữ pháp</Text>
-        </TouchableOpacity>
-      </View>
+                {lesson.partNumber && (
+                  <Text style={styles.lessonText2}>
+                    {LESSON_TYPE_MAPPING[lesson.type]}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      ))}
 
       {/* Lịch sử Section */}
       <View style={styles.historySection}>
@@ -242,7 +141,10 @@ export default function HomeScreen() {
         {/* Tab buttons for switching between "Luyện tập" and "Thi" */}
         <View style={styles.tabContainer}>
           <TouchableOpacity
-            style={[styles.tabButton, activeTab === "practice" && styles.activeTab]}
+            style={[
+              styles.tabButton,
+              activeTab === "practice" && styles.activeTab,
+            ]}
             onPress={() => setActiveTab("practice")}
           >
             <Text style={styles.tabText}>Luyện tập</Text>
@@ -270,7 +172,7 @@ export default function HomeScreen() {
               </View>
               <TouchableOpacity
                 style={styles.historyItem}
-                onPress={() => router.push('/reviewResults')} 
+                onPress={() => router.push("/reviewResults")}
               >
                 <Text style={styles.historyText}>Bài đánh giá</Text>
                 <Text style={styles.historyProgress}>100/990</Text>
@@ -330,7 +232,9 @@ export default function HomeScreen() {
                     <Text style={styles.modalItemDetails}>30%</Text>
                   </View>
                   <View style={styles.modalItem}>
-                    <Text style={styles.modalItemTitle}>Bài đánh giá ngày 1</Text>
+                    <Text style={styles.modalItemTitle}>
+                      Bài đánh giá ngày 1
+                    </Text>
                     <Text style={styles.modalItemDetails}>Số câu hỏi: 6</Text>
                     <Text style={styles.modalItemDetails}>50%</Text>
                   </View>
@@ -367,13 +271,13 @@ export default function HomeScreen() {
         <View style={styles.notebookList}>
           <TouchableOpacity
             style={styles.notebookCard}
-            onPress={() => router.push('/saveQuestion')} 
+            onPress={() => router.push("/saveQuestion")}
           >
             <Image
-              source={require("../../assets/images/books.png")} 
+              source={require("../../assets/images/books.png")}
               style={styles.notebookIcon}
             />
-            <Text style={styles.notebookButton}>Ôn tập</Text> 
+            <Text style={styles.notebookButton}>Ôn tập</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -406,7 +310,7 @@ const styles = StyleSheet.create({
   greenBox: {
     marginTop: 10,
     marginBottom: -30,
-    padding: 0, 
+    padding: 0,
     borderRadius: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
@@ -415,7 +319,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   gradientBackground: {
-    padding: 50, 
+    padding: 50,
     borderRadius: 20,
   },
   boxImage: {
@@ -578,20 +482,20 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     position: "absolute",
-    bottom: 0, 
+    bottom: 0,
     left: 0,
     right: 0,
     marginStart: -20,
     marginEnd: -20,
-    height: "40%", 
+    height: "40%",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)", 
-    zIndex: 10, 
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    zIndex: 10,
   },
   modalContent: {
     width: "100%", // Ensure the modal content spans the full width
     backgroundColor: "#FFF",
-    borderTopLeftRadius: 20, 
+    borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
     height: "100%",
