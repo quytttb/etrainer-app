@@ -23,6 +23,8 @@ interface QuestionRenderer4Props {
   goToNextQuestion: () => void;
   goToPrevQuestion: () => void;
   handleSelectAnswer: (option: string) => void;
+  hideHeader?: boolean;
+  showWrongAnswer?: boolean; // thêm props này
 }
 
 const QuestionRenderer4 = ({
@@ -34,8 +36,9 @@ const QuestionRenderer4 = ({
   goToNextQuestion,
   goToPrevQuestion,
   handleSelectAnswer,
+  hideHeader = false,
+  showWrongAnswer = true, // mặc định true
 }: QuestionRenderer4Props) => {
-  const currentImageUri = currentQuestion.imageUrl;
   const currentAnswers = currentQuestion.answers;
 
   const combineStyles = (
@@ -49,12 +52,15 @@ const QuestionRenderer4 = ({
     const isCorrectAnswer = option.isCorrect;
     const userHasAnswered = !!values[`question_${currentQuestion._id}`];
     const showCorrectAnswer = userHasAnswered && isCorrectAnswer;
-    const isWrongAnswer = userHasAnswered && isSelected && !isCorrectAnswer;
+    const isWrongAnswer =
+      userHasAnswered && isSelected && !isCorrectAnswer && showWrongAnswer;
 
     return combineStyles(
       styles.answerButton,
       isWrongAnswer && styles.selectedWrongAnswer,
-      showCorrectAnswer && styles.correctAnswer
+      ((showCorrectAnswer && showWrongAnswer) ||
+        (isSelected && !showWrongAnswer)) &&
+        styles.correctAnswer
     );
   };
 
@@ -63,15 +69,16 @@ const QuestionRenderer4 = ({
       <StatusBar barStyle="light-content" backgroundColor="#2FC095" />
 
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Ionicons name="chevron-back" size={28} color="white" />
-        </TouchableOpacity>
-
-        <Text style={styles.headerTitle}>
-          Câu {currentQuestionIndex + 1} / {questionList.length}
-        </Text>
-      </View>
+      {!hideHeader && (
+        <View style={styles.header}>
+          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+            <Ionicons name="chevron-back" size={28} color="white" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>
+            Câu {currentQuestionIndex + 1} / {questionList.length}
+          </Text>
+        </View>
+      )}
 
       {/* Question Content */}
       <View style={styles.content}>
@@ -109,6 +116,7 @@ const QuestionRenderer4 = ({
                 styles.answerText,
                 !!values[`question_${currentQuestion._id}`] &&
                   option.isCorrect &&
+                  showWrongAnswer &&
                   styles.correctAnswerText,
                 values[`question_${currentQuestion._id}`] === option._id && {
                   color: "white",

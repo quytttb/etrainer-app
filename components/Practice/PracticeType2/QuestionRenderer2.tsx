@@ -24,6 +24,9 @@ interface QuestionRendererProps {
   goToNextQuestion: () => Promise<void>;
   goToPrevQuestion: () => Promise<void>;
   handleSelectAnswer: (option: string) => void;
+  hideHeader?: boolean;
+  showWrongAnswer?: boolean; // thêm props này
+  disabledPrevButton?: boolean;
 }
 
 const QuestionRenderer = ({
@@ -36,6 +39,9 @@ const QuestionRenderer = ({
   goToNextQuestion,
   goToPrevQuestion,
   handleSelectAnswer,
+  hideHeader = false,
+  showWrongAnswer = true, // mặc định true
+  disabledPrevButton = true,
 }: QuestionRendererProps) => {
   const currentAudioUri = currentQuestion.audio.url;
   const currentImageUri = currentQuestion.imageUrl;
@@ -52,12 +58,15 @@ const QuestionRenderer = ({
     const isCorrectAnswer = option.isCorrect;
     const userHasAnswered = !!values[`question_${currentQuestion._id}`];
     const showCorrectAnswer = userHasAnswered && isCorrectAnswer;
-    const isWrongAnswer = userHasAnswered && isSelected && !isCorrectAnswer;
+    const isWrongAnswer =
+      userHasAnswered && isSelected && !isCorrectAnswer && showWrongAnswer;
 
     return combineStyles(
       styles.answerButton,
       isWrongAnswer && styles.selectedWrongAnswer,
-      showCorrectAnswer && styles.correctAnswer
+      ((showCorrectAnswer && showWrongAnswer) ||
+        (isSelected && !showWrongAnswer)) &&
+        styles.correctAnswer
     );
   };
 
@@ -66,15 +75,16 @@ const QuestionRenderer = ({
       <StatusBar barStyle="light-content" backgroundColor="#2FC095" />
 
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Ionicons name="chevron-back" size={28} color="white" />
-        </TouchableOpacity>
-
-        <Text style={styles.headerTitle}>
-          Câu {currentQuestionIndex + 1} / {questionList.length}
-        </Text>
-      </View>
+      {!hideHeader && (
+        <View style={styles.header}>
+          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+            <Ionicons name="chevron-back" size={28} color="white" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>
+            Câu {currentQuestionIndex + 1} / {questionList.length}
+          </Text>
+        </View>
+      )}
 
       {/* Audio Player */}
       <AudioPlayer
@@ -110,6 +120,7 @@ const QuestionRenderer = ({
                 styles.answerText,
                 !!values[`question_${currentQuestion._id}`] &&
                   option.isCorrect &&
+                  showWrongAnswer &&
                   styles.correctAnswerText,
                 values[`question_${currentQuestion._id}`] === option._id && {
                   color: "white",
@@ -126,20 +137,26 @@ const QuestionRenderer = ({
         <TouchableOpacity
           style={[
             styles.navButton,
-            currentQuestionIndex === 0 && styles.disabledButton,
+            currentQuestionIndex === 0 &&
+              disabledPrevButton &&
+              styles.disabledButton,
           ]}
           onPress={goToPrevQuestion}
-          disabled={currentQuestionIndex === 0}
+          disabled={currentQuestionIndex === 0 && disabledPrevButton}
         >
           <AntDesign
             name="left"
             size={20}
-            color={currentQuestionIndex === 0 ? "#CCC" : "#333"}
+            color={
+              currentQuestionIndex === 0 && disabledPrevButton ? "#CCC" : "#333"
+            }
           />
           <Text
             style={[
               styles.navButtonText,
-              currentQuestionIndex === 0 && styles.disabledText,
+              currentQuestionIndex === 0 &&
+                disabledPrevButton &&
+                styles.disabledText,
             ]}
           >
             Previous

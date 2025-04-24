@@ -1,16 +1,24 @@
 import React, { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Formik } from "formik";
-import QuestionRenderer4 from "./QuestionRenderer4";
-import { Question } from "../type";
+import QuestionRenderer4 from "@/components/Practice/PracticeType4/QuestionRenderer4";
+import { Question } from "@/components/Practice/type";
 
-interface PracticeType4Props {
+interface PracticeType4ExamProps {
   questions: Question[];
   onBack?: () => void;
   onSubmit: (questionAnswers: any[]) => void;
+  initialQuestionIndex?: number;
+  onQuestionIndexChange?: (index: number) => void;
 }
 
-const PracticeType4 = ({ questions, onBack, onSubmit }: PracticeType4Props) => {
+const PracticeType4_Exam = ({
+  questions,
+  onBack,
+  onSubmit,
+  initialQuestionIndex = 0,
+  onQuestionIndexChange,
+}: PracticeType4ExamProps) => {
   const questionList = questions;
   const navigation = useNavigation();
 
@@ -19,7 +27,7 @@ const PracticeType4 = ({ questions, onBack, onSubmit }: PracticeType4Props) => {
     initialValues[`question_${q._id}`] = "";
   });
 
-  const handleBack = async () => {
+  const handleBack = () => {
     if (onBack) onBack();
     else navigation.goBack();
   };
@@ -30,7 +38,6 @@ const PracticeType4 = ({ questions, onBack, onSubmit }: PracticeType4Props) => {
       const correctAnswer = it.answers.find((ans) => ans.isCorrect);
       const isCorrect = userAnswer === correctAnswer?._id;
       const isNotAnswer = !userAnswer;
-
       return {
         ...it,
         userAnswer,
@@ -38,7 +45,6 @@ const PracticeType4 = ({ questions, onBack, onSubmit }: PracticeType4Props) => {
         isNotAnswer,
       };
     });
-
     onSubmit(payload);
   };
 
@@ -49,13 +55,14 @@ const PracticeType4 = ({ questions, onBack, onSubmit }: PracticeType4Props) => {
       enableReinitialize
     >
       {({ values, setFieldValue, handleSubmit }) => {
-        const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+        const [currentQuestionIndex, setCurrentQuestionIndex] =
+          useState(initialQuestionIndex);
         const currentQuestion = questionList[currentQuestionIndex];
-        console.log("currentQuestion", currentQuestion.answers);
 
         const goToNextQuestion = () => {
           if (currentQuestionIndex < questionList.length - 1) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
+            onQuestionIndexChange?.(currentQuestionIndex + 1);
           } else {
             handleSubmit();
           }
@@ -64,6 +71,10 @@ const PracticeType4 = ({ questions, onBack, onSubmit }: PracticeType4Props) => {
         const goToPrevQuestion = () => {
           if (currentQuestionIndex > 0) {
             setCurrentQuestionIndex(currentQuestionIndex - 1);
+            onQuestionIndexChange?.(currentQuestionIndex - 1);
+          } else {
+            // Khi ở câu đầu tiên, gọi onBack để quay lại màn intro
+            if (onBack) onBack();
           }
         };
 
@@ -81,6 +92,8 @@ const PracticeType4 = ({ questions, onBack, onSubmit }: PracticeType4Props) => {
             goToNextQuestion={goToNextQuestion}
             goToPrevQuestion={goToPrevQuestion}
             handleSelectAnswer={handleSelectAnswer}
+            hideHeader={true}
+            showWrongAnswer={false}
           />
         );
       }}
@@ -88,4 +101,4 @@ const PracticeType4 = ({ questions, onBack, onSubmit }: PracticeType4Props) => {
   );
 };
 
-export default PracticeType4;
+export default PracticeType4_Exam;

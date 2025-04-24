@@ -1,17 +1,27 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Formik } from "formik";
-import QuestionRenderer4 from "./QuestionRenderer4";
-import { Question } from "../type";
+import { AudioPlayerRef } from "@/components/AudioPlayer/AudioPlayer";
+import { Question } from "@/components/Practice/type";
+import QuestionRenderer from "@/components/Practice/PracticeType2/QuestionRenderer2";
 
-interface PracticeType4Props {
+interface PracticeType2ExamProps {
   questions: Question[];
   onBack?: () => void;
   onSubmit: (questionAnswers: any[]) => void;
+  initialQuestionIndex?: number;
+  onQuestionIndexChange?: (index: number) => void;
 }
 
-const PracticeType4 = ({ questions, onBack, onSubmit }: PracticeType4Props) => {
+const PracticeType2_Exam = ({
+  questions,
+  onBack,
+  onSubmit,
+  initialQuestionIndex = 0,
+  onQuestionIndexChange,
+}: PracticeType2ExamProps) => {
   const questionList = questions;
+  const audioPlayerRef = useRef<AudioPlayerRef>(null);
   const navigation = useNavigation();
 
   const initialValues: Record<string, string> = {};
@@ -20,6 +30,7 @@ const PracticeType4 = ({ questions, onBack, onSubmit }: PracticeType4Props) => {
   });
 
   const handleBack = async () => {
+    await audioPlayerRef.current?.reset();
     if (onBack) onBack();
     else navigation.goBack();
   };
@@ -30,7 +41,6 @@ const PracticeType4 = ({ questions, onBack, onSubmit }: PracticeType4Props) => {
       const correctAnswer = it.answers.find((ans) => ans.isCorrect);
       const isCorrect = userAnswer === correctAnswer?._id;
       const isNotAnswer = !userAnswer;
-
       return {
         ...it,
         userAnswer,
@@ -38,32 +48,46 @@ const PracticeType4 = ({ questions, onBack, onSubmit }: PracticeType4Props) => {
         isNotAnswer,
       };
     });
-
     onSubmit(payload);
   };
 
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={onFormSubmit}
+      onSubmit={async (values) => {
+        if (audioPlayerRef.current) {
+          await audioPlayerRef.current.reset();
+        }
+        onFormSubmit(values);
+      }}
       enableReinitialize
     >
       {({ values, setFieldValue, handleSubmit }) => {
-        const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+        const [currentQuestionIndex, setCurrentQuestionIndex] =
+          useState(initialQuestionIndex);
         const currentQuestion = questionList[currentQuestionIndex];
-        console.log("currentQuestion", currentQuestion.answers);
 
-        const goToNextQuestion = () => {
+        const goToNextQuestion = async () => {
           if (currentQuestionIndex < questionList.length - 1) {
+            if (audioPlayerRef.current) {
+              await audioPlayerRef.current.reset();
+            }
             setCurrentQuestionIndex(currentQuestionIndex + 1);
+            onQuestionIndexChange?.(currentQuestionIndex + 1);
           } else {
             handleSubmit();
           }
         };
 
-        const goToPrevQuestion = () => {
+        const goToPrevQuestion = async () => {
           if (currentQuestionIndex > 0) {
+            if (audioPlayerRef.current) {
+              await audioPlayerRef.current.reset();
+            }
             setCurrentQuestionIndex(currentQuestionIndex - 1);
+            onQuestionIndexChange?.(currentQuestionIndex - 1);
+          } else {
+            onBack?.();
           }
         };
 
@@ -72,15 +96,19 @@ const PracticeType4 = ({ questions, onBack, onSubmit }: PracticeType4Props) => {
         };
 
         return (
-          <QuestionRenderer4
+          <QuestionRenderer
             currentQuestionIndex={currentQuestionIndex}
             questionList={questionList}
             currentQuestion={currentQuestion}
             values={values}
+            audioPlayerRef={audioPlayerRef}
             handleBack={handleBack}
             goToNextQuestion={goToNextQuestion}
             goToPrevQuestion={goToPrevQuestion}
             handleSelectAnswer={handleSelectAnswer}
+            hideHeader={true}
+            showWrongAnswer={false}
+            disabledPrevButton={false}
           />
         );
       }}
@@ -88,4 +116,4 @@ const PracticeType4 = ({ questions, onBack, onSubmit }: PracticeType4Props) => {
   );
 };
 
-export default PracticeType4;
+export default PracticeType2_Exam;
