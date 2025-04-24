@@ -5,10 +5,13 @@ import { useMutation } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useMemo, useState } from "react";
 import { startPracticeService, submitPracticeService } from "./service";
-import { Alert } from "react-native";
+import { Alert, Text } from "react-native";
 import dayjs from "dayjs";
 import PracticeType3 from "@/components/Practice/PracticeType3/PracticeType3";
 import PracticeType2 from "@/components/Practice/PracticeType2/PracticeType2";
+import PracticeType4 from "@/components/Practice/PracticeType4/PracticeType4";
+import PracticeType5 from "@/components/Practice/PracticeType5/PracticeType5";
+import PracticeType6 from "@/components/Practice/PracticeType6/PracticeType6";
 
 const Practice = () => {
   const params = useLocalSearchParams();
@@ -17,7 +20,7 @@ const Practice = () => {
   const [step, setStep] = useState<"PREPARE" | "PRACTICE">("PREPARE");
   const [startTime, setStartTime] = useState<string | null>(null);
 
-  const { type1, type2, type3, type4, type5 } = useMemo(() => {
+  const { type1, type2, type3, type4, type5, type6 } = useMemo(() => {
     const type1 = [LESSON_TYPE.IMAGE_DESCRIPTION].includes(type);
     const type2 = [LESSON_TYPE.ASK_AND_ANSWER].includes(type);
     const type3 = [
@@ -25,12 +28,10 @@ const Practice = () => {
       LESSON_TYPE.SHORT_TALK,
     ].includes(type);
     const type4 = [LESSON_TYPE.FILL_IN_THE_BLANK_QUESTION].includes(type);
-    const type5 = [
-      LESSON_TYPE.FILL_IN_THE_PARAGRAPH,
-      LESSON_TYPE.READ_AND_UNDERSTAND,
-    ].includes(type);
+    const type5 = [LESSON_TYPE.FILL_IN_THE_PARAGRAPH].includes(type);
+    const type6 = [LESSON_TYPE.READ_AND_UNDERSTAND].includes(type);
 
-    return { type1, type2, type3, type4, type5 };
+    return { type1, type2, type3, type4, type5, type6 };
   }, [type]);
 
   const startPracticeMutation = useMutation({
@@ -102,9 +103,39 @@ const Practice = () => {
     );
   }
 
-  if (type3 || type4) {
+  if (type3) {
     return (
       <PracticeType3
+        questions={startPracticeMutation.data}
+        onSubmit={onSubmit}
+        onBack={() => setStep("PREPARE")}
+      />
+    );
+  }
+
+  if (type4) {
+    return (
+      <PracticeType4
+        questions={startPracticeMutation.data}
+        onSubmit={onSubmit}
+        onBack={() => setStep("PREPARE")}
+      />
+    );
+  }
+
+  if (type5) {
+    return (
+      <PracticeType5
+        questions={startPracticeMutation.data}
+        onSubmit={onSubmit}
+        onBack={() => setStep("PREPARE")}
+      />
+    );
+  }
+
+  if (type6) {
+    return (
+      <PracticeType6
         questions={startPracticeMutation.data}
         onSubmit={onSubmit}
         onBack={() => setStep("PREPARE")}

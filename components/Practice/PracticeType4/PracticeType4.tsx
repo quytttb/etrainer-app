@@ -1,19 +1,17 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Formik } from "formik";
-import { AudioPlayerRef } from "@/components/AudioPlayer/AudioPlayer";
+import QuestionRenderer4 from "./QuestionRenderer4";
 import { Question } from "../type";
-import QuestionRenderer from "./QuestionRenderer2";
 
-interface PracticeType2Props {
+interface PracticeType4Props {
   questions: Question[];
   onBack?: () => void;
   onSubmit: (questionAnswers: any[]) => void;
 }
 
-const PracticeType2 = ({ questions, onBack, onSubmit }: PracticeType2Props) => {
+const PracticeType4 = ({ questions, onBack, onSubmit }: PracticeType4Props) => {
   const questionList = questions;
-  const audioPlayerRef = useRef<AudioPlayerRef>(null);
   const navigation = useNavigation();
 
   const initialValues: Record<string, string> = {};
@@ -21,18 +19,7 @@ const PracticeType2 = ({ questions, onBack, onSubmit }: PracticeType2Props) => {
     initialValues[`question_${q._id}`] = "";
   });
 
-  // const validationSchema = Yup.object().shape(
-  //   questionList.reduce((schema, q) => {
-  //     return {
-  //       ...schema,
-  //       [`question_${q._id}`]: Yup.string().required("Please select an answer"),
-  //     };
-  //   }, {})
-  // );
-
   const handleBack = async () => {
-    await audioPlayerRef.current?.reset();
-
     if (onBack) onBack();
     else navigation.goBack();
   };
@@ -58,35 +45,23 @@ const PracticeType2 = ({ questions, onBack, onSubmit }: PracticeType2Props) => {
   return (
     <Formik
       initialValues={initialValues}
-      // validationSchema={validationSchema}
-      onSubmit={async (values) => {
-        if (audioPlayerRef.current) {
-          await audioPlayerRef.current.reset();
-        }
-        onFormSubmit(values);
-      }}
+      onSubmit={onFormSubmit}
       enableReinitialize
     >
       {({ values, setFieldValue, handleSubmit }) => {
         const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
         const currentQuestion = questionList[currentQuestionIndex];
 
-        const goToNextQuestion = async () => {
+        const goToNextQuestion = () => {
           if (currentQuestionIndex < questionList.length - 1) {
-            if (audioPlayerRef.current) {
-              await audioPlayerRef.current.reset();
-            }
             setCurrentQuestionIndex(currentQuestionIndex + 1);
           } else {
             handleSubmit();
           }
         };
 
-        const goToPrevQuestion = async () => {
+        const goToPrevQuestion = () => {
           if (currentQuestionIndex > 0) {
-            if (audioPlayerRef.current) {
-              await audioPlayerRef.current.reset();
-            }
             setCurrentQuestionIndex(currentQuestionIndex - 1);
           }
         };
@@ -96,12 +71,11 @@ const PracticeType2 = ({ questions, onBack, onSubmit }: PracticeType2Props) => {
         };
 
         return (
-          <QuestionRenderer
+          <QuestionRenderer4
             currentQuestionIndex={currentQuestionIndex}
             questionList={questionList}
             currentQuestion={currentQuestion}
             values={values}
-            audioPlayerRef={audioPlayerRef}
             handleBack={handleBack}
             goToNextQuestion={goToNextQuestion}
             goToPrevQuestion={goToPrevQuestion}
@@ -113,4 +87,4 @@ const PracticeType2 = ({ questions, onBack, onSubmit }: PracticeType2Props) => {
   );
 };
 
-export default PracticeType2;
+export default PracticeType4;

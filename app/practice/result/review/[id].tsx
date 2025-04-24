@@ -47,7 +47,8 @@ const PracticeResultReview = () => {
 
     switch (data.lessonType) {
       case LESSON_TYPE.IMAGE_DESCRIPTION:
-      case LESSON_TYPE.ASK_AND_ANSWER: {
+      case LESSON_TYPE.ASK_AND_ANSWER:
+      case LESSON_TYPE.FILL_IN_THE_BLANK_QUESTION: {
         return data.questionAnswers.map((item, idx) => ({
           _id: item._id,
           question: idx + 1,
@@ -59,7 +60,9 @@ const PracticeResultReview = () => {
       }
 
       case LESSON_TYPE.CONVERSATION_PIECE:
-      case LESSON_TYPE.SHORT_TALK: {
+      case LESSON_TYPE.SHORT_TALK:
+      case LESSON_TYPE.FILL_IN_THE_PARAGRAPH:
+      case LESSON_TYPE.READ_AND_UNDERSTAND: {
         const questions = data.questionAnswers.reduce((acc, item, index) => {
           const questions = item.questions.map((it: any, idx: number) => ({
             ...it,
