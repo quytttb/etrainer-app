@@ -1,48 +1,31 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Formik } from "formik";
-import { AudioPlayerRef } from "@/components/AudioPlayer/AudioPlayer";
-import QuestionRenderer from "./QuestionRenderer";
+import QuestionRenderer5 from "./QuestionRenderer6";
 import { Question } from "../type";
 
-interface PracticeType3Props {
+interface PracticeType6Props {
   questions: Question[];
   onBack?: () => void;
   onSubmit: (questionAnswers: any[]) => void;
 }
 
-const PracticeType3 = ({ questions, onBack, onSubmit }: PracticeType3Props) => {
+const PracticeType6 = ({ questions, onBack, onSubmit }: PracticeType6Props) => {
   const questionList = questions;
-  const audioPlayerRef = useRef<AudioPlayerRef>(null);
   const navigation = useNavigation();
 
   const initialValues: Record<string, string> = {};
   questionList.forEach((q) => {
     if (q.questions && q.questions.length > 0) {
-      // Handle nested questions
       q.questions.forEach((subQ) => {
         initialValues[`question_${q._id}_${subQ._id}`] = "";
       });
     } else {
-      // Handle direct answers
       initialValues[`question_${q._id}`] = "";
     }
   });
 
-  // const validationSchema = Yup.object().shape(
-  //   questionList.reduce((schema, q) => {
-  //     return {
-  //       ...schema,
-  //       [`question_${q._id}`]: Yup.string().required("Please select an answer"),
-  //     };
-  //   }, {})
-  // );
-
-  const handleBack = async () => {
-    if (audioPlayerRef.current) {
-      await audioPlayerRef.current.reset();
-    }
-
+  const handleBack = () => {
     if (onBack) onBack();
     else navigation.goBack();
   };
@@ -76,34 +59,23 @@ const PracticeType3 = ({ questions, onBack, onSubmit }: PracticeType3Props) => {
     <Formik
       initialValues={initialValues}
       // validationSchema={validationSchema}
-      onSubmit={async (values) => {
-        if (audioPlayerRef.current) {
-          await audioPlayerRef.current.reset();
-        }
-        onFormSubmit(values);
-      }}
+      onSubmit={onFormSubmit}
       enableReinitialize
     >
       {({ values, setFieldValue, handleSubmit }) => {
         const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
         const currentQuestion = questionList[currentQuestionIndex];
 
-        const goToNextQuestion = async () => {
+        const goToNextQuestion = () => {
           if (currentQuestionIndex < questionList.length - 1) {
-            if (audioPlayerRef.current) {
-              await audioPlayerRef.current.reset();
-            }
             setCurrentQuestionIndex(currentQuestionIndex + 1);
           } else {
             handleSubmit();
           }
         };
 
-        const goToPrevQuestion = async () => {
+        const goToPrevQuestion = () => {
           if (currentQuestionIndex > 0) {
-            if (audioPlayerRef.current) {
-              await audioPlayerRef.current.reset();
-            }
             setCurrentQuestionIndex(currentQuestionIndex - 1);
           }
         };
@@ -120,12 +92,11 @@ const PracticeType3 = ({ questions, onBack, onSubmit }: PracticeType3Props) => {
         };
 
         return (
-          <QuestionRenderer
+          <QuestionRenderer5
             currentQuestionIndex={currentQuestionIndex}
             questionList={questionList}
             currentQuestion={currentQuestion}
             values={values}
-            audioPlayerRef={audioPlayerRef}
             handleBack={handleBack}
             goToNextQuestion={goToNextQuestion}
             goToPrevQuestion={goToPrevQuestion}
@@ -137,4 +108,4 @@ const PracticeType3 = ({ questions, onBack, onSubmit }: PracticeType3Props) => {
   );
 };
 
-export default PracticeType3;
+export default PracticeType6;
