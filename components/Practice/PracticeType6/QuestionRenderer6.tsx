@@ -22,6 +22,8 @@ interface QuestionRenderer6Props {
   goToNextQuestion: () => void;
   goToPrevQuestion: () => void;
   handleSelectAnswer: (option: string, subQuestionId?: string) => void;
+  hideHeader?: boolean;
+  showWrongAnswer?: boolean; // thêm props này
 }
 
 const screenHeight = Dimensions.get("window").height;
@@ -35,6 +37,8 @@ const QuestionRenderer6 = ({
   goToNextQuestion,
   goToPrevQuestion,
   handleSelectAnswer,
+  hideHeader = false,
+  showWrongAnswer = true, // mặc định true
 }: QuestionRenderer6Props) => {
   // Hiển thị các câu hỏi con nếu có, nếu không hiển thị câu hỏi chính
   const renderQuestions = () => {
@@ -90,7 +94,10 @@ const QuestionRenderer6 = ({
 
           const showCorrectAnswer = userHasAnswered && isCorrectAnswer;
           const isWrongAnswer =
-            userHasAnswered && isSelected && !isCorrectAnswer;
+            userHasAnswered &&
+            isSelected &&
+            !isCorrectAnswer &&
+            showWrongAnswer;
 
           return (
             <TouchableOpacity
@@ -101,15 +108,19 @@ const QuestionRenderer6 = ({
               <View
                 style={[
                   styles.circleOption,
-                  showCorrectAnswer && styles.selectedCircleOption,
+                  ((showCorrectAnswer && showWrongAnswer) ||
+                    (isSelected && !showWrongAnswer)) &&
+                    styles.selectedCircleOption,
                   isWrongAnswer && styles.selectedWrongAnswer,
                 ]}
               >
                 <Text
                   style={[
                     styles.circleOptionText,
-                    showCorrectAnswer && styles.selectedCircleOptionText,
-                    isWrongAnswer && {
+                    showCorrectAnswer &&
+                      showWrongAnswer &&
+                      styles.selectedCircleOptionText,
+                    (isWrongAnswer || isSelected) && {
                       color: "white",
                     },
                   ]}
@@ -129,13 +140,14 @@ const QuestionRenderer6 = ({
       <StatusBar barStyle="light-content" backgroundColor="#2FC095" />
 
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Ionicons name="chevron-back" size={28} color="white" />
-        </TouchableOpacity>
-
-        <Text style={styles.headerTitle}>Câu {currentQuestionIndex + 1}</Text>
-      </View>
+      {!hideHeader && (
+        <View style={styles.header}>
+          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+            <Ionicons name="chevron-back" size={28} color="white" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Câu {currentQuestionIndex + 1}</Text>
+        </View>
+      )}
 
       <ScrollView
         style={styles.questionParagraphContainer}
