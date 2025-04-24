@@ -59,11 +59,11 @@ const PracticeType1 = ({ questions, onBack, onSubmit }: PracticeType1Props) => {
     <Formik
       initialValues={initialValues}
       // validationSchema={validationSchema}
-      onSubmit={(values) => {
-        onFormSubmit(values);
+      onSubmit={async (values) => {
         if (audioPlayerRef.current) {
-          audioPlayerRef.current.reset();
+          await audioPlayerRef.current.reset();
         }
+        onFormSubmit(values);
       }}
       enableReinitialize
     >
