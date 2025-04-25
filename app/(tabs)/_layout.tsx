@@ -1,13 +1,12 @@
-import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { FontAwesome } from '@expo/vector-icons';
-import { Ionicons } from '@expo/vector-icons';
-import { View, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import HomeScreen from './home';
-import TestScreen from './mock-test';
-import ChatScreen from './chatAI';
-import StudyPlanScreen from './study-plan';
-import ProfileScreen from './profile';
+import React from "react";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { FontAwesome } from "@expo/vector-icons";
+import { View, TouchableOpacity, StyleSheet, Image } from "react-native";
+import HomeScreen from "./home";
+import ChatScreen from "./chatAI";
+import StudyPlanScreen from "./study-plan";
+import ProfileScreen from "./profile";
+import Exam from "./exam";
 
 const Tab = createBottomTabNavigator();
 
@@ -17,13 +16,13 @@ export default function App() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {
-          position: 'absolute',
-          backgroundColor: '#fff',
+          position: "absolute",
+          backgroundColor: "#fff",
           height: 70,
           borderRadius: 30,
           margin: 10,
           paddingTop: 10,
-          display: route.name === 'chat' ? 'none' : 'flex', 
+          display: route.name === "chat" ? "none" : "flex",
         },
         tabBarShowLabel: true,
         tabBarLabelStyle: {
@@ -39,17 +38,17 @@ export default function App() {
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="home" size={size} color={color} />
           ),
-          tabBarLabel: 'Trang chủ',
+          tabBarLabel: "Trang chủ",
         }}
       />
       <Tab.Screen
-        name="mock-test"
-        component={TestScreen}
+        name="exam"
+        component={Exam}
         options={{
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="pencil" size={size} color={color} />
           ),
-          tabBarLabel: 'Thi',
+          tabBarLabel: "Thi",
         }}
       />
       <Tab.Screen
@@ -59,7 +58,10 @@ export default function App() {
           tabBarButton: ({ onPress }) => (
             <TouchableOpacity style={styles.floatingButton} onPress={onPress}>
               <View style={styles.floatingButtonInner}>
-                <Image source={require('../../assets/images/ai.png')} style={styles.AiImage} />
+                <Image
+                  source={require("../../assets/images/ai.png")}
+                  style={styles.AiImage}
+                />
               </View>
             </TouchableOpacity>
           ),
@@ -72,7 +74,7 @@ export default function App() {
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="calendar" size={size} color={color} />
           ),
-          tabBarLabel: 'Lộ trình',
+          tabBarLabel: "Lộ trình",
         }}
       />
       <Tab.Screen
@@ -82,7 +84,7 @@ export default function App() {
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="user" size={size} color={color} />
           ),
-          tabBarLabel: 'Cá nhân',
+          tabBarLabel: "Cá nhân",
         }}
       />
     </Tab.Navigator>
@@ -92,25 +94,25 @@ export default function App() {
 const styles = StyleSheet.create({
   floatingButton: {
     top: -30,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   floatingButtonInner: {
     width: 70,
     height: 70,
     borderRadius: 40,
-    backgroundColor: 'rgba(208, 238, 250, 0.53)', 
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
+    backgroundColor: "rgba(208, 238, 250, 0.53)",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 5,
   },
   AiImage: {
-    width: 80, 
+    width: 80,
     height: 80,
-    resizeMode: 'contain',
+    resizeMode: "contain",
     marginBottom: 10,
   },
 });
