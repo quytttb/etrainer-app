@@ -51,7 +51,6 @@ const PracticeType4 = ({ questions, onBack, onSubmit }: PracticeType4Props) => {
       {({ values, setFieldValue, handleSubmit }) => {
         const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
         const currentQuestion = questionList[currentQuestionIndex];
-        console.log("currentQuestion", currentQuestion.answers);
 
         const goToNextQuestion = () => {
           if (currentQuestionIndex < questionList.length - 1) {

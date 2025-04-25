@@ -25,6 +25,7 @@ interface QuestionRenderer4Props {
   handleSelectAnswer: (option: string) => void;
   hideHeader?: boolean;
   showWrongAnswer?: boolean; // thêm props này
+  disabledPrevButton?: boolean;
 }
 
 const QuestionRenderer4 = ({
@@ -38,8 +39,11 @@ const QuestionRenderer4 = ({
   handleSelectAnswer,
   hideHeader = false,
   showWrongAnswer = true, // mặc định true
+  disabledPrevButton = true,
 }: QuestionRenderer4Props) => {
   const currentAnswers = currentQuestion.answers;
+
+  const isDisabledPrevButton = currentQuestionIndex === 0 && disabledPrevButton;
 
   const combineStyles = (
     ...styles: (object | boolean | null | undefined)[]
@@ -133,20 +137,20 @@ const QuestionRenderer4 = ({
         <TouchableOpacity
           style={[
             styles.navButton,
-            currentQuestionIndex === 0 && styles.disabledButton,
+            isDisabledPrevButton && styles.disabledButton,
           ]}
           onPress={goToPrevQuestion}
-          disabled={currentQuestionIndex === 0}
+          disabled={isDisabledPrevButton}
         >
           <AntDesign
             name="left"
             size={20}
-            color={currentQuestionIndex === 0 ? "#CCC" : "#333"}
+            color={isDisabledPrevButton ? "#CCC" : "#333"}
           />
           <Text
             style={[
               styles.navButtonText,
-              currentQuestionIndex === 0 && styles.disabledText,
+              isDisabledPrevButton && styles.disabledText,
             ]}
           >
             Previous

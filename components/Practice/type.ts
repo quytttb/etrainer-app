@@ -19,10 +19,12 @@ export interface Question {
   questions: {
     question: string;
     answers: IAnswer[];
+    userAnswer: string | null;
     _id: string;
   }[];
   createdAt: string;
   updatedAt: string;
   questionNumber: number;
+  userAnswer: string | null;
   __v: number;
 }

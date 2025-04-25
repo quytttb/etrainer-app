@@ -23,6 +23,7 @@ interface QuestionRenderer5Props {
   handleSelectAnswer: (option: string, subQuestionId?: string) => void;
   hideHeader?: boolean;
   showWrongAnswer?: boolean; // thêm props này
+  disabledPrevButton?: boolean;
 }
 
 const screenHeight = Dimensions.get("window").height;
@@ -38,7 +39,10 @@ const QuestionRenderer5 = ({
   handleSelectAnswer,
   hideHeader = false,
   showWrongAnswer = true, // mặc định true
+  disabledPrevButton = true,
 }: QuestionRenderer5Props) => {
+  const isDisabledPrevButton = currentQuestionIndex === 0 && disabledPrevButton;
+
   // Hiển thị các câu hỏi con nếu có, nếu không hiển thị câu hỏi chính
   const renderQuestions = () => {
     return currentQuestion.questions.map((subQuestion, index) => (
@@ -170,20 +174,20 @@ const QuestionRenderer5 = ({
         <TouchableOpacity
           style={[
             styles.navButton,
-            currentQuestionIndex === 0 && styles.disabledButton,
+            isDisabledPrevButton && styles.disabledButton,
           ]}
           onPress={goToPrevQuestion}
-          disabled={currentQuestionIndex === 0}
+          disabled={isDisabledPrevButton}
         >
           <AntDesign
             name="left"
             size={20}
-            color={currentQuestionIndex === 0 ? "#CCC" : "#333"}
+            color={isDisabledPrevButton ? "#CCC" : "#333"}
           />
           <Text
             style={[
               styles.navButtonText,
-              currentQuestionIndex === 0 && styles.disabledText,
+              isDisabledPrevButton && styles.disabledText,
             ]}
           >
             Previous

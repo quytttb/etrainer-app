@@ -52,7 +52,6 @@ const Exam = (props: ExamProps) => {
   const [sectionResults, setSectionResults] = useState<{
     [type: string]: any[];
   }>({});
-  console.log("🚀 TDS ~ Exam ~ sectionResults:", sectionResults);
 
   const handleNext = () => {
     setShowIntro(false);
@@ -69,12 +68,6 @@ const Exam = (props: ExamProps) => {
   const handleSectionSubmit = (questionAnswers: any[]) => {
     const section = sections[sectionIndex];
     const sectionType = section.type;
-
-    // Lưu kết quả theo section type
-    setSectionResults((prev) => ({
-      ...prev,
-      [sectionType]: questionAnswers,
-    }));
 
     if (sectionIndex < sections.length - 1) {
       setSectionIndex(sectionIndex + 1);
@@ -109,10 +102,45 @@ const Exam = (props: ExamProps) => {
     // Có thể bổ sung thêm xử lý nếu đang ở section 0 (ví dụ: thoát khỏi exam)
   };
 
+  const handleValuesChange = (questionAnswers: any[]) => {
+    const section = sections[sectionIndex];
+    const sectionType = section.type;
+
+    // Fix: Use JSON stringification to prevent unnecessary state updates
+    setSectionResults((prev) => {
+      // Only update if values have actually changed
+      const currentAnswers = prev[sectionType];
+
+      if (
+        !currentAnswers ||
+        JSON.stringify(currentAnswers) !== JSON.stringify(questionAnswers)
+      ) {
+        return {
+          ...prev,
+          [sectionType]: questionAnswers,
+        };
+      }
+
+      return prev; // Return previous state if no changes
+    });
+  };
+
+  const handleSubmitSection = () => {
+    setSectionIndex(sectionIndex + 1);
+    setShowIntro(true);
+    setQuestionIndex(0);
+  };
+
   // Render header luôn luôn
   const renderHeader = () => (
+    // <View style={styles.header}>
+    //   <Text style={styles.headerText}>
+    //     {showIntro ? "Section giới thiệu" : `Câu x/x`}
+    //   </Text>
+    // </View>
+
     <View style={styles.header}>
-      <Text style={styles.headerText}>
+      <Text style={styles.headerTitle}>
         {showIntro ? "Section giới thiệu" : `Câu x/x`}
       </Text>
     </View>
@@ -149,12 +177,14 @@ const Exam = (props: ExamProps) => {
         onSubmit={handleSectionSubmit}
         initialQuestionIndex={questionIndex}
         onQuestionIndexChange={setQuestionIndex}
-        onBack={handleBack} // Truyền callback để quay về intro
+        onBack={handleBack}
+        initialValues={sectionResults[section.type]}
+        onValuesChange={handleValuesChange}
       />
     ) : (
       <View style={styles.container}>
         <Text>Không hỗ trợ type này: {section.type}</Text>
-        <TouchableOpacity style={styles.button} onPress={handleSectionSubmit}>
+        <TouchableOpacity style={styles.button} onPress={handleSubmitSection}>
           <Text style={styles.buttonText}>Section tiếp theo</Text>
         </TouchableOpacity>
       </View>
@@ -171,17 +201,17 @@ const Exam = (props: ExamProps) => {
 
 const styles = StyleSheet.create({
   header: {
-    height: 56,
-    backgroundColor: "#22c993",
-    justifyContent: "center",
+    flexDirection: "row",
     alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    backgroundColor: "#2FC095",
+    paddingVertical: 15,
+    paddingHorizontal: 15,
   },
-  headerText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 18,
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "white",
+    marginLeft: 32,
   },
   container: {
     flex: 1,
