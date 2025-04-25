@@ -25,6 +25,7 @@ interface QuestionRenderer6Props {
   hideHeader?: boolean;
   showWrongAnswer?: boolean; // thêm props này
   disabledPrevButton?: boolean;
+  isSubmit?: boolean;
 }
 
 const screenHeight = Dimensions.get("window").height;
@@ -41,8 +42,11 @@ const QuestionRenderer6 = ({
   hideHeader = false,
   showWrongAnswer = true, // mặc định true
   disabledPrevButton = true,
+  isSubmit = true,
 }: QuestionRenderer6Props) => {
   const isDisabledPrevButton = currentQuestionIndex === 0 && disabledPrevButton;
+  const isSubmitButton =
+    isSubmit && currentQuestionIndex === questionList.length - 1;
 
   // Hiển thị các câu hỏi con nếu có, nếu không hiển thị câu hỏi chính
   const renderQuestions = () => {
@@ -203,7 +207,7 @@ const QuestionRenderer6 = ({
         <TouchableOpacity
           style={[
             styles.navButton,
-            currentQuestionIndex === questionList.length - 1
+            isSubmitButton
               ? { backgroundColor: "#2FC095", borderColor: "#2FC095" }
               : null,
           ]}
@@ -212,16 +216,12 @@ const QuestionRenderer6 = ({
           <Text
             style={[
               styles.navButtonText,
-              currentQuestionIndex === questionList.length - 1
-                ? { color: "white" }
-                : null,
+              isSubmitButton ? { color: "white" } : null,
             ]}
           >
-            {currentQuestionIndex === questionList.length - 1
-              ? "Submit"
-              : "Next"}
+            {isSubmitButton ? "Submit" : "Next"}
           </Text>
-          {currentQuestionIndex !== questionList.length - 1 && (
+          {(currentQuestionIndex !== questionList.length - 1 || !isSubmit) && (
             <AntDesign name="right" size={20} color="#333" />
           )}
         </TouchableOpacity>
@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#CCC",
     borderRadius: 6,
-    backgroundColor: "#F8F8F8",
+    backgroundColor: "#fff",
   },
   navButtonText: {
     marginHorizontal: 5,

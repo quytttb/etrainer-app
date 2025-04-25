@@ -93,10 +93,11 @@ const PracticeType2_Exam = ({
         };
 
         const goToPrevQuestion = async () => {
+          if (audioPlayerRef.current) {
+            await audioPlayerRef.current.reset();
+          }
+
           if (currentQuestionIndex > 0) {
-            if (audioPlayerRef.current) {
-              await audioPlayerRef.current.reset();
-            }
             setCurrentQuestionIndex(currentQuestionIndex - 1);
             onQuestionIndexChange?.(currentQuestionIndex - 1);
           } else {
@@ -122,6 +123,7 @@ const PracticeType2_Exam = ({
             hideHeader={true}
             showWrongAnswer={false}
             disabledPrevButton={false}
+            isSubmit={false}
           />
         );
       }}
