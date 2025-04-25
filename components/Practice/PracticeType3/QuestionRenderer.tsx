@@ -8,12 +8,7 @@ import {
   SafeAreaView,
   ScrollView,
 } from "react-native";
-import {
-  Ionicons,
-  MaterialIcons,
-  Feather,
-  AntDesign,
-} from "@expo/vector-icons";
+import { Ionicons, AntDesign } from "@expo/vector-icons";
 import AudioPlayer, {
   AudioPlayerRef,
 } from "@/components/AudioPlayer/AudioPlayer";
@@ -32,6 +27,7 @@ interface QuestionRendererProps {
   hideHeader?: boolean;
   showWrongAnswer?: boolean; // thêm props này
   disabledPrevButton?: boolean;
+  isSubmit?: boolean;
 }
 
 const QuestionRenderer = ({
@@ -47,10 +43,13 @@ const QuestionRenderer = ({
   hideHeader = false,
   showWrongAnswer = true, // mặc định true
   disabledPrevButton = true,
+  isSubmit = true,
 }: QuestionRendererProps) => {
   const currentAudioUri = currentQuestion.audio.url;
 
   const isDisabledPrevButton = currentQuestionIndex === 0 && disabledPrevButton;
+  const isSubmitButton =
+    isSubmit && currentQuestionIndex === questionList.length - 1;
 
   // Hiển thị các câu hỏi con nếu có, nếu không hiển thị câu hỏi chính
   const renderQuestions = () => {
@@ -203,7 +202,7 @@ const QuestionRenderer = ({
         <TouchableOpacity
           style={[
             styles.navButton,
-            currentQuestionIndex === questionList.length - 1
+            isSubmitButton
               ? { backgroundColor: "#2FC095", borderColor: "#2FC095" }
               : null,
           ]}
@@ -212,16 +211,12 @@ const QuestionRenderer = ({
           <Text
             style={[
               styles.navButtonText,
-              currentQuestionIndex === questionList.length - 1
-                ? { color: "white" }
-                : null,
+              isSubmitButton ? { color: "white" } : null,
             ]}
           >
-            {currentQuestionIndex === questionList.length - 1
-              ? "Submit"
-              : "Next"}
+            {isSubmitButton ? "Submit" : "Next"}
           </Text>
-          {currentQuestionIndex !== questionList.length - 1 && (
+          {(currentQuestionIndex !== questionList.length - 1 || !isSubmit) && (
             <AntDesign name="right" size={20} color="#333" />
           )}
         </TouchableOpacity>

@@ -64,7 +64,14 @@ const PrepareTestScreen = () => {
   }
 
   if (step === "EXAM") {
-    return <Exam data={data} />;
+    // Truyền thêm totalQuestion vào Exam, các props khác (currentQuestionIndex, currentSubQuestionIndex) sẽ được xử lý trong Exam
+    return (
+      <Exam
+        data={data}
+        totalQuestion={totalQuestion}
+        onBack={() => setStep("PREPARE")}
+      />
+    );
   }
 
   return (

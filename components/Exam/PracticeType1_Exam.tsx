@@ -124,6 +124,7 @@ const PracticeType1_Exam = ({
             hideHeader={true}
             showWrongAnswer={false}
             disabledPrevButton={false}
+            isSubmit={false}
           />
         );
       }}

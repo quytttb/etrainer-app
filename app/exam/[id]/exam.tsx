@@ -1,5 +1,5 @@
 import { IExam } from "@/app/(tabs)/service";
-import React, { useState } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import {
   Text,
   View,
@@ -14,9 +14,13 @@ import PracticeType3_Exam from "@/components/Exam/PracticeType3_Exam";
 import PracticeType4_Exam from "@/components/Exam/PracticeType4_Exam";
 import PracticeType5_Exam from "@/components/Exam/PracticeType5_Exam";
 import PracticeType6_Exam from "@/components/Exam/PracticeType6_Exam";
+import { LESSON_TYPE_MAPPING } from "@/constants/lesson-types";
+import { getLessonDescriptions } from "@/utils/lessonDescriptions";
 
 interface ExamProps {
   data: IExam;
+  onBack: () => void;
+  totalQuestion: number; // thêm prop này
 }
 
 const getPracticeComponent = (type: string) => {
@@ -40,18 +44,30 @@ const getPracticeComponent = (type: string) => {
 };
 
 const Exam = (props: ExamProps) => {
-  const { data } = props;
+  const { data, onBack, totalQuestion } = props;
   const sections = data.sections;
 
   const [sectionIndex, setSectionIndex] = useState(0);
   const [showIntro, setShowIntro] = useState(true);
-
   const [questionIndex, setQuestionIndex] = useState(0);
 
-  // State lưu kết quả từng section theo section type
   const [sectionResults, setSectionResults] = useState<{
     [type: string]: any[];
   }>({});
+
+  const { sectionName, description, sectionType } = useMemo(() => {
+    const section = sections[sectionIndex];
+    const sectionType = section.type;
+
+    const sectionName = LESSON_TYPE_MAPPING[sectionType];
+    const { description } = getLessonDescriptions(sectionType);
+
+    return {
+      sectionName,
+      description,
+      sectionType,
+    };
+  }, [sections, sectionIndex]);
 
   const handleNext = () => {
     setShowIntro(false);
@@ -59,9 +75,7 @@ const Exam = (props: ExamProps) => {
   };
 
   const handleBack = () => {
-    // Quay lại màn intro của section hiện tại
     setShowIntro(true);
-    // Reset lại questionIndex nếu muốn bắt đầu từ câu đầu tiên khi quay lại
     setQuestionIndex(0);
   };
 
@@ -74,7 +88,6 @@ const Exam = (props: ExamProps) => {
       setShowIntro(true);
       setQuestionIndex(0);
     } else {
-      // Đã hết section, log toàn bộ kết quả
       console.log("Tất cả kết quả:", {
         ...sectionResults,
         [sectionType]: questionAnswers,
@@ -83,7 +96,6 @@ const Exam = (props: ExamProps) => {
   };
 
   const handleBackFromIntro = () => {
-    // Chỉ xử lý back khi không phải section đầu tiên
     if (sectionIndex > 0) {
       // Quay lại section trước
       const prevSectionIndex = sectionIndex - 1;
@@ -97,18 +109,12 @@ const Exam = (props: ExamProps) => {
       const lastQuestionIndex = prevSectionQuestions.length - 1;
       setQuestionIndex(lastQuestionIndex);
     } else {
-      console.log("Đang ở section đầu tiên, không thể quay lại.");
+      onBack();
     }
-    // Có thể bổ sung thêm xử lý nếu đang ở section 0 (ví dụ: thoát khỏi exam)
   };
 
   const handleValuesChange = (questionAnswers: any[]) => {
-    const section = sections[sectionIndex];
-    const sectionType = section.type;
-
-    // Fix: Use JSON stringification to prevent unnecessary state updates
     setSectionResults((prev) => {
-      // Only update if values have actually changed
       const currentAnswers = prev[sectionType];
 
       if (
@@ -121,7 +127,7 @@ const Exam = (props: ExamProps) => {
         };
       }
 
-      return prev; // Return previous state if no changes
+      return prev;
     });
   };
 
@@ -131,40 +137,123 @@ const Exam = (props: ExamProps) => {
     setQuestionIndex(0);
   };
 
-  // Render header luôn luôn
-  const renderHeader = () => (
-    // <View style={styles.header}>
-    //   <Text style={styles.headerText}>
-    //     {showIntro ? "Section giới thiệu" : `Câu x/x`}
-    //   </Text>
-    // </View>
+  const totalSeconds = data.duration * 60;
+  const [secondsLeft, setSecondsLeft] = useState(totalSeconds);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      setSecondsLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current!);
+          // TODO: Xử lý khi hết giờ (ví dụ: tự động nộp bài hoặc thông báo)
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  const formatTime = (secs: number) => {
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = secs % 60;
+    return [
+      h > 0 ? String(h).padStart(2, "0") : null,
+      String(m).padStart(2, "0"),
+      String(s).padStart(2, "0"),
+    ]
+      .filter(Boolean)
+      .join(":");
+  };
+
+  // Tính toán current question/sub-question index (bắt đầu từ 1)
+  const getCurrentQuestionDisplay = () => {
+    const section = sections[sectionIndex];
+    const type = section.type;
+    const questions = section.questions;
+
+    // Tính chỉ số câu hỏi tổng thể (globalIndex: số thứ tự câu hỏi đầu tiên của section hiện tại)
+    let globalIndex = 1;
+    for (let i = 0; i < sectionIndex; i++) {
+      const sec = sections[i];
+      if (
+        [
+          "IMAGE_DESCRIPTION",
+          "ASK_AND_ANSWER",
+          "FILL_IN_THE_BLANK_QUESTION",
+        ].includes(sec.type)
+      ) {
+        globalIndex += sec.questions.length;
+      } else {
+        for (let q of sec.questions) {
+          globalIndex += q.questions?.length || 0;
+        }
+      }
+    }
+
+    if (
+      [
+        "IMAGE_DESCRIPTION",
+        "ASK_AND_ANSWER",
+        "FILL_IN_THE_BLANK_QUESTION",
+      ].includes(type)
+    ) {
+      // Không có sub-question
+      return `Câu ${globalIndex + questionIndex}/${totalQuestion}`;
+    } else {
+      // Có sub-question
+      const subQuestions = questions[questionIndex]?.questions || [];
+      if (subQuestions.length <= 1) {
+        // Nếu chỉ có 1 sub-question, chỉ hiện 1 số
+        return `Câu ${globalIndex + questionIndex}/${totalQuestion}`;
+      } else {
+        // Nếu có nhiều sub-question, hiện dải số
+        const from = globalIndex + questionIndex;
+        const to = from + subQuestions.length - 1;
+        return `Câu ${from} - ${to}/${totalQuestion}`;
+      }
+    }
+  };
+
+  const renderHeader = () => (
     <View style={styles.header}>
       <Text style={styles.headerTitle}>
-        {showIntro ? "Section giới thiệu" : `Câu x/x`}
+        {showIntro ? sectionName : getCurrentQuestionDisplay()}
       </Text>
+      <View>
+        <TouchableOpacity>
+          <Text style={styles.submitExamTxt}>Nộp bài</Text>
+        </TouchableOpacity>
+        <Text style={styles.timerText}>{formatTime(secondsLeft)}</Text>
+      </View>
     </View>
   );
 
-  // Render nội dung
   let content = null;
   if (showIntro) {
     content = (
       <View style={styles.container}>
-        {/* Thêm nút Back vào màn intro nếu không phải section đầu tiên */}
-        {/* {sectionIndex > 0 && ( */}
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={handleBackFromIntro}
-        >
-          <Text style={styles.backButtonText}>Back</Text>
-        </TouchableOpacity>
-        {/* )} */}
-        <Text style={styles.sectionTitle}>SECTION {sectionIndex + 1}</Text>
-        <Text style={styles.sectionType}>{sections[sectionIndex].type}</Text>
-        <TouchableOpacity style={styles.button} onPress={handleNext}>
-          <Text style={styles.buttonText}>Tiếp tục</Text>
-        </TouchableOpacity>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.sectionTitle}>
+            PART {sectionIndex + 1}. {sectionName}
+          </Text>
+          <Text style={styles.sectionType}>{description}</Text>
+        </View>
+
+        <View style={styles.buttonGroup}>
+          <TouchableOpacity style={styles.button} onPress={handleBackFromIntro}>
+            <Text style={styles.buttonText}>Quay lại</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.button} onPress={handleNext}>
+            <Text style={styles.buttonText}>Tiếp tục</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   } else {
@@ -178,7 +267,7 @@ const Exam = (props: ExamProps) => {
         initialQuestionIndex={questionIndex}
         onQuestionIndexChange={setQuestionIndex}
         onBack={handleBack}
-        initialValues={sectionResults[section.type]}
+        initialValues={sectionResults[sectionType]}
         onValuesChange={handleValuesChange}
       />
     ) : (
@@ -204,31 +293,37 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#2FC095",
-    paddingVertical: 15,
     paddingHorizontal: 15,
+    justifyContent: "space-between",
+    height: 60,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: "600",
     color: "white",
-    marginLeft: 32,
+  },
+
+  timerText: {
+    color: "yellow",
+    letterSpacing: 1,
+    textAlign: "right",
   },
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
+    padding: 12,
     backgroundColor: "#fff",
   },
   sectionTitle: {
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 16,
+    textAlign: "left",
   },
   sectionType: {
-    fontSize: 18,
+    fontSize: 16,
     color: "#333",
     marginBottom: 32,
+    lineHeight: 26,
   },
   button: {
     backgroundColor: "#22c993",
@@ -240,6 +335,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
+    textAlign: "center",
   },
   backButton: {
     position: "absolute",
@@ -253,6 +349,20 @@ const styles = StyleSheet.create({
   backButtonText: {
     color: "#fff",
     fontWeight: "500",
+  },
+
+  submitExamTxt: {
+    color: "#fff",
+    textDecorationLine: "underline",
+    fontSize: 16,
+    marginBottom: 1,
+  },
+
+  buttonGroup: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBlock: 20,
+    columnGap: 10,
   },
 });
 

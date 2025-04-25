@@ -27,6 +27,7 @@ interface QuestionRendererProps {
   hideHeader?: boolean;
   showWrongAnswer?: boolean;
   disabledPrevButton?: boolean;
+  isSubmit?: boolean;
 }
 
 const QuestionRenderer = ({
@@ -42,12 +43,15 @@ const QuestionRenderer = ({
   hideHeader = false,
   showWrongAnswer = true,
   disabledPrevButton = true,
+  isSubmit = true,
 }: QuestionRendererProps) => {
   const currentAudioUri = currentQuestion.audio.url;
   const currentImageUri = currentQuestion.imageUrl;
   const currentAnswers = currentQuestion.answers;
 
   const isDisabledPrevButton = currentQuestionIndex === 0 && disabledPrevButton;
+  const isSubmitButton =
+    isSubmit && currentQuestionIndex === questionList.length - 1;
 
   const combineStyles = (
     ...styles: (object | boolean | null | undefined)[]
@@ -164,7 +168,7 @@ const QuestionRenderer = ({
         <TouchableOpacity
           style={[
             styles.navButton,
-            currentQuestionIndex === questionList.length - 1
+            isSubmitButton
               ? { backgroundColor: "#2FC095", borderColor: "#2FC095" }
               : null,
           ]}
@@ -173,16 +177,12 @@ const QuestionRenderer = ({
           <Text
             style={[
               styles.navButtonText,
-              currentQuestionIndex === questionList.length - 1
-                ? { color: "white" }
-                : null,
+              isSubmitButton ? { color: "white" } : null,
             ]}
           >
-            {currentQuestionIndex === questionList.length - 1
-              ? "Submit"
-              : "Next"}
+            {isSubmitButton ? "Submit" : "Next"}
           </Text>
-          {currentQuestionIndex !== questionList.length - 1 && (
+          {(currentQuestionIndex !== questionList.length - 1 || !isSubmit) && (
             <AntDesign name="right" size={20} color="#333" />
           )}
         </TouchableOpacity>
