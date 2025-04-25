@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Formik } from "formik";
 import { AudioPlayerRef } from "@/components/AudioPlayer/AudioPlayer";
@@ -11,6 +11,8 @@ interface PracticeType3ExamProps {
   onSubmit: (questionAnswers: any[]) => void;
   initialQuestionIndex?: number;
   onQuestionIndexChange?: (index: number) => void;
+  initialValues: Question[];
+  onValuesChange: (values: any[]) => void;
 }
 
 const PracticeType3_Exam = ({
@@ -19,8 +21,10 @@ const PracticeType3_Exam = ({
   onSubmit,
   initialQuestionIndex = 0,
   onQuestionIndexChange,
+  initialValues: initialValuesProps,
+  onValuesChange,
 }: PracticeType3ExamProps) => {
-  const questionList = questions;
+  const questionList = initialValuesProps ?? questions;
   const audioPlayerRef = useRef<AudioPlayerRef>(null);
   const navigation = useNavigation();
 
@@ -28,10 +32,10 @@ const PracticeType3_Exam = ({
   questionList.forEach((q) => {
     if (q.questions && q.questions.length > 0) {
       q.questions.forEach((subQ) => {
-        initialValues[`question_${q._id}_${subQ._id}`] = "";
+        initialValues[`question_${q._id}_${subQ._id}`] = subQ?.userAnswer ?? "";
       });
     } else {
-      initialValues[`question_${q._id}`] = "";
+      initialValues[`question_${q._id}`] = q.userAnswer ?? "";
     }
   });
 
@@ -43,8 +47,8 @@ const PracticeType3_Exam = ({
     else navigation.goBack();
   };
 
-  const onFormSubmit = async (values: Record<string, string>) => {
-    const payload = questionList.map((it) => {
+  const processFormValues = (values: Record<string, string>) => {
+    return questionList.map((it) => {
       const questions = it.questions.map((subQ) => {
         const userAnswer = values[`question_${it._id}_${subQ._id}`];
         const correctAnswer = subQ.answers.find((ans) => ans.isCorrect);
@@ -62,6 +66,10 @@ const PracticeType3_Exam = ({
         questions,
       };
     });
+  };
+
+  const onFormSubmit = (values: Record<string, string>) => {
+    const payload = processFormValues(values);
     onSubmit(payload);
   };
 
@@ -81,6 +89,11 @@ const PracticeType3_Exam = ({
           useState(initialQuestionIndex);
         const currentQuestion = questionList[currentQuestionIndex];
 
+        useEffect(() => {
+          const payload = processFormValues(values);
+          onValuesChange(payload);
+        }, [values, onValuesChange]);
+
         const goToNextQuestion = async () => {
           if (currentQuestionIndex < questionList.length - 1) {
             if (audioPlayerRef.current) {
@@ -94,12 +107,15 @@ const PracticeType3_Exam = ({
         };
 
         const goToPrevQuestion = async () => {
+          if (audioPlayerRef.current) {
+            await audioPlayerRef.current.reset();
+          }
+
           if (currentQuestionIndex > 0) {
-            if (audioPlayerRef.current) {
-              await audioPlayerRef.current.reset();
-            }
             setCurrentQuestionIndex(currentQuestionIndex - 1);
             onQuestionIndexChange?.(currentQuestionIndex - 1);
+          } else {
+            onBack?.();
           }
         };
 
@@ -127,6 +143,7 @@ const PracticeType3_Exam = ({
             handleSelectAnswer={handleSelectAnswer}
             hideHeader={true}
             showWrongAnswer={false}
+            disabledPrevButton={false}
           />
         );
       }}

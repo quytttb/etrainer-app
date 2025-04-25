@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Formik } from "formik";
 import QuestionRenderer4 from "@/components/Practice/PracticeType4/QuestionRenderer4";
@@ -10,6 +10,8 @@ interface PracticeType4ExamProps {
   onSubmit: (questionAnswers: any[]) => void;
   initialQuestionIndex?: number;
   onQuestionIndexChange?: (index: number) => void;
+  initialValues: Question[];
+  onValuesChange: (values: any[]) => void;
 }
 
 const PracticeType4_Exam = ({
@@ -18,13 +20,15 @@ const PracticeType4_Exam = ({
   onSubmit,
   initialQuestionIndex = 0,
   onQuestionIndexChange,
+  initialValues: initialValuesProps,
+  onValuesChange,
 }: PracticeType4ExamProps) => {
-  const questionList = questions;
+  const questionList = initialValuesProps ?? questions;
   const navigation = useNavigation();
 
   const initialValues: Record<string, string> = {};
   questionList.forEach((q) => {
-    initialValues[`question_${q._id}`] = "";
+    initialValues[`question_${q._id}`] = q.userAnswer ?? "";
   });
 
   const handleBack = () => {
@@ -32,8 +36,8 @@ const PracticeType4_Exam = ({
     else navigation.goBack();
   };
 
-  const onFormSubmit = async (values: Record<string, string>) => {
-    const payload = questionList.map((it) => {
+  const processFormValues = (values: Record<string, string>) => {
+    return questionList.map((it) => {
       const userAnswer = values[`question_${it._id}`];
       const correctAnswer = it.answers.find((ans) => ans.isCorrect);
       const isCorrect = userAnswer === correctAnswer?._id;
@@ -45,6 +49,10 @@ const PracticeType4_Exam = ({
         isNotAnswer,
       };
     });
+  };
+
+  const onFormSubmit = (values: Record<string, string>) => {
+    const payload = processFormValues(values);
     onSubmit(payload);
   };
 
@@ -58,6 +66,11 @@ const PracticeType4_Exam = ({
         const [currentQuestionIndex, setCurrentQuestionIndex] =
           useState(initialQuestionIndex);
         const currentQuestion = questionList[currentQuestionIndex];
+
+        useEffect(() => {
+          const payload = processFormValues(values);
+          onValuesChange(payload);
+        }, [values, onValuesChange]);
 
         const goToNextQuestion = () => {
           if (currentQuestionIndex < questionList.length - 1) {
@@ -94,6 +107,7 @@ const PracticeType4_Exam = ({
             handleSelectAnswer={handleSelectAnswer}
             hideHeader={true}
             showWrongAnswer={false}
+            disabledPrevButton={false}
           />
         );
       }}

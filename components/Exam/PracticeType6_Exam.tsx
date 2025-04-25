@@ -1,15 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Formik } from "formik";
 import QuestionRenderer6 from "@/components/Practice/PracticeType6/QuestionRenderer6";
 import { Question } from "@/components/Practice/type";
 
-interface PracticeType6ExamProps {
+interface PracticeType5ExamProps {
   questions: Question[];
   onBack?: () => void;
   onSubmit: (questionAnswers: any[]) => void;
   initialQuestionIndex?: number;
   onQuestionIndexChange?: (index: number) => void;
+  initialValues: Question[];
+  onValuesChange: (values: any[]) => void;
 }
 
 const PracticeType6_Exam = ({
@@ -18,18 +20,20 @@ const PracticeType6_Exam = ({
   onSubmit,
   initialQuestionIndex = 0,
   onQuestionIndexChange,
-}: PracticeType6ExamProps) => {
-  const questionList = questions;
+  initialValues: initialValuesProps,
+  onValuesChange,
+}: PracticeType5ExamProps) => {
+  const questionList = initialValuesProps ?? questions;
   const navigation = useNavigation();
 
   const initialValues: Record<string, string> = {};
   questionList.forEach((q) => {
     if (q.questions && q.questions.length > 0) {
       q.questions.forEach((subQ) => {
-        initialValues[`question_${q._id}_${subQ._id}`] = "";
+        initialValues[`question_${q._id}_${subQ._id}`] = subQ?.userAnswer ?? "";
       });
     } else {
-      initialValues[`question_${q._id}`] = "";
+      initialValues[`question_${q._id}`] = q?.userAnswer ?? "";
     }
   });
 
@@ -38,8 +42,8 @@ const PracticeType6_Exam = ({
     else navigation.goBack();
   };
 
-  const onFormSubmit = async (values: Record<string, string>) => {
-    const payload = questionList.map((it) => {
+  const processFormValues = (values: Record<string, string>) => {
+    return questionList.map((it) => {
       const questions = it.questions.map((subQ) => {
         const userAnswer = values[`question_${it._id}_${subQ._id}`];
         const correctAnswer = subQ.answers.find((ans) => ans.isCorrect);
@@ -57,6 +61,10 @@ const PracticeType6_Exam = ({
         questions,
       };
     });
+  };
+
+  const onFormSubmit = (values: Record<string, string>) => {
+    const payload = processFormValues(values);
     onSubmit(payload);
   };
 
@@ -70,6 +78,11 @@ const PracticeType6_Exam = ({
         const [currentQuestionIndex, setCurrentQuestionIndex] =
           useState(initialQuestionIndex);
         const currentQuestion = questionList[currentQuestionIndex];
+
+        useEffect(() => {
+          const payload = processFormValues(values);
+          onValuesChange(payload);
+        }, [values, onValuesChange]);
 
         const goToNextQuestion = () => {
           if (currentQuestionIndex < questionList.length - 1) {
@@ -113,6 +126,7 @@ const PracticeType6_Exam = ({
             handleSelectAnswer={handleSelectAnswer}
             hideHeader={true}
             showWrongAnswer={false}
+            disabledPrevButton={false}
           />
         );
       }}
