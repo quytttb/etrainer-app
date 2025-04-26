@@ -1,5 +1,6 @@
 import { Alert, Platform } from "react-native";
 import * as Notifications from "expo-notifications";
+import request from "@/api/request";
 
 export const getExpoPushToken = async () => {
   try {
@@ -15,6 +16,7 @@ export const getExpoPushToken = async () => {
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
     }
+    console.log("🚀 TDS ~ getExpoPushToken ~ finalStatus:", finalStatus);
 
     if (finalStatus !== "granted") {
       Alert.alert(
@@ -38,6 +40,8 @@ export const getExpoPushToken = async () => {
         lightColor: "#FF231F7C",
       });
     }
+
+    await request.post("/users/expo-push-token", { expoPushToken: token });
 
     return token;
   } catch (error: any) {
