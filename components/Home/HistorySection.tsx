@@ -53,12 +53,12 @@ const HistorySection = () => {
   const [activeTab, setActiveTab] = useState("practice");
 
   const { data: practiceHistories } = useQuery({
-    queryKey: ["PRACTICE_HISTORY", activeTab],
+    queryKey: ["HOME_PRACTICE_HISTORY"],
     queryFn: () => getPracticeHistoryService(),
   });
 
   const { data: examHistories } = useQuery({
-    queryKey: ["EXAM_HISTORY", activeTab],
+    queryKey: ["HOME_EXAM_HISTORY"],
     queryFn: getExamHistoriesService,
   });
 
@@ -90,7 +90,7 @@ const HistorySection = () => {
         <View style={styles.historyCardContainer}>
           {/* Practice Items */}
           {practiceHistories && practiceHistories.length > 0 ? (
-            practiceHistories.splice(0, 4).map((item) => {
+            [...practiceHistories].splice(0, 4).map((item) => {
               const { progressColor, badgeColor } = getColorByAccuracyRate(
                 item.accuracyRate
               );
@@ -107,7 +107,7 @@ const HistorySection = () => {
                         {LESSON_TYPE_MAPPING[item.lessonType]}
                       </Text>
                       <Text style={styles.practiceDate}>
-                        {dayjs(item.createdAt).format("DD/MM/YYYY")}
+                        {dayjs(item.createdAt).format("DD/MM/YYYY HH:mm")}
                       </Text>
                     </View>
                     <View
@@ -175,7 +175,7 @@ const HistorySection = () => {
         <View style={styles.historyCardContainer}>
           {/* Practice Items */}
           {examHistories && examHistories.length > 0 ? (
-            examHistories.splice(0, 4).map((item) => {
+            [...examHistories].splice(0, 4).map((item) => {
               const { progressColor, badgeColor } = getColorByAccuracyRate(
                 item.accuracyRate
               );
@@ -193,7 +193,7 @@ const HistorySection = () => {
                         {dayjs(item.exam.createdAt).get("y")}
                       </Text>
                       <Text style={styles.practiceDate}>
-                        {dayjs(item.createdAt).format("DD/MM/YYYY")}
+                        {dayjs(item.createdAt).format("DD/MM/YYYY HH:mm")}
                       </Text>
                     </View>
                     <View
