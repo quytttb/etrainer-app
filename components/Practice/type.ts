@@ -20,11 +20,15 @@ export interface Question {
     question: string;
     answers: IAnswer[];
     userAnswer: string | null;
+    isCorrect: boolean;
+    isNotAnswer: boolean;
     _id: string;
   }[];
   createdAt: string;
   updatedAt: string;
   questionNumber: number;
   userAnswer: string | null;
+  isCorrect: boolean;
+  isNotAnswer: boolean;
   __v: number;
 }

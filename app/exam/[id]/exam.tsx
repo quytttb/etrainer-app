@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
+  Alert,
 } from "react-native";
 
 import PracticeType1_Exam from "@/components/Exam/PracticeType1_Exam";
@@ -14,13 +15,17 @@ import PracticeType3_Exam from "@/components/Exam/PracticeType3_Exam";
 import PracticeType4_Exam from "@/components/Exam/PracticeType4_Exam";
 import PracticeType5_Exam from "@/components/Exam/PracticeType5_Exam";
 import PracticeType6_Exam from "@/components/Exam/PracticeType6_Exam";
-import { LESSON_TYPE_MAPPING } from "@/constants/lesson-types";
+import { LESSON_TYPE, LESSON_TYPE_MAPPING } from "@/constants/lesson-types";
 import { getLessonDescriptions } from "@/utils/lessonDescriptions";
+import dayjs from "dayjs";
+import { useMutation } from "@tanstack/react-query";
+import { submitExamService } from "../service";
+import { router } from "expo-router";
 
 interface ExamProps {
   data: IExam;
   onBack: () => void;
-  totalQuestion: number; // thêm prop này
+  totalQuestion: number;
 }
 
 const getPracticeComponent = (type: string) => {
@@ -46,7 +51,12 @@ const getPracticeComponent = (type: string) => {
 const Exam = (props: ExamProps) => {
   const { data, onBack, totalQuestion } = props;
   const sections = data.sections;
+  const totalSeconds = data.duration * 60;
 
+  const [secondsLeft, setSecondsLeft] = useState(totalSeconds);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [startTime, setStartTime] = useState("");
   const [sectionIndex, setSectionIndex] = useState(0);
   const [showIntro, setShowIntro] = useState(true);
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -69,6 +79,92 @@ const Exam = (props: ExamProps) => {
     };
   }, [sections, sectionIndex]);
 
+  useEffect(() => {
+    setStartTime(dayjs().toISOString());
+  }, []);
+
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      setSecondsLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current!);
+          handleSubmitExam();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  const submitExamMutation = useMutation({
+    mutationKey: ["SUBMIT_EXAM"],
+    mutationFn: submitExamService,
+    onSuccess: (r) => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+
+      Alert.alert("Thành công", "Đã nộp bài thi thành công");
+
+      router.replace(`/exam/result/${r._id}`);
+    },
+    onError: () => {
+      Alert.alert("Lỗi", "Có lỗi khi nộp bài thi");
+    },
+  });
+
+  const handleSubmitExam = () => {
+    const actionAnswers = data.sections.map((section) => {
+      let questions;
+      if (sectionResults[section.type]) {
+        questions = sectionResults[section.type];
+      } else {
+        questions = section.questions.map((question) => {
+          if (
+            [
+              LESSON_TYPE.IMAGE_DESCRIPTION,
+              LESSON_TYPE.ASK_AND_ANSWER,
+              LESSON_TYPE.FILL_IN_THE_BLANK_QUESTION,
+            ].includes(section.type)
+          ) {
+            return {
+              ...question,
+              isNotAnswer: true,
+              isCorrect: false,
+              userAnswer: "",
+            };
+          } else {
+            return {
+              ...question,
+              questions: question.questions.map((it) => ({
+                ...it,
+                isNotAnswer: true,
+                isCorrect: false,
+                userAnswer: "",
+              })),
+            };
+          }
+        });
+      }
+
+      return {
+        ...section,
+        questions,
+      };
+    });
+
+    submitExamMutation.mutate({
+      startTime,
+      endTime: dayjs().toISOString(),
+      sections: actionAnswers,
+      examId: data._id,
+    });
+  };
+
   const handleNext = () => {
     setShowIntro(false);
     setQuestionIndex(0);
@@ -79,19 +175,13 @@ const Exam = (props: ExamProps) => {
     setQuestionIndex(0);
   };
 
-  const handleSectionSubmit = (questionAnswers: any[]) => {
-    const section = sections[sectionIndex];
-    const sectionType = section.type;
-
+  const handleSectionSubmit = () => {
     if (sectionIndex < sections.length - 1) {
       setSectionIndex(sectionIndex + 1);
       setShowIntro(true);
       setQuestionIndex(0);
     } else {
-      console.log("Tất cả kết quả:", {
-        ...sectionResults,
-        [sectionType]: questionAnswers,
-      });
+      handleSubmitExam();
     }
   };
 
@@ -137,27 +227,6 @@ const Exam = (props: ExamProps) => {
     setQuestionIndex(0);
   };
 
-  const totalSeconds = data.duration * 60;
-  const [secondsLeft, setSecondsLeft] = useState(totalSeconds);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    timerRef.current = setInterval(() => {
-      setSecondsLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current!);
-          // TODO: Xử lý khi hết giờ (ví dụ: tự động nộp bài hoặc thông báo)
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, []);
-
   const formatTime = (secs: number) => {
     const h = Math.floor(secs / 3600);
     const m = Math.floor((secs % 3600) / 60);
@@ -171,13 +240,11 @@ const Exam = (props: ExamProps) => {
       .join(":");
   };
 
-  // Tính toán current question/sub-question index (bắt đầu từ 1)
   const getCurrentQuestionDisplay = () => {
     const section = sections[sectionIndex];
     const type = section.type;
     const questions = section.questions;
 
-    // Tính chỉ số câu hỏi tổng thể (globalIndex: số thứ tự câu hỏi đầu tiên của section hiện tại)
     let globalIndex = 1;
     for (let i = 0; i < sectionIndex; i++) {
       const sec = sections[i];
@@ -226,7 +293,7 @@ const Exam = (props: ExamProps) => {
         {showIntro ? sectionName : getCurrentQuestionDisplay()}
       </Text>
       <View>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleSubmitExam}>
           <Text style={styles.submitExamTxt}>Nộp bài</Text>
         </TouchableOpacity>
         <Text style={styles.timerText}>{formatTime(secondsLeft)}</Text>
