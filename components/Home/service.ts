@@ -1,4 +1,5 @@
 import request from "@/api/request";
+import { IExamResult } from "@/app/exam/service";
 import { IPracticeHistory } from "@/app/practice/service";
 import { LESSON_TYPE } from "@/constants/lesson-types";
 
@@ -14,4 +15,8 @@ export const getPracticeHistoryService = (
       lessonType: params?.type,
     },
   });
+};
+
+export const getExamHistoriesService = (): Promise<IExamResult[]> => {
+  return request.get("/exam-history");
 };

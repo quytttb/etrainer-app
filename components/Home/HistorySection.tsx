@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
-import { getPracticeHistoryService } from "./service";
+import { getExamHistoriesService, getPracticeHistoryService } from "./service";
 import { LESSON_TYPE_MAPPING } from "@/constants/lesson-types";
 import dayjs from "dayjs";
 
@@ -48,28 +48,19 @@ const getColorByAccuracyRate = (
   }
 };
 
-interface ExamHistory {
-  id: string;
-  title: string;
-  questionCount: number;
-  score: string;
-}
-
 const HistorySection = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("practice");
 
   const { data: practiceHistories } = useQuery({
-    queryKey: ["PRACTICE_HISTORY"],
+    queryKey: ["HOME_PRACTICE_HISTORY"],
     queryFn: () => getPracticeHistoryService(),
   });
 
-  const defaultExamHistory: ExamHistory[] = [
-    { id: "test1", title: "Test 1", questionCount: 20, score: "20/990" },
-    { id: "test2", title: "Test 2", questionCount: 15, score: "40/990" },
-    { id: "test3", title: "Test 3", questionCount: 10, score: "10/990" },
-  ];
-  const examItems = defaultExamHistory;
+  const { data: examHistories } = useQuery({
+    queryKey: ["HOME_EXAM_HISTORY"],
+    queryFn: getExamHistoriesService,
+  });
 
   return (
     <View style={styles.historySection}>
@@ -99,7 +90,7 @@ const HistorySection = () => {
         <View style={styles.historyCardContainer}>
           {/* Practice Items */}
           {practiceHistories && practiceHistories.length > 0 ? (
-            practiceHistories.splice(0, 4).map((item) => {
+            [...practiceHistories].splice(0, 4).map((item) => {
               const { progressColor, badgeColor } = getColorByAccuracyRate(
                 item.accuracyRate
               );
@@ -116,7 +107,7 @@ const HistorySection = () => {
                         {LESSON_TYPE_MAPPING[item.lessonType]}
                       </Text>
                       <Text style={styles.practiceDate}>
-                        {dayjs(item.createdAt).format("DD/MM/YYYY")}
+                        {dayjs(item.createdAt).format("DD/MM/YYYY HH:mm")}
                       </Text>
                     </View>
                     <View
@@ -181,16 +172,87 @@ const HistorySection = () => {
 
       {/* Content for Exam tab */}
       {activeTab === "exam" && (
-        <View style={styles.historyCard}>
-          <View style={styles.historyColumn}>
-            <Text style={styles.historySubTitle}>Thi</Text>
-            {examItems.map((item) => (
-              <View key={item.id} style={styles.historyItem}>
-                <Text style={styles.historyText}>{item.title}</Text>
-                <Text style={styles.historyProgress}>{item.score}</Text>
-              </View>
-            ))}
-          </View>
+        <View style={styles.historyCardContainer}>
+          {/* Practice Items */}
+          {examHistories && examHistories.length > 0 ? (
+            [...examHistories].splice(0, 4).map((item) => {
+              const { progressColor, badgeColor } = getColorByAccuracyRate(
+                item.accuracyRate
+              );
+
+              return (
+                <TouchableOpacity
+                  key={item._id}
+                  style={styles.practiceCard}
+                  onPress={() => router.push(`/exam/result/${item._id}`)}
+                >
+                  <View style={styles.practiceCardHeader}>
+                    <View style={styles.practiceCardHeaderText}>
+                      <Text style={styles.practiceType}>
+                        {item.exam.name} ETS{" "}
+                        {dayjs(item.exam.createdAt).get("y")}
+                      </Text>
+                      <Text style={styles.practiceDate}>
+                        {dayjs(item.createdAt).format("DD/MM/YYYY HH:mm")}
+                      </Text>
+                    </View>
+                    <View
+                      style={[
+                        styles.durationBadge,
+                        { backgroundColor: badgeColor },
+                      ]}
+                    >
+                      <Text
+                        style={[styles.durationText, { color: progressColor }]}
+                      >
+                        {formatDuration(item.startTime, item.endTime)}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.progressInfoContainer}>
+                    {/* Progress bar */}
+                    <View style={styles.progressBarContainer}>
+                      <View
+                        style={[
+                          styles.progressBar,
+                          {
+                            width: `${item.accuracyRate}%`,
+                            backgroundColor: progressColor,
+                          },
+                        ]}
+                      />
+                    </View>
+
+                    {/* Stats row */}
+                    <View style={styles.statsRow}>
+                      <Text style={styles.statsText}>
+                        <Text style={styles.statsBold}>
+                          {item.correctAnswers}
+                        </Text>{" "}
+                        đúng /
+                        <Text style={styles.statsBold}>
+                          {" "}
+                          {item.totalQuestions}
+                        </Text>{" "}
+                        câu
+                      </Text>
+                      <Text
+                        style={[
+                          styles.percentageText,
+                          { color: progressColor },
+                        ]}
+                      >
+                        {item.accuracyRate}%
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              );
+            })
+          ) : (
+            <Text style={styles.emptyTxt}>Chưa có lịch sử thi</Text>
+          )}
         </View>
       )}
     </View>
