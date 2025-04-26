@@ -1,7 +1,6 @@
 import request from "@/api/request";
 import { Question } from "@/components/Practice/type";
 import { LESSON_TYPE } from "@/constants/lesson-types";
-import { getExpoPushToken } from "@/utils/getExpoPushToken";
 
 interface ICreateStudyReminder {
   hour: number;
@@ -11,10 +10,7 @@ interface ICreateStudyReminder {
 export const setStudyReminderService = async (
   payload: ICreateStudyReminder
 ) => {
-  return request.post("/reminder", {
-    ...payload,
-    expoPushToken: await getExpoPushToken(),
-  });
+  return request.post("/reminder", payload);
 };
 
 export const getNotificationService = () => {
