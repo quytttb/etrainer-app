@@ -25,8 +25,6 @@ export default function HomeScreen() {
     queryFn: getNotificationService,
   });
 
-  console.log("Notification count", data?.length);
-
   const handlePress = (lessonType: LESSON_TYPE) => {
     switch (lessonType) {
       case LESSON_TYPE.VOCABULARY: {

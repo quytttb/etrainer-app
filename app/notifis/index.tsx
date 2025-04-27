@@ -62,7 +62,7 @@ const NotificationScreen = () => {
                       <Ionicons
                         name="notifications"
                         size={20}
-                        color="#2FC095"
+                        color="#0099CC"
                       />
                     </View>
                   </View>
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: "#2FC095",
+    backgroundColor: "#0099CC",
   },
   emptyState: {
     alignItems: "center",
@@ -209,12 +209,12 @@ const styles = StyleSheet.create({
   },
   refreshButton: {
     flexDirection: "row",
-    backgroundColor: "#2FC095",
+    backgroundColor: "#0099CC",
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 10,
     alignItems: "center",
-    shadowColor: "#2FC095",
+    shadowColor: "#0099CC",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
