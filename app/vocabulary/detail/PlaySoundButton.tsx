@@ -13,7 +13,6 @@ const PlaySoundButton = ({ audioUrl }: IPlaySoundButtonProps) => {
   useEffect(() => {
     return () => {
       if (sound) {
-        console.log("Unloading sound...");
         sound.unloadAsync();
       }
     };

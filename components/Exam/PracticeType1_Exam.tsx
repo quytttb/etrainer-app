@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useImperativeHandle } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Formik } from "formik";
 import { AudioPlayerRef } from "@/components/AudioPlayer/AudioPlayer";
@@ -13,6 +13,7 @@ interface PracticeType1ExamProps {
   onQuestionIndexChange?: (index: number) => void;
   initialValues: Question[];
   onValuesChange: (values: any[]) => void;
+  examRef: any;
 }
 
 const PracticeType1_Exam = ({
@@ -23,6 +24,7 @@ const PracticeType1_Exam = ({
   onQuestionIndexChange,
   initialValues: initialValuesProps,
   onValuesChange,
+  examRef,
 }: PracticeType1ExamProps) => {
   const questionList = initialValuesProps ?? questions;
   const audioPlayerRef = useRef<AudioPlayerRef>(null);
@@ -32,6 +34,14 @@ const PracticeType1_Exam = ({
   questionList.forEach((q) => {
     initialValues[`question_${q._id}`] = q?.userAnswer ?? "";
   });
+
+  useImperativeHandle(examRef, () => ({
+    reset: async () => {
+      if (audioPlayerRef.current) {
+        await audioPlayerRef.current.reset();
+      }
+    },
+  }));
 
   const handleBack = async () => {
     await audioPlayerRef.current?.reset();
