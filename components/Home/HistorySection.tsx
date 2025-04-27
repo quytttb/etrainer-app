@@ -27,7 +27,7 @@ const getColorByAccuracyRate = (
 ): { progressColor: string; badgeColor: string } => {
   if (accuracyRate >= 80) {
     return {
-      progressColor: "#2FC095",
+      progressColor: "#0099CC",
       badgeColor: "#E8FFF3",
     };
   } else if (accuracyRate >= 60) {
