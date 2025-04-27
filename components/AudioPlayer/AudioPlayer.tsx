@@ -162,9 +162,9 @@ const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>(
           minimumValue={0}
           maximumValue={duration}
           value={seekValue}
-          minimumTrackTintColor="#2FC095"
+          minimumTrackTintColor="#0099CC"
           maximumTrackTintColor="#D9D9D9"
-          thumbTintColor="#2FC095"
+          thumbTintColor="#0099CC"
           onValueChange={(value: number) => setSeekValue(value)}
           onSlidingStart={() => setIsSeeking(true)}
           onSlidingComplete={async (value: number) => {
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#2FC095",
+    backgroundColor: "#0099CC",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 8,

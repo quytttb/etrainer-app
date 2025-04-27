@@ -16,7 +16,6 @@ export const getExpoPushToken = async () => {
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
     }
-    console.log("🚀 TDS ~ getExpoPushToken ~ finalStatus:", finalStatus);
 
     if (finalStatus !== "granted") {
       Alert.alert(

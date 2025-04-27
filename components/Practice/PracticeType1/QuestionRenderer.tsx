@@ -78,7 +78,7 @@ const QuestionRenderer = ({
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#2FC095" />
+      <StatusBar barStyle="light-content" backgroundColor="#0099CC" />
 
       {/* Header */}
       {!hideHeader && (
@@ -169,7 +169,7 @@ const QuestionRenderer = ({
           style={[
             styles.navButton,
             isSubmitButton
-              ? { backgroundColor: "#2FC095", borderColor: "#2FC095" }
+              ? { backgroundColor: "#0099CC", borderColor: "#0099CC" }
               : null,
           ]}
           onPress={goToNextQuestion}
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#2FC095",
+    backgroundColor: "#0099CC",
     paddingVertical: 15,
     paddingHorizontal: 15,
   },
@@ -270,8 +270,8 @@ const styles = StyleSheet.create({
     borderColor: "red",
   },
   correctAnswer: {
-    backgroundColor: "#2FC095",
-    borderColor: "#2FC095",
+    backgroundColor: "#0099CC",
+    borderColor: "#0099CC",
   },
   answerText: {
     fontSize: 16,

@@ -55,6 +55,7 @@ const Exam = (props: ExamProps) => {
 
   const [secondsLeft, setSecondsLeft] = useState(totalSeconds);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const examRef = useRef<any>(null);
 
   const [startTime, setStartTime] = useState("");
   const [sectionIndex, setSectionIndex] = useState(0);
@@ -117,7 +118,11 @@ const Exam = (props: ExamProps) => {
     },
   });
 
-  const handleSubmitExam = () => {
+  const handleSubmitExam = async () => {
+    if (examRef.current) {
+      await examRef.current?.reset();
+    }
+
     const actionAnswers = data.sections.map((section) => {
       let questions;
       if (sectionResults[section.type]) {
@@ -336,6 +341,7 @@ const Exam = (props: ExamProps) => {
         onBack={handleBack}
         initialValues={sectionResults[sectionType]}
         onValuesChange={handleValuesChange}
+        examRef={examRef}
       />
     ) : (
       <View style={styles.container}>
@@ -359,7 +365,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#2FC095",
+    backgroundColor: "#0099CC",
     paddingHorizontal: 15,
     justifyContent: "space-between",
     height: 60,
@@ -393,7 +399,7 @@ const styles = StyleSheet.create({
     lineHeight: 26,
   },
   button: {
-    backgroundColor: "#22c993",
+    backgroundColor: "#0099CC",
     paddingHorizontal: 32,
     paddingVertical: 14,
     borderRadius: 10,

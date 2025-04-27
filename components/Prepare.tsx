@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: "#2FC095",
+    backgroundColor: "#0099CC",
   },
   headerTitle: {
     fontSize: 20,
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   startButton: {
-    backgroundColor: "#2FC095",
+    backgroundColor: "#0099CC",
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 30,
