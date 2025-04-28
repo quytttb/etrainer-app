@@ -11,7 +11,9 @@ interface PracticeType4ExamProps {
   initialQuestionIndex?: number;
   onQuestionIndexChange?: (index: number) => void;
   initialValues: Question[];
-  onValuesChange: (values: any[]) => void;
+  onValuesChange?: (values: any[]) => void;
+  showWrongAnswer?: boolean;
+  isViewMode?: boolean;
 }
 
 const PracticeType4_Exam = ({
@@ -22,6 +24,8 @@ const PracticeType4_Exam = ({
   onQuestionIndexChange,
   initialValues: initialValuesProps,
   onValuesChange,
+  showWrongAnswer = false,
+  isViewMode,
 }: PracticeType4ExamProps) => {
   const questionList = initialValuesProps ?? questions;
   const navigation = useNavigation();
@@ -69,7 +73,7 @@ const PracticeType4_Exam = ({
 
         useEffect(() => {
           const payload = processFormValues(values);
-          onValuesChange(payload);
+          onValuesChange?.(payload);
         }, [values, onValuesChange]);
 
         const goToNextQuestion = () => {
@@ -92,6 +96,8 @@ const PracticeType4_Exam = ({
         };
 
         const handleSelectAnswer = (option: string) => {
+          if (isViewMode) return;
+
           setFieldValue(`question_${currentQuestion._id}`, option);
         };
 
@@ -106,9 +112,10 @@ const PracticeType4_Exam = ({
             goToPrevQuestion={goToPrevQuestion}
             handleSelectAnswer={handleSelectAnswer}
             hideHeader={true}
-            showWrongAnswer={false}
+            showWrongAnswer={showWrongAnswer}
             disabledPrevButton={false}
             isSubmit={false}
+            isViewMode={isViewMode}
           />
         );
       }}

@@ -4,14 +4,10 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  Image,
   StatusBar,
   SafeAreaView,
 } from "react-native";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
-import AudioPlayer, {
-  AudioPlayerRef,
-} from "@/components/AudioPlayer/AudioPlayer";
 import { IAnswer, Question } from "../type";
 
 interface QuestionRenderer4Props {
@@ -27,6 +23,9 @@ interface QuestionRenderer4Props {
   showWrongAnswer?: boolean; // thêm props này
   disabledPrevButton?: boolean;
   isSubmit?: boolean;
+  isViewMode?: boolean;
+  isHiddenSubmit?: boolean;
+  toggleExplanation?: any;
 }
 
 const QuestionRenderer4 = ({
@@ -42,6 +41,9 @@ const QuestionRenderer4 = ({
   showWrongAnswer = true, // mặc định true
   disabledPrevButton = true,
   isSubmit = true,
+  isViewMode = false,
+  isHiddenSubmit = false,
+  toggleExplanation,
 }: QuestionRenderer4Props) => {
   const currentAnswers = currentQuestion.answers;
 
@@ -59,7 +61,8 @@ const QuestionRenderer4 = ({
     const isSelected = values[`question_${currentQuestion._id}`] === option._id;
     const isCorrectAnswer = option.isCorrect;
     const userHasAnswered = !!values[`question_${currentQuestion._id}`];
-    const showCorrectAnswer = userHasAnswered && isCorrectAnswer;
+    const showCorrectAnswer =
+      (userHasAnswered || isViewMode) && isCorrectAnswer;
     const isWrongAnswer =
       userHasAnswered && isSelected && !isCorrectAnswer && showWrongAnswer;
 
@@ -85,6 +88,13 @@ const QuestionRenderer4 = ({
           <Text style={styles.headerTitle}>
             Câu {currentQuestionIndex + 1} / {questionList.length}
           </Text>
+
+          <TouchableOpacity
+            style={{ marginLeft: "auto" }}
+            onPress={() => toggleExplanation(currentQuestion)}
+          >
+            <Text style={styles.submitExamTxt}>Giải thích</Text>
+          </TouchableOpacity>
         </View>
       )}
 
@@ -122,9 +132,10 @@ const QuestionRenderer4 = ({
             <Text
               style={[
                 styles.answerText,
-                !!values[`question_${currentQuestion._id}`] &&
+                ((!!values[`question_${currentQuestion._id}`] &&
                   option.isCorrect &&
-                  showWrongAnswer &&
+                  showWrongAnswer) ||
+                  (isViewMode && option.isCorrect)) &&
                   styles.correctAnswerText,
                 values[`question_${currentQuestion._id}`] === option._id && {
                   color: "white",
@@ -161,27 +172,28 @@ const QuestionRenderer4 = ({
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[
-            styles.navButton,
-            isSubmitButton
-              ? { backgroundColor: "#0099CC", borderColor: "#0099CC" }
-              : null,
-          ]}
-          onPress={goToNextQuestion}
-        >
-          <Text
+        {!isHiddenSubmit && (
+          <TouchableOpacity
             style={[
-              styles.navButtonText,
-              isSubmitButton ? { color: "white" } : null,
+              styles.navButton,
+              isSubmitButton
+                ? { backgroundColor: "#0099CC", borderColor: "#0099CC" }
+                : null,
             ]}
+            onPress={goToNextQuestion}
           >
-            {isSubmitButton ? "Submit" : "Next"}
-          </Text>
-          {(currentQuestionIndex !== questionList.length - 1 || !isSubmit) && (
-            <AntDesign name="right" size={20} color="#333" />
-          )}
-        </TouchableOpacity>
+            <Text
+              style={[
+                styles.navButtonText,
+                isSubmitButton ? { color: "white" } : null,
+              ]}
+            >
+              {isSubmitButton ? "Submit" : "Next"}
+            </Text>
+            {(currentQuestionIndex !== questionList.length - 1 ||
+              !isSubmit) && <AntDesign name="right" size={20} color="#333" />}
+          </TouchableOpacity>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -197,8 +209,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#0099CC",
-    paddingVertical: 15,
     paddingHorizontal: 15,
+    height: 60,
   },
   backButton: {
     padding: 5,
@@ -323,6 +335,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333",
     width: 30,
+  },
+
+  submitExamTxt: {
+    color: "#fff",
+    textDecorationLine: "underline",
+    fontSize: 16,
+    marginBottom: 1,
   },
 });
 
