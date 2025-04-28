@@ -28,6 +28,7 @@ interface QuestionRendererProps {
   showWrongAnswer?: boolean; // thêm props này
   disabledPrevButton?: boolean;
   isSubmit?: boolean;
+  isViewMode?: boolean;
 }
 
 const QuestionRenderer = ({
@@ -44,6 +45,7 @@ const QuestionRenderer = ({
   showWrongAnswer = true, // mặc định true
   disabledPrevButton = true,
   isSubmit = true,
+  isViewMode = false,
 }: QuestionRendererProps) => {
   const currentAudioUri = currentQuestion.audio.url;
 
@@ -103,7 +105,8 @@ const QuestionRenderer = ({
           const isCorrectAnswer = option.isCorrect;
           const userHasAnswered = !!values[fieldName];
 
-          const showCorrectAnswer = userHasAnswered && isCorrectAnswer;
+          const showCorrectAnswer =
+            (userHasAnswered || isViewMode) && isCorrectAnswer;
           const isWrongAnswer =
             userHasAnswered &&
             isSelected &&
@@ -167,7 +170,7 @@ const QuestionRenderer = ({
         audioUri={currentAudioUri}
         ref={audioPlayerRef}
         key={`audio-player-${currentQuestionIndex}`}
-        autoPlay
+        autoPlay={!isViewMode}
       />
 
       {/* Questions Content */}

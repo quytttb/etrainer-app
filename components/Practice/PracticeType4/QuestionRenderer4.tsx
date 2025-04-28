@@ -4,14 +4,10 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  Image,
   StatusBar,
   SafeAreaView,
 } from "react-native";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
-import AudioPlayer, {
-  AudioPlayerRef,
-} from "@/components/AudioPlayer/AudioPlayer";
 import { IAnswer, Question } from "../type";
 
 interface QuestionRenderer4Props {
@@ -27,6 +23,7 @@ interface QuestionRenderer4Props {
   showWrongAnswer?: boolean; // thêm props này
   disabledPrevButton?: boolean;
   isSubmit?: boolean;
+  isViewMode?: boolean;
 }
 
 const QuestionRenderer4 = ({
@@ -42,6 +39,7 @@ const QuestionRenderer4 = ({
   showWrongAnswer = true, // mặc định true
   disabledPrevButton = true,
   isSubmit = true,
+  isViewMode = false,
 }: QuestionRenderer4Props) => {
   const currentAnswers = currentQuestion.answers;
 
@@ -59,7 +57,8 @@ const QuestionRenderer4 = ({
     const isSelected = values[`question_${currentQuestion._id}`] === option._id;
     const isCorrectAnswer = option.isCorrect;
     const userHasAnswered = !!values[`question_${currentQuestion._id}`];
-    const showCorrectAnswer = userHasAnswered && isCorrectAnswer;
+    const showCorrectAnswer =
+      (userHasAnswered || isViewMode) && isCorrectAnswer;
     const isWrongAnswer =
       userHasAnswered && isSelected && !isCorrectAnswer && showWrongAnswer;
 
@@ -122,9 +121,10 @@ const QuestionRenderer4 = ({
             <Text
               style={[
                 styles.answerText,
-                !!values[`question_${currentQuestion._id}`] &&
+                ((!!values[`question_${currentQuestion._id}`] &&
                   option.isCorrect &&
-                  showWrongAnswer &&
+                  showWrongAnswer) ||
+                  (isViewMode && option.isCorrect)) &&
                   styles.correctAnswerText,
                 values[`question_${currentQuestion._id}`] === option._id && {
                   color: "white",

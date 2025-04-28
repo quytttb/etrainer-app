@@ -25,6 +25,7 @@ interface QuestionRenderer5Props {
   showWrongAnswer?: boolean; // thêm props này
   disabledPrevButton?: boolean;
   isSubmit?: boolean;
+  isViewMode?: boolean;
 }
 
 const screenHeight = Dimensions.get("window").height;
@@ -42,6 +43,7 @@ const QuestionRenderer5 = ({
   showWrongAnswer = true, // mặc định true
   disabledPrevButton = true,
   isSubmit = true,
+  isViewMode,
 }: QuestionRenderer5Props) => {
   const isDisabledPrevButton = currentQuestionIndex === 0 && disabledPrevButton;
   const isSubmitButton =
@@ -99,7 +101,8 @@ const QuestionRenderer5 = ({
           const isCorrectAnswer = option.isCorrect;
           const userHasAnswered = !!values[fieldName];
 
-          const showCorrectAnswer = userHasAnswered && isCorrectAnswer;
+          const showCorrectAnswer =
+            (userHasAnswered || isViewMode) && isCorrectAnswer;
           const isWrongAnswer =
             userHasAnswered &&
             isSelected &&

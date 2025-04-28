@@ -28,6 +28,7 @@ interface QuestionRendererProps {
   showWrongAnswer?: boolean;
   disabledPrevButton?: boolean;
   isSubmit?: boolean;
+  isViewMode?: boolean;
 }
 
 const QuestionRenderer = ({
@@ -44,6 +45,7 @@ const QuestionRenderer = ({
   showWrongAnswer = true,
   disabledPrevButton = true,
   isSubmit = true,
+  isViewMode = false,
 }: QuestionRendererProps) => {
   const currentAudioUri = currentQuestion.audio.url;
   const currentImageUri = currentQuestion.imageUrl;
@@ -63,7 +65,8 @@ const QuestionRenderer = ({
     const isSelected = values[`question_${currentQuestion._id}`] === option._id;
     const isCorrectAnswer = option.isCorrect;
     const userHasAnswered = !!values[`question_${currentQuestion._id}`];
-    const showCorrectAnswer = userHasAnswered && isCorrectAnswer;
+    const showCorrectAnswer =
+      (userHasAnswered || isViewMode) && isCorrectAnswer;
     const isWrongAnswer =
       userHasAnswered && isSelected && !isCorrectAnswer && showWrongAnswer;
 
@@ -97,7 +100,7 @@ const QuestionRenderer = ({
         audioUri={currentAudioUri}
         ref={audioPlayerRef}
         key={`audio-player-${currentQuestionIndex}`}
-        autoPlay
+        autoPlay={!isViewMode}
       />
 
       {/* Question Content */}
@@ -142,32 +145,35 @@ const QuestionRenderer = ({
       </View>
 
       <View style={styles.navigationButtons}>
-        <TouchableOpacity
-          style={[
-            styles.navButton,
-            isDisabledPrevButton && styles.disabledButton,
-          ]}
-          onPress={goToPrevQuestion}
-          disabled={isDisabledPrevButton}
-        >
-          <AntDesign
-            name="left"
-            size={20}
-            color={isDisabledPrevButton ? "#CCC" : "#333"}
-          />
-          <Text
+        {!isViewMode && (
+          <TouchableOpacity
             style={[
-              styles.navButtonText,
-              isDisabledPrevButton && styles.disabledText,
+              styles.navButton,
+              isDisabledPrevButton && styles.disabledButton,
             ]}
+            onPress={goToPrevQuestion}
+            disabled={isDisabledPrevButton}
           >
-            Previous
-          </Text>
-        </TouchableOpacity>
+            <AntDesign
+              name="left"
+              size={20}
+              color={isDisabledPrevButton ? "#CCC" : "#333"}
+            />
+            <Text
+              style={[
+                styles.navButtonText,
+                isDisabledPrevButton && styles.disabledText,
+              ]}
+            >
+              Previous
+            </Text>
+          </TouchableOpacity>
+        )}
 
         <TouchableOpacity
           style={[
             styles.navButton,
+            { marginLeft: "auto" },
             isSubmitButton
               ? { backgroundColor: "#0099CC", borderColor: "#0099CC" }
               : null,

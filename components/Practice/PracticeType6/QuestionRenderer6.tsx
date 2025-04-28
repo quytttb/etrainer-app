@@ -26,6 +26,7 @@ interface QuestionRenderer6Props {
   showWrongAnswer?: boolean; // thêm props này
   disabledPrevButton?: boolean;
   isSubmit?: boolean;
+  isViewMode?: boolean;
 }
 
 const screenHeight = Dimensions.get("window").height;
@@ -43,6 +44,7 @@ const QuestionRenderer6 = ({
   showWrongAnswer = true, // mặc định true
   disabledPrevButton = true,
   isSubmit = true,
+  isViewMode = false,
 }: QuestionRenderer6Props) => {
   const isDisabledPrevButton = currentQuestionIndex === 0 && disabledPrevButton;
   const isSubmitButton =
@@ -100,7 +102,8 @@ const QuestionRenderer6 = ({
           const isCorrectAnswer = option.isCorrect;
           const userHasAnswered = !!values[fieldName];
 
-          const showCorrectAnswer = userHasAnswered && isCorrectAnswer;
+          const showCorrectAnswer =
+            (userHasAnswered || isViewMode) && isCorrectAnswer;
           const isWrongAnswer =
             userHasAnswered &&
             isSelected &&
@@ -204,27 +207,28 @@ const QuestionRenderer6 = ({
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[
-            styles.navButton,
-            isSubmitButton
-              ? { backgroundColor: "#0099CC", borderColor: "#0099CC" }
-              : null,
-          ]}
-          onPress={goToNextQuestion}
-        >
-          <Text
+        {!isViewMode && (
+          <TouchableOpacity
             style={[
-              styles.navButtonText,
-              isSubmitButton ? { color: "white" } : null,
+              styles.navButton,
+              isSubmitButton
+                ? { backgroundColor: "#0099CC", borderColor: "#0099CC" }
+                : null,
             ]}
+            onPress={goToNextQuestion}
           >
-            {isSubmitButton ? "Submit" : "Next"}
-          </Text>
-          {(currentQuestionIndex !== questionList.length - 1 || !isSubmit) && (
-            <AntDesign name="right" size={20} color="#333" />
-          )}
-        </TouchableOpacity>
+            <Text
+              style={[
+                styles.navButtonText,
+                isSubmitButton ? { color: "white" } : null,
+              ]}
+            >
+              {isSubmitButton ? "Submit" : "Next"}
+            </Text>
+            {(currentQuestionIndex !== questionList.length - 1 ||
+              !isSubmit) && <AntDesign name="right" size={20} color="#333" />}
+          </TouchableOpacity>
+        )}
       </View>
     </SafeAreaView>
   );

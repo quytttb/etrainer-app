@@ -8,7 +8,7 @@ import {
   ScrollView,
 } from "react-native";
 import { useQuery } from "@tanstack/react-query";
-import { LESSON_TYPE, LESSON_TYPE_MAPPING } from "@/constants/lesson-types";
+import { LESSON_TYPE } from "@/constants/lesson-types";
 import { IAnswer } from "@/components/Practice/type";
 import { getExamResultService } from "../../service";
 
@@ -42,6 +42,8 @@ const ExamResultReview = () => {
       isNotAnswer: boolean;
       userAnswer: string;
       questionNumber: number;
+      parentQuestionId: string;
+      type: LESSON_TYPE;
     }[] = data.sections
       .reduce((acc, item) => {
         if (
@@ -51,12 +53,14 @@ const ExamResultReview = () => {
             LESSON_TYPE.FILL_IN_THE_BLANK_QUESTION,
           ].includes(item.type)
         ) {
-          const questions = item.questions.map((item, idx) => ({
+          const questions = item.questions.map((item) => ({
             _id: item._id,
             answers: item.answers,
             isCorrect: item.isCorrect,
             isNotAnswer: item.isNotAnswer,
             userAnswer: item.userAnswer,
+            parentQuestionId: item._id,
+            type: item.type,
           }));
 
           acc.push(...questions);
@@ -64,17 +68,25 @@ const ExamResultReview = () => {
           return acc;
         } else {
           const subQuestions = item.questions.reduce((acc, item) => {
-            acc.push(...item.questions);
+            acc.push(
+              ...item.questions.map((x) => ({
+                ...x,
+                parentQuestionId: item._id,
+                type: item.type,
+              }))
+            );
 
             return acc;
           }, [] as any);
 
-          const questions = subQuestions.map((item: any, idx: number) => ({
-            _id: item._id,
-            answers: item.answers,
-            isCorrect: item.isCorrect,
-            isNotAnswer: item.isNotAnswer,
-            userAnswer: item.userAnswer,
+          const questions = subQuestions.map((x: any) => ({
+            _id: x._id,
+            answers: x.answers,
+            isCorrect: x.isCorrect,
+            isNotAnswer: x.isNotAnswer,
+            userAnswer: x.userAnswer,
+            parentQuestionId: x.parentQuestionId,
+            type: x.type,
           }));
 
           acc.push(...questions);
@@ -145,7 +157,19 @@ const ExamResultReview = () => {
       {/* Scrollable Question List */}
       <ScrollView style={styles.scrollView}>
         {filteredQuestions.map((q) => (
-          <View key={q._id} style={styles.questionItem}>
+          <TouchableOpacity
+            key={q._id}
+            style={styles.questionItem}
+            onPress={() => {
+              router.push({
+                pathname: `/exam/${params.id}/history`,
+                params: {
+                  questionId: q.parentQuestionId,
+                  type: q.type,
+                },
+              });
+            }}
+          >
             <View style={styles.questionHeader}>
               <Text
                 style={q.isCorrect ? styles.correctIcon : styles.incorrectIcon}
@@ -191,7 +215,7 @@ const ExamResultReview = () => {
                 </View>
               ))}
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
       </ScrollView>
 
