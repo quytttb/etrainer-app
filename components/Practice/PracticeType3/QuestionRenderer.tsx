@@ -28,6 +28,9 @@ interface QuestionRendererProps {
   showWrongAnswer?: boolean; // thêm props này
   disabledPrevButton?: boolean;
   isSubmit?: boolean;
+  isViewMode?: boolean;
+  isHiddenSubmit?: boolean;
+  toggleExplanation?: any;
 }
 
 const QuestionRenderer = ({
@@ -44,6 +47,9 @@ const QuestionRenderer = ({
   showWrongAnswer = true, // mặc định true
   disabledPrevButton = true,
   isSubmit = true,
+  isViewMode = false,
+  isHiddenSubmit = false,
+  toggleExplanation,
 }: QuestionRendererProps) => {
   const currentAudioUri = currentQuestion.audio.url;
 
@@ -103,7 +109,8 @@ const QuestionRenderer = ({
           const isCorrectAnswer = option.isCorrect;
           const userHasAnswered = !!values[fieldName];
 
-          const showCorrectAnswer = userHasAnswered && isCorrectAnswer;
+          const showCorrectAnswer =
+            (userHasAnswered || isViewMode) && isCorrectAnswer;
           const isWrongAnswer =
             userHasAnswered &&
             isSelected &&
@@ -159,6 +166,13 @@ const QuestionRenderer = ({
           <Text style={styles.headerTitle}>
             Câu {currentQuestionIndex + 1} / {questionList.length}
           </Text>
+
+          <TouchableOpacity
+            style={{ marginLeft: "auto" }}
+            onPress={() => toggleExplanation(currentQuestion)}
+          >
+            <Text style={styles.submitExamTxt}>Giải thích</Text>
+          </TouchableOpacity>
         </View>
       )}
 
@@ -167,7 +181,7 @@ const QuestionRenderer = ({
         audioUri={currentAudioUri}
         ref={audioPlayerRef}
         key={`audio-player-${currentQuestionIndex}`}
-        autoPlay
+        autoPlay={!isViewMode}
       />
 
       {/* Questions Content */}
@@ -199,27 +213,28 @@ const QuestionRenderer = ({
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[
-            styles.navButton,
-            isSubmitButton
-              ? { backgroundColor: "#0099CC", borderColor: "#0099CC" }
-              : null,
-          ]}
-          onPress={goToNextQuestion}
-        >
-          <Text
+        {!isHiddenSubmit && (
+          <TouchableOpacity
             style={[
-              styles.navButtonText,
-              isSubmitButton ? { color: "white" } : null,
+              styles.navButton,
+              isSubmitButton
+                ? { backgroundColor: "#0099CC", borderColor: "#0099CC" }
+                : null,
             ]}
+            onPress={goToNextQuestion}
           >
-            {isSubmitButton ? "Submit" : "Next"}
-          </Text>
-          {(currentQuestionIndex !== questionList.length - 1 || !isSubmit) && (
-            <AntDesign name="right" size={20} color="#333" />
-          )}
-        </TouchableOpacity>
+            <Text
+              style={[
+                styles.navButtonText,
+                isSubmitButton ? { color: "white" } : null,
+              ]}
+            >
+              {isSubmitButton ? "Submit" : "Next"}
+            </Text>
+            {(currentQuestionIndex !== questionList.length - 1 ||
+              !isSubmit) && <AntDesign name="right" size={20} color="#333" />}
+          </TouchableOpacity>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -234,8 +249,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#0099CC",
-    paddingVertical: 15,
     paddingHorizontal: 15,
+    height: 60,
   },
   backButton: {
     padding: 5,
@@ -401,6 +416,13 @@ const styles = StyleSheet.create({
   selectedWrongAnswer: {
     backgroundColor: "red",
     borderColor: "red",
+  },
+
+  submitExamTxt: {
+    color: "#fff",
+    textDecorationLine: "underline",
+    fontSize: 16,
+    marginBottom: 1,
   },
 });
 

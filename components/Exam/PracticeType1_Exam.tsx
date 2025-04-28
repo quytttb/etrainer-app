@@ -12,8 +12,10 @@ interface PracticeType1ExamProps {
   initialQuestionIndex?: number;
   onQuestionIndexChange?: (index: number) => void;
   initialValues: Question[];
-  onValuesChange: (values: any[]) => void;
+  onValuesChange?: (values: any[]) => void;
   examRef: any;
+  showWrongAnswer?: boolean;
+  isViewMode?: boolean;
 }
 
 const PracticeType1_Exam = ({
@@ -25,6 +27,8 @@ const PracticeType1_Exam = ({
   initialValues: initialValuesProps,
   onValuesChange,
   examRef,
+  showWrongAnswer = false,
+  isViewMode,
 }: PracticeType1ExamProps) => {
   const questionList = initialValuesProps ?? questions;
   const audioPlayerRef = useRef<AudioPlayerRef>(null);
@@ -87,7 +91,7 @@ const PracticeType1_Exam = ({
 
         useEffect(() => {
           const payload = processFormValues(values);
-          onValuesChange(payload);
+          onValuesChange?.(payload);
         }, [values, onValuesChange]);
 
         const goToNextQuestion = async () => {
@@ -117,6 +121,8 @@ const PracticeType1_Exam = ({
         };
 
         const handleSelectAnswer = (option: string) => {
+          if (isViewMode) return;
+
           setFieldValue(`question_${currentQuestion._id}`, option);
         };
 
@@ -132,9 +138,10 @@ const PracticeType1_Exam = ({
             goToPrevQuestion={goToPrevQuestion}
             handleSelectAnswer={handleSelectAnswer}
             hideHeader={true}
-            showWrongAnswer={false}
+            showWrongAnswer={showWrongAnswer}
             disabledPrevButton={false}
             isSubmit={false}
+            isViewMode={isViewMode}
           />
         );
       }}

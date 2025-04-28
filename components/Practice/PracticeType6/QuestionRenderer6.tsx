@@ -26,6 +26,9 @@ interface QuestionRenderer6Props {
   showWrongAnswer?: boolean; // thêm props này
   disabledPrevButton?: boolean;
   isSubmit?: boolean;
+  isViewMode?: boolean;
+  isHiddenSubmit?: boolean;
+  toggleExplanation?: any;
 }
 
 const screenHeight = Dimensions.get("window").height;
@@ -43,6 +46,9 @@ const QuestionRenderer6 = ({
   showWrongAnswer = true, // mặc định true
   disabledPrevButton = true,
   isSubmit = true,
+  isViewMode = false,
+  isHiddenSubmit = false,
+  toggleExplanation,
 }: QuestionRenderer6Props) => {
   const isDisabledPrevButton = currentQuestionIndex === 0 && disabledPrevButton;
   const isSubmitButton =
@@ -100,7 +106,8 @@ const QuestionRenderer6 = ({
           const isCorrectAnswer = option.isCorrect;
           const userHasAnswered = !!values[fieldName];
 
-          const showCorrectAnswer = userHasAnswered && isCorrectAnswer;
+          const showCorrectAnswer =
+            (userHasAnswered || isViewMode) && isCorrectAnswer;
           const isWrongAnswer =
             userHasAnswered &&
             isSelected &&
@@ -154,6 +161,12 @@ const QuestionRenderer6 = ({
             <Ionicons name="chevron-back" size={28} color="white" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Câu {currentQuestionIndex + 1}</Text>
+          <TouchableOpacity
+            style={{ marginLeft: "auto" }}
+            onPress={() => toggleExplanation(currentQuestion)}
+          >
+            <Text style={styles.submitExamTxt}>Giải thích</Text>
+          </TouchableOpacity>
         </View>
       )}
 
@@ -204,27 +217,31 @@ const QuestionRenderer6 = ({
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[
-            styles.navButton,
-            isSubmitButton
-              ? { backgroundColor: "#0099CC", borderColor: "#0099CC" }
-              : null,
-          ]}
-          onPress={goToNextQuestion}
-        >
-          <Text
+        {(isViewMode && currentQuestionIndex === questionList.length - 1) ||
+        isHiddenSubmit ? (
+          <></>
+        ) : (
+          <TouchableOpacity
             style={[
-              styles.navButtonText,
-              isSubmitButton ? { color: "white" } : null,
+              styles.navButton,
+              isSubmitButton
+                ? { backgroundColor: "#0099CC", borderColor: "#0099CC" }
+                : null,
             ]}
+            onPress={goToNextQuestion}
           >
-            {isSubmitButton ? "Submit" : "Next"}
-          </Text>
-          {(currentQuestionIndex !== questionList.length - 1 || !isSubmit) && (
-            <AntDesign name="right" size={20} color="#333" />
-          )}
-        </TouchableOpacity>
+            <Text
+              style={[
+                styles.navButtonText,
+                isSubmitButton ? { color: "white" } : null,
+              ]}
+            >
+              {isSubmitButton ? "Submit" : "Next"}
+            </Text>
+            {(currentQuestionIndex !== questionList.length - 1 ||
+              !isSubmit) && <AntDesign name="right" size={20} color="#333" />}
+          </TouchableOpacity>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -239,8 +256,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#0099CC",
-    paddingVertical: 15,
     paddingHorizontal: 15,
+    height: 60,
   },
   backButton: {
     padding: 5,
@@ -420,6 +437,12 @@ const styles = StyleSheet.create({
     width: "100%",
     aspectRatio: 16 / 9,
     marginBottom: 10,
+  },
+  submitExamTxt: {
+    color: "#fff",
+    textDecorationLine: "underline",
+    fontSize: 16,
+    marginBottom: 1,
   },
 });
 
