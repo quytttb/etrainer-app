@@ -10,6 +10,7 @@ interface PracticeType6Props {
   onSubmit?: (questionAnswers: any[]) => void;
   isViewMode?: boolean;
   questionId?: string;
+  toggleExplanation?: any;
 }
 
 const PracticeType6 = ({
@@ -18,6 +19,7 @@ const PracticeType6 = ({
   onSubmit,
   isViewMode,
   questionId,
+  toggleExplanation,
 }: PracticeType6Props) => {
   const questionList = questions;
   const navigation = useNavigation();
@@ -125,6 +127,7 @@ const PracticeType6 = ({
             handleSelectAnswer={handleSelectAnswer}
             isViewMode={isViewMode}
             isHiddenSubmit={isHiddenSubmit}
+            toggleExplanation={toggleExplanation}
           />
         );
       }}

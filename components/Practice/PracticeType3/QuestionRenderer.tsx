@@ -30,6 +30,7 @@ interface QuestionRendererProps {
   isSubmit?: boolean;
   isViewMode?: boolean;
   isHiddenSubmit?: boolean;
+  toggleExplanation?: any;
 }
 
 const QuestionRenderer = ({
@@ -48,6 +49,7 @@ const QuestionRenderer = ({
   isSubmit = true,
   isViewMode = false,
   isHiddenSubmit = false,
+  toggleExplanation,
 }: QuestionRendererProps) => {
   const currentAudioUri = currentQuestion.audio.url;
 
@@ -164,6 +166,13 @@ const QuestionRenderer = ({
           <Text style={styles.headerTitle}>
             Câu {currentQuestionIndex + 1} / {questionList.length}
           </Text>
+
+          <TouchableOpacity
+            style={{ marginLeft: "auto" }}
+            onPress={() => toggleExplanation(currentQuestion)}
+          >
+            <Text style={styles.submitExamTxt}>Giải thích</Text>
+          </TouchableOpacity>
         </View>
       )}
 
@@ -240,8 +249,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#0099CC",
-    paddingVertical: 15,
     paddingHorizontal: 15,
+    height: 60,
   },
   backButton: {
     padding: 5,
@@ -407,6 +416,13 @@ const styles = StyleSheet.create({
   selectedWrongAnswer: {
     backgroundColor: "red",
     borderColor: "red",
+  },
+
+  submitExamTxt: {
+    color: "#fff",
+    textDecorationLine: "underline",
+    fontSize: 16,
+    marginBottom: 1,
   },
 });
 

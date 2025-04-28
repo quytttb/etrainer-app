@@ -10,6 +10,7 @@ interface PracticeType5Props {
   onSubmit?: (questionAnswers: any[]) => void;
   isViewMode?: boolean;
   questionId?: string;
+  toggleExplanation: any;
 }
 
 const PracticeType5 = ({
@@ -18,6 +19,7 @@ const PracticeType5 = ({
   onSubmit,
   isViewMode,
   questionId,
+  toggleExplanation,
 }: PracticeType5Props) => {
   const questionList = questions;
   const navigation = useNavigation();
@@ -125,6 +127,7 @@ const PracticeType5 = ({
             handleSelectAnswer={handleSelectAnswer}
             isViewMode={isViewMode}
             isHiddenSubmit={isHiddenSubmit}
+            toggleExplanation={toggleExplanation}
           />
         );
       }}

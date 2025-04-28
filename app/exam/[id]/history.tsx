@@ -6,6 +6,10 @@ import {
   StyleSheet,
   SafeAreaView,
   ActivityIndicator,
+  Animated,
+  Dimensions,
+  TouchableWithoutFeedback,
+  ScrollView,
 } from "react-native";
 
 import { AntDesign } from "@expo/vector-icons";
@@ -47,6 +51,31 @@ const ExamHistory = () => {
 
   const [sectionIndex, setSectionIndex] = useState(0);
   const [questionIndex, setQuestionIndex] = useState(0);
+  const [showExplanation, setShowExplanation] = useState(false);
+  const [activeTab, setActiveTab] = useState("explanation"); // 'subtitle' or 'explanation'
+  const translateYAnim = useRef(new Animated.Value(500)).current;
+  const overlayOpacity = useRef(new Animated.Value(0)).current;
+
+  const toggleExplanation = () => {
+    const toValue = showExplanation ? 500 : 0;
+    const opacityValue = showExplanation ? 0 : 1;
+
+    Animated.parallel([
+      Animated.spring(translateYAnim, {
+        toValue,
+        useNativeDriver: true,
+        friction: 8,
+        tension: 40,
+      }),
+      Animated.timing(overlayOpacity, {
+        toValue: opacityValue,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    setShowExplanation(!showExplanation);
+  };
 
   const { data } = useQuery({
     queryKey: ["EXAM_HISTORY", params?.id],
@@ -167,7 +196,7 @@ const ExamHistory = () => {
       </View>
 
       <View>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={toggleExplanation}>
           <Text style={styles.submitExamTxt}>Giải thích</Text>
         </TouchableOpacity>
       </View>
@@ -176,6 +205,82 @@ const ExamHistory = () => {
 
   const section = sections[sectionIndex];
   const PracticeComponent = getPracticeComponent(section.type);
+
+  const renderExplanation = () => {
+    const currentQuestion = questions[questionIndex];
+    const explanation =
+      currentQuestion?.explanation || "Không có giải thích cho câu hỏi này.";
+    const subtitle =
+      currentQuestion?.subtitle || "Không có phụ đề cho câu hỏi này.";
+
+    return (
+      <>
+        <Animated.View
+          style={[
+            styles.explanationContainer,
+            { transform: [{ translateY: translateYAnim }] },
+          ]}
+        >
+          <View style={styles.explanationHeader}>
+            <View style={styles.tabContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.tabButton,
+                  activeTab === "subtitle" && styles.activeTabButton,
+                ]}
+                onPress={() => setActiveTab("subtitle")}
+              >
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeTab === "subtitle" && styles.activeTabText,
+                  ]}
+                >
+                  Phụ đề
+                </Text>
+                {activeTab === "subtitle" && (
+                  <View style={styles.activeIndicator} />
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.tabButton,
+                  activeTab === "explanation" && styles.activeTabButton,
+                ]}
+                onPress={() => setActiveTab("explanation")}
+              >
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeTab === "explanation" && styles.activeTabText,
+                  ]}
+                >
+                  Giải thích
+                </Text>
+                {activeTab === "explanation" && (
+                  <View style={styles.activeIndicator} />
+                )}
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity
+              onPress={toggleExplanation}
+              style={styles.closeButton}
+            >
+              <AntDesign name="close" size={22} color="#333" />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView style={styles.explanationContent}>
+            {activeTab === "subtitle" ? (
+              <Text style={styles.explanationText}>{subtitle}</Text>
+            ) : (
+              <Text style={styles.explanationText}>{explanation}</Text>
+            )}
+          </ScrollView>
+        </Animated.View>
+      </>
+    );
+  };
 
   let content = PracticeComponent ? (
     <PracticeComponent
@@ -202,6 +307,7 @@ const ExamHistory = () => {
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       {renderHeader()}
       <View style={{ flex: 1 }}>{content}</View>
+      {renderExplanation()}
     </SafeAreaView>
   );
 };
@@ -281,6 +387,94 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBlock: 20,
     columnGap: 10,
+  },
+
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    zIndex: 1,
+  },
+
+  explanationContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    minHeight: "40%",
+    maxHeight: "70%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
+    elevation: 5,
+    paddingBottom: 30,
+    zIndex: 2,
+  },
+
+  explanationHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+    paddingHorizontal: 10,
+  },
+
+  tabContainer: {
+    flexDirection: "row",
+    flex: 1,
+  },
+
+  tabButton: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: "center",
+    position: "relative",
+  },
+
+  closeButton: {
+    paddingLeft: 16,
+    paddingVertical: 12,
+  },
+
+  activeTabButton: {},
+
+  tabText: {
+    fontSize: 16,
+    color: "#666",
+  },
+
+  activeTabText: {
+    fontWeight: "600",
+    color: "#0099CC",
+  },
+
+  activeIndicator: {
+    position: "absolute",
+    bottom: 0,
+    left: "25%",
+    width: "50%",
+    height: 3,
+    backgroundColor: "#0099CC",
+    borderRadius: 1.5,
+  },
+
+  explanationContent: {
+    padding: 16,
+    maxHeight: Dimensions.get("window").height * 0.5,
+  },
+
+  explanationText: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: "#333",
   },
 });
 

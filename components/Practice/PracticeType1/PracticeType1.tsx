@@ -11,6 +11,7 @@ interface PracticeType1Props {
   onSubmit?: (questionAnswers: any[]) => void;
   isViewMode?: boolean;
   questionId?: string;
+  toggleExplanation: (data?: { subtitle: string; explanation: string }) => void;
 }
 
 const PracticeType1 = ({
@@ -19,6 +20,7 @@ const PracticeType1 = ({
   onSubmit,
   isViewMode,
   questionId,
+  toggleExplanation,
 }: PracticeType1Props) => {
   const questionList = questions;
   const audioPlayerRef = useRef<AudioPlayerRef>(null);
@@ -130,6 +132,7 @@ const PracticeType1 = ({
             handleSelectAnswer={handleSelectAnswer}
             isViewMode={isViewMode}
             isHiddenSubmit={isHiddenSubmit}
+            toggleExplanation={toggleExplanation}
           />
         );
       }}
