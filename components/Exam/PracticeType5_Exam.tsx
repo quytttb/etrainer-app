@@ -11,7 +11,9 @@ interface PracticeType5ExamProps {
   initialQuestionIndex?: number;
   onQuestionIndexChange?: (index: number) => void;
   initialValues: Question[];
-  onValuesChange: (values: any[]) => void;
+  onValuesChange?: (values: any[]) => void;
+  showWrongAnswer?: boolean;
+  isViewMode?: boolean;
 }
 
 const PracticeType5_Exam = ({
@@ -22,6 +24,8 @@ const PracticeType5_Exam = ({
   onQuestionIndexChange,
   initialValues: initialValuesProps,
   onValuesChange,
+  showWrongAnswer = false,
+  isViewMode,
 }: PracticeType5ExamProps) => {
   const questionList = initialValuesProps ?? questions;
   const navigation = useNavigation();
@@ -81,7 +85,7 @@ const PracticeType5_Exam = ({
 
         useEffect(() => {
           const payload = processFormValues(values);
-          onValuesChange(payload);
+          onValuesChange?.(payload);
         }, [values, onValuesChange]);
 
         const goToNextQuestion = () => {
@@ -104,6 +108,8 @@ const PracticeType5_Exam = ({
         };
 
         const handleSelectAnswer = (option: string, subQuestionId?: string) => {
+          if (isViewMode) return;
+
           if (subQuestionId) {
             setFieldValue(
               `question_${currentQuestion._id}_${subQuestionId}`,
@@ -125,9 +131,10 @@ const PracticeType5_Exam = ({
             goToPrevQuestion={goToPrevQuestion}
             handleSelectAnswer={handleSelectAnswer}
             hideHeader={true}
-            showWrongAnswer={false}
+            showWrongAnswer={showWrongAnswer}
             disabledPrevButton={false}
             isSubmit={false}
+            isViewMode={isViewMode}
           />
         );
       }}
