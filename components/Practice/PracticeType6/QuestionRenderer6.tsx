@@ -27,6 +27,7 @@ interface QuestionRenderer6Props {
   disabledPrevButton?: boolean;
   isSubmit?: boolean;
   isViewMode?: boolean;
+  isHiddenSubmit?: boolean;
 }
 
 const screenHeight = Dimensions.get("window").height;
@@ -45,6 +46,7 @@ const QuestionRenderer6 = ({
   disabledPrevButton = true,
   isSubmit = true,
   isViewMode = false,
+  isHiddenSubmit = false,
 }: QuestionRenderer6Props) => {
   const isDisabledPrevButton = currentQuestionIndex === 0 && disabledPrevButton;
   const isSubmitButton =
@@ -207,7 +209,10 @@ const QuestionRenderer6 = ({
           </Text>
         </TouchableOpacity>
 
-        {!isViewMode && (
+        {(isViewMode && currentQuestionIndex === questionList.length - 1) ||
+        isHiddenSubmit ? (
+          <></>
+        ) : (
           <TouchableOpacity
             style={[
               styles.navButton,

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Formik } from "formik";
 import QuestionRenderer4 from "./QuestionRenderer4";
@@ -7,16 +7,24 @@ import { Question } from "../type";
 interface PracticeType4Props {
   questions: Question[];
   onBack?: () => void;
-  onSubmit: (questionAnswers: any[]) => void;
+  onSubmit?: (questionAnswers: any[]) => void;
+  isViewMode?: boolean;
+  questionId?: string;
 }
 
-const PracticeType4 = ({ questions, onBack, onSubmit }: PracticeType4Props) => {
+const PracticeType4 = ({
+  questions,
+  onBack,
+  onSubmit,
+  isViewMode,
+  questionId,
+}: PracticeType4Props) => {
   const questionList = questions;
   const navigation = useNavigation();
 
   const initialValues: Record<string, string> = {};
   questionList.forEach((q) => {
-    initialValues[`question_${q._id}`] = "";
+    initialValues[`question_${q._id}`] = q.userAnswer || "";
   });
 
   const handleBack = async () => {
@@ -39,7 +47,7 @@ const PracticeType4 = ({ questions, onBack, onSubmit }: PracticeType4Props) => {
       };
     });
 
-    onSubmit(payload);
+    onSubmit?.(payload);
   };
 
   return (
@@ -51,6 +59,18 @@ const PracticeType4 = ({ questions, onBack, onSubmit }: PracticeType4Props) => {
       {({ values, setFieldValue, handleSubmit }) => {
         const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
         const currentQuestion = questionList[currentQuestionIndex];
+
+        const isHiddenSubmit =
+          currentQuestionIndex === questionList.length - 1 && isViewMode;
+
+        useEffect(() => {
+          if (questionId) {
+            const index = questionList.findIndex((q) => q._id === questionId);
+            if (index !== -1) {
+              setCurrentQuestionIndex(index);
+            }
+          }
+        }, [questionId]);
 
         const goToNextQuestion = () => {
           if (currentQuestionIndex < questionList.length - 1) {
@@ -67,6 +87,8 @@ const PracticeType4 = ({ questions, onBack, onSubmit }: PracticeType4Props) => {
         };
 
         const handleSelectAnswer = (option: string) => {
+          if (isViewMode) return;
+
           setFieldValue(`question_${currentQuestion._id}`, option);
         };
 
@@ -80,6 +102,8 @@ const PracticeType4 = ({ questions, onBack, onSubmit }: PracticeType4Props) => {
             goToNextQuestion={goToNextQuestion}
             goToPrevQuestion={goToPrevQuestion}
             handleSelectAnswer={handleSelectAnswer}
+            isViewMode={isViewMode}
+            isHiddenSubmit={isHiddenSubmit}
           />
         );
       }}

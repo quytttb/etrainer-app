@@ -42,6 +42,7 @@ const PracticeResultReview = () => {
     isCorrect: boolean;
     isNotAnswer: boolean;
     userAnswer: string;
+    questionId: string;
   }[] = useMemo(() => {
     if (!data) return [];
 
@@ -56,6 +57,7 @@ const PracticeResultReview = () => {
           isCorrect: item.isCorrect,
           isNotAnswer: item.isNotAnswer,
           userAnswer: item.userAnswer,
+          questionId: item._id,
         }));
       }
 
@@ -67,6 +69,7 @@ const PracticeResultReview = () => {
           const questions = item.questions.map((it: any, idx: number) => ({
             ...it,
             question: `${index + 1}.${idx + 1}`,
+            questionId: item._id,
           }));
 
           acc.push(...questions);
@@ -81,6 +84,7 @@ const PracticeResultReview = () => {
           isCorrect: item.isCorrect,
           isNotAnswer: item.isNotAnswer,
           userAnswer: item.userAnswer,
+          questionId: item.questionId,
         }));
       }
 
@@ -143,7 +147,18 @@ const PracticeResultReview = () => {
       {/* Scrollable Question List */}
       <ScrollView style={styles.scrollView}>
         {filteredQuestions.map((q) => (
-          <View key={q._id} style={styles.questionItem}>
+          <TouchableOpacity
+            key={q._id}
+            style={styles.questionItem}
+            onPress={() => {
+              router.push({
+                pathname: `/practice/history/${params.id}`,
+                params: {
+                  questionId: q.questionId,
+                },
+              });
+            }}
+          >
             <View style={styles.questionHeader}>
               <Text
                 style={q.isCorrect ? styles.correctIcon : styles.incorrectIcon}
@@ -189,7 +204,7 @@ const PracticeResultReview = () => {
                 </View>
               ))}
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
       </ScrollView>
 

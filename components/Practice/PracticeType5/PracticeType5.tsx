@@ -1,17 +1,24 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Formik } from "formik";
-import { AudioPlayerRef } from "@/components/AudioPlayer/AudioPlayer";
 import QuestionRenderer5 from "./QuestionRenderer5";
 import { Question } from "../type";
 
 interface PracticeType5Props {
   questions: Question[];
   onBack?: () => void;
-  onSubmit: (questionAnswers: any[]) => void;
+  onSubmit?: (questionAnswers: any[]) => void;
+  isViewMode?: boolean;
+  questionId?: string;
 }
 
-const PracticeType5 = ({ questions, onBack, onSubmit }: PracticeType5Props) => {
+const PracticeType5 = ({
+  questions,
+  onBack,
+  onSubmit,
+  isViewMode,
+  questionId,
+}: PracticeType5Props) => {
   const questionList = questions;
   const navigation = useNavigation();
 
@@ -19,10 +26,10 @@ const PracticeType5 = ({ questions, onBack, onSubmit }: PracticeType5Props) => {
   questionList.forEach((q) => {
     if (q.questions && q.questions.length > 0) {
       q.questions.forEach((subQ) => {
-        initialValues[`question_${q._id}_${subQ._id}`] = "";
+        initialValues[`question_${q._id}_${subQ._id}`] = subQ.userAnswer || "";
       });
     } else {
-      initialValues[`question_${q._id}`] = "";
+      initialValues[`question_${q._id}`] = q.userAnswer || "";
     }
   });
 
@@ -53,7 +60,7 @@ const PracticeType5 = ({ questions, onBack, onSubmit }: PracticeType5Props) => {
       };
     });
 
-    onSubmit(payload);
+    onSubmit?.(payload);
   };
 
   return (
@@ -66,6 +73,18 @@ const PracticeType5 = ({ questions, onBack, onSubmit }: PracticeType5Props) => {
       {({ values, setFieldValue, handleSubmit }) => {
         const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
         const currentQuestion = questionList[currentQuestionIndex];
+
+        const isHiddenSubmit =
+          currentQuestionIndex === questionList.length - 1 && isViewMode;
+
+        useEffect(() => {
+          if (questionId) {
+            const index = questionList.findIndex((q) => q._id === questionId);
+            if (index !== -1) {
+              setCurrentQuestionIndex(index);
+            }
+          }
+        }, [questionId]);
 
         const goToNextQuestion = () => {
           if (currentQuestionIndex < questionList.length - 1) {
@@ -82,6 +101,8 @@ const PracticeType5 = ({ questions, onBack, onSubmit }: PracticeType5Props) => {
         };
 
         const handleSelectAnswer = (option: string, subQuestionId?: string) => {
+          if (isViewMode) return;
+
           if (subQuestionId) {
             setFieldValue(
               `question_${currentQuestion._id}_${subQuestionId}`,
@@ -102,6 +123,8 @@ const PracticeType5 = ({ questions, onBack, onSubmit }: PracticeType5Props) => {
             goToNextQuestion={goToNextQuestion}
             goToPrevQuestion={goToPrevQuestion}
             handleSelectAnswer={handleSelectAnswer}
+            isViewMode={isViewMode}
+            isHiddenSubmit={isHiddenSubmit}
           />
         );
       }}
