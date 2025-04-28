@@ -28,6 +28,7 @@ interface QuestionRenderer6Props {
   isSubmit?: boolean;
   isViewMode?: boolean;
   isHiddenSubmit?: boolean;
+  toggleExplanation?: any;
 }
 
 const screenHeight = Dimensions.get("window").height;
@@ -47,6 +48,7 @@ const QuestionRenderer6 = ({
   isSubmit = true,
   isViewMode = false,
   isHiddenSubmit = false,
+  toggleExplanation,
 }: QuestionRenderer6Props) => {
   const isDisabledPrevButton = currentQuestionIndex === 0 && disabledPrevButton;
   const isSubmitButton =
@@ -159,6 +161,12 @@ const QuestionRenderer6 = ({
             <Ionicons name="chevron-back" size={28} color="white" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Câu {currentQuestionIndex + 1}</Text>
+          <TouchableOpacity
+            style={{ marginLeft: "auto" }}
+            onPress={() => toggleExplanation(currentQuestion)}
+          >
+            <Text style={styles.submitExamTxt}>Giải thích</Text>
+          </TouchableOpacity>
         </View>
       )}
 
@@ -248,8 +256,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#0099CC",
-    paddingVertical: 15,
     paddingHorizontal: 15,
+    height: 60,
   },
   backButton: {
     padding: 5,
@@ -429,6 +437,12 @@ const styles = StyleSheet.create({
     width: "100%",
     aspectRatio: 16 / 9,
     marginBottom: 10,
+  },
+  submitExamTxt: {
+    color: "#fff",
+    textDecorationLine: "underline",
+    fontSize: 16,
+    marginBottom: 1,
   },
 });
 

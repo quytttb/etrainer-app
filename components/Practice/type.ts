@@ -31,4 +31,6 @@ export interface Question {
   isCorrect: boolean;
   isNotAnswer: boolean;
   __v: number;
+  subtitle: string;
+  explanation: string;
 }
