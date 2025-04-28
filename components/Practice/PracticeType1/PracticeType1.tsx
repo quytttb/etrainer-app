@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Formik } from "formik";
 import { AudioPlayerRef } from "@/components/AudioPlayer/AudioPlayer";
@@ -8,17 +8,25 @@ import { Question } from "../type";
 interface PracticeType1Props {
   questions: Question[];
   onBack?: () => void;
-  onSubmit: (questionAnswers: any[]) => void;
+  onSubmit?: (questionAnswers: any[]) => void;
+  isViewMode?: boolean;
+  questionId?: string;
 }
 
-const PracticeType1 = ({ questions, onBack, onSubmit }: PracticeType1Props) => {
+const PracticeType1 = ({
+  questions,
+  onBack,
+  onSubmit,
+  isViewMode,
+  questionId,
+}: PracticeType1Props) => {
   const questionList = questions;
   const audioPlayerRef = useRef<AudioPlayerRef>(null);
   const navigation = useNavigation();
 
   const initialValues: Record<string, string> = {};
   questionList.forEach((q) => {
-    initialValues[`question_${q._id}`] = "";
+    initialValues[`question_${q._id}`] = q.userAnswer || "";
   });
 
   // const validationSchema = Yup.object().shape(
@@ -52,7 +60,7 @@ const PracticeType1 = ({ questions, onBack, onSubmit }: PracticeType1Props) => {
       };
     });
 
-    onSubmit(payload);
+    onSubmit?.(payload);
   };
 
   return (
@@ -70,6 +78,18 @@ const PracticeType1 = ({ questions, onBack, onSubmit }: PracticeType1Props) => {
       {({ values, setFieldValue, handleSubmit }) => {
         const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
         const currentQuestion = questionList[currentQuestionIndex];
+
+        const isHiddenSubmit =
+          currentQuestionIndex === questionList.length - 1 && isViewMode;
+
+        useEffect(() => {
+          if (questionId) {
+            const index = questionList.findIndex((q) => q._id === questionId);
+            if (index !== -1) {
+              setCurrentQuestionIndex(index);
+            }
+          }
+        }, [questionId]);
 
         const goToNextQuestion = async () => {
           if (currentQuestionIndex < questionList.length - 1) {
@@ -92,6 +112,8 @@ const PracticeType1 = ({ questions, onBack, onSubmit }: PracticeType1Props) => {
         };
 
         const handleSelectAnswer = (option: string) => {
+          if (isViewMode) return;
+
           setFieldValue(`question_${currentQuestion._id}`, option);
         };
 
@@ -106,6 +128,8 @@ const PracticeType1 = ({ questions, onBack, onSubmit }: PracticeType1Props) => {
             goToNextQuestion={goToNextQuestion}
             goToPrevQuestion={goToPrevQuestion}
             handleSelectAnswer={handleSelectAnswer}
+            isViewMode={isViewMode}
+            isHiddenSubmit={isHiddenSubmit}
           />
         );
       }}

@@ -45,6 +45,8 @@ const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>(
     };
 
     useEffect(() => {
+      if (!audioUri) return;
+
       const loadSound = async () => {
         try {
           const { sound } = await Audio.Sound.createAsync(

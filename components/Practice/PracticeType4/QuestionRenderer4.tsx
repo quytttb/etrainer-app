@@ -24,6 +24,7 @@ interface QuestionRenderer4Props {
   disabledPrevButton?: boolean;
   isSubmit?: boolean;
   isViewMode?: boolean;
+  isHiddenSubmit?: boolean;
 }
 
 const QuestionRenderer4 = ({
@@ -40,6 +41,7 @@ const QuestionRenderer4 = ({
   disabledPrevButton = true,
   isSubmit = true,
   isViewMode = false,
+  isHiddenSubmit = false,
 }: QuestionRenderer4Props) => {
   const currentAnswers = currentQuestion.answers;
 
@@ -161,27 +163,28 @@ const QuestionRenderer4 = ({
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[
-            styles.navButton,
-            isSubmitButton
-              ? { backgroundColor: "#0099CC", borderColor: "#0099CC" }
-              : null,
-          ]}
-          onPress={goToNextQuestion}
-        >
-          <Text
+        {!isHiddenSubmit && (
+          <TouchableOpacity
             style={[
-              styles.navButtonText,
-              isSubmitButton ? { color: "white" } : null,
+              styles.navButton,
+              isSubmitButton
+                ? { backgroundColor: "#0099CC", borderColor: "#0099CC" }
+                : null,
             ]}
+            onPress={goToNextQuestion}
           >
-            {isSubmitButton ? "Submit" : "Next"}
-          </Text>
-          {(currentQuestionIndex !== questionList.length - 1 || !isSubmit) && (
-            <AntDesign name="right" size={20} color="#333" />
-          )}
-        </TouchableOpacity>
+            <Text
+              style={[
+                styles.navButtonText,
+                isSubmitButton ? { color: "white" } : null,
+              ]}
+            >
+              {isSubmitButton ? "Submit" : "Next"}
+            </Text>
+            {(currentQuestionIndex !== questionList.length - 1 ||
+              !isSubmit) && <AntDesign name="right" size={20} color="#333" />}
+          </TouchableOpacity>
+        )}
       </View>
     </SafeAreaView>
   );
