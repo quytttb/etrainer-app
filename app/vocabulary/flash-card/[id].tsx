@@ -2,101 +2,65 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, PanResponder } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Audio } from 'expo-av';
-import FlipCard from 'react-native-flip-card'; // Import FlipCard
+import FlipCard from 'react-native-flip-card';
+import PlaySoundButton from '../detail/PlaySoundButton';
 
 const FlashCardScreen = () => {
-  const { id } = useLocalSearchParams(); // Lấy id của chủ đề từ URL
-  const parsedId = Number(id); // Chuyển đổi id thành số
-  const [currentIndex, setCurrentIndex] = useState(0); // Lưu chỉ số của từ vựng hiện tại
-  const [swipeDirection, setSwipeDirection] = useState<string | null>(null); // Lưu hướng quẹt
-  const [showAnswer, setShowAnswer] = useState(false); // Kiểm tra xem có hiện nghĩa từ hay không
-  const [rightSwipeCount, setRightSwipeCount] = useState(0); // Số lượng quẹt phải (Đã hiểu)
-  const [leftSwipeCount, setLeftSwipeCount] = useState(0); // Số lượng quẹt trái (Cần học thêm)
-  const [isFlipped, setIsFlipped] = useState(false); // State to track flip state
-  const [remainingWords, setRemainingWords] = useState<number[]>([]); // Track words marked as "Cần học thêm"
+  const router = useRouter();
+  const { id, words } = useLocalSearchParams();
+  // Parse vocabulary from params or use default
+  const vocabulary =
+    words && typeof words === 'string'
+      ? (() => {
+          try {
+            const arr = JSON.parse(words);
+            return Array.isArray(arr)
+              ? arr.map((item: any) => ({
+                  word: item.word,
+                  pronunciation: item.pronunciation || '',
+                  meaning: item.meaning,
+                  audio: item.audio || undefined, // Add audio property if exists
+                }))
+              : [];
+          } catch {
+            return [];
+          }
+        })()
+      : [];
 
-  // Dữ liệu từ vựng giả lập cho các chủ đề
-  const vocabularyData: { [key: number]: { word: string; pronunciation: string; meaning: string; }[] } = {
-    1: [
-      { word: 'New', pronunciation: '/nju:/', meaning: 'Mới' },
-      { word: 'Company', pronunciation: '/ˈkʌmpəni/', meaning: 'Công ty' },
-      { word: 'Mr.', pronunciation: '/ˈmɪstər/', meaning: 'Ông' },
-      { word: 'Year', pronunciation: '/jɪər/', meaning: 'Năm' },
-      { word: 'Service', pronunciation: '/ˈsɜːvɪs/', meaning: 'Dịch vụ' },
-    ],
-    2: [
-      { word: 'Travel', pronunciation: '/ˈtrævl/', meaning: 'Du lịch' },
-      { word: 'Flight', pronunciation: '/flaɪt/', meaning: 'Chuyến bay' },
-      { word: 'Airport', pronunciation: '/ˈɛəpɔːt/', meaning: 'Sân bay' },
-      { word: 'Hotel', pronunciation: '/həʊˈtɛl/', meaning: 'Khách sạn' },
-      { word: 'Tourist', pronunciation: '/ˈtʊərɪst/', meaning: 'Du khách' },
-    ],
-  };
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [rightSwipeCount, setRightSwipeCount] = useState(0);
+  const [leftSwipeCount, setLeftSwipeCount] = useState(0);
+  const [remainingWords, setRemainingWords] = useState<number[]>([]);
 
-  const currentCard = vocabularyData[parsedId] && vocabularyData[parsedId][currentIndex];
-  const progress = (currentIndex + 1) / (vocabularyData[parsedId]?.length || 1); // Calculate progress
+  const currentCard = vocabulary[currentIndex];
+  const progress = (currentIndex + 1) / (vocabulary.length || 1);
 
-  const handleReset = () => {
-    setCurrentIndex(0); // Reset to the first word
-    setRightSwipeCount(0); // Reset "Đã hiểu" count
-    setLeftSwipeCount(0); // Reset "Cần học thêm" count
-    setRemainingWords([]); // Clear remaining words
-  };
-
-  const handleContinue = () => {
-    if (remainingWords.length > 0) {
-      const filteredVocabulary = remainingWords.map((index) => vocabularyData[parsedId][index]);
-      vocabularyData[parsedId] = filteredVocabulary; // Update vocabulary data to only include remaining words
-      setCurrentIndex(0); // Start from the first remaining word
-      setRightSwipeCount(0); // Reset "Đã hiểu" count
-      setLeftSwipeCount(0); // Reset "Cần học thêm" count
-      setRemainingWords([]); // Clear remaining words
-    }
-  };
-
-  // Hàm xử lý quẹt thẻ
-  const scaleAnim = new Animated.Value(1);
+  // Swipe logic
   const handleSwipe = (direction: string) => {
-    if (!vocabularyData[parsedId]) return;
-
-    if (currentIndex >= vocabularyData[parsedId].length - 1) {
+    if (!vocabulary) return;
+    if (currentIndex >= vocabulary.length - 1) {
       setRemainingWords(
-        vocabularyData[parsedId]
+        vocabulary
           .map((_, index) => index)
           .filter((index) => !remainingWords.includes(index) && leftSwipeCount > 0)
-      ); // Track words marked as "Cần học thêm"
-      setCurrentIndex(vocabularyData[parsedId].length); // Show final card
+      );
+      setCurrentIndex(vocabulary.length);
       return;
     }
-
-    Animated.timing(scaleAnim, {
-      toValue: 1.1,
-      duration: 200,
-      useNativeDriver: true,
-    }).start(() => {
-      Animated.timing(scaleAnim, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: true,
-      }).start();
-
-      if (direction === 'right') {
-        setSwipeDirection('right');
-        setRightSwipeCount(rightSwipeCount + 1);
-        setCurrentIndex(currentIndex + 1);
-      } else if (direction === 'left') {
-        setSwipeDirection('left');
-        setLeftSwipeCount(leftSwipeCount + 1);
-        setRemainingWords([...remainingWords, currentIndex]); // Add to remaining words
-        setCurrentIndex(currentIndex + 1);
-      }
-    });
+    if (direction === 'right') {
+      setRightSwipeCount(rightSwipeCount + 1);
+      setCurrentIndex(currentIndex + 1);
+    } else if (direction === 'left') {
+      setLeftSwipeCount(leftSwipeCount + 1);
+      setRemainingWords([...remainingWords, currentIndex]);
+      setCurrentIndex(currentIndex + 1);
+    }
   };
 
-  // Tạo động tác quẹt với PanResponder
+  // PanResponder for swipe
   const swipeAnim = new Animated.Value(0);
-
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onPanResponderMove: Animated.event(
@@ -105,73 +69,71 @@ const FlashCardScreen = () => {
     ),
     onPanResponderRelease: (e, gestureState) => {
       if (gestureState.dx > 150) {
-        handleSwipe('right'); // Quẹt phải
+        handleSwipe('right');
       } else if (gestureState.dx < -150) {
-        handleSwipe('left'); // Quẹt trái
+        handleSwipe('left');
       } else {
-        Animated.spring(swipeAnim, { toValue: 0, useNativeDriver: false }).start(); // Quay lại vị trí ban đầu
+        Animated.spring(swipeAnim, { toValue: 0, useNativeDriver: false }).start();
       }
     },
   });
 
-  // Hàm quay lại trang trước
-  const router = useRouter();
+  // Back
   const handleBackPress = () => {
-    router.back(); // Quay lại trang trước khi bạn nhấn Flash Card
+    router.back();
   };
 
-   // Play pronunciation
-   const playPronunciation = async () => {
-    if (currentCard?.word) {
-      try {
-        const sound = new Audio.Sound();
-        await sound.loadAsync({ uri: `https://api.dictionaryapi.dev/media/pronunciations/en/${currentCard.word}.mp3` });
-        await sound.playAsync();
-      } catch (error) {
-        console.error('Error playing sound:', error);
-      }
+  // Reset
+  const handleReset = () => {
+    setCurrentIndex(0);
+    setRightSwipeCount(0);
+    setLeftSwipeCount(0);
+    setRemainingWords([]);
+  };
+
+  // Continue with remaining words
+  const handleContinue = () => {
+    if (remainingWords.length > 0) {
+      setCurrentIndex(0);
+      setRightSwipeCount(0);
+      setLeftSwipeCount(0);
+      setRemainingWords([]);
     }
   };
 
-  // Hiển thị thẻ cuối khi học xong
-  if (currentIndex >= vocabularyData[parsedId]?.length) {
+  // End of cards
+  if (currentIndex >= vocabulary.length) {
     if (leftSwipeCount === 0) {
-      // Show congratulatory card if all words are marked as "Đã hiểu"
       return (
         <View style={styles.container}>
-          {/* Header */}
           <View style={styles.headerContainer}>
             <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
               <FontAwesome name="chevron-left" size={20} color="#000" />
             </TouchableOpacity>
           </View>
-
           <View style={styles.flashCardContainer}>
             <View style={styles.flashCard}>
               <Text style={styles.word}>Bạn làm tốt lắm!</Text>
             </View>
             <View style={styles.buttons}>
-            <TouchableOpacity
-              style={[styles.actionButton, { backgroundColor: '#FF5722', width: '60%' }]}
-              onPress={handleReset} 
-            >
-              <Text style={styles.buttonText}>Làm mới</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.actionButton, { backgroundColor: '#FF5722', width: '60%' }]}
+                onPress={handleReset}
+              >
+                <Text style={styles.buttonText}>Làm mới</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
       );
     }
-
     return (
       <View style={styles.container}>
-        {/* Header */}
         <View style={styles.headerContainer}>
           <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
             <FontAwesome name="chevron-left" size={20} color="#000" />
           </TouchableOpacity>
         </View>
-
         <View style={styles.flashCardContainer}>
           <View style={styles.flashCard}>
             <Text style={styles.word}>Bạn vừa học {rightSwipeCount} từ vựng.</Text>
@@ -183,7 +145,8 @@ const FlashCardScreen = () => {
         <View style={styles.buttons}>
           <TouchableOpacity
             style={[styles.actionButton, { backgroundColor: '#4CAF50' }]}
-            onPress={handleContinue}           >
+            onPress={handleContinue}
+          >
             <Text style={styles.buttonText}>Tiếp tục</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -195,60 +158,79 @@ const FlashCardScreen = () => {
         </View>
       </View>
     );
-  };
+  }
+
+  // Nếu không có từ vựng, hiển thị thông báo
+  if (!currentCard) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.headerContainer}>
+          <TouchableOpacity onPress={router.back} style={styles.backButton}>
+            <FontAwesome name="chevron-left" size={30} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.flashCardContainer}>
+          <Text style={styles.word}>Không có dữ liệu từ vựng.</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.headerContainer}>
         <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <FontAwesome name="chevron-left" size={30} color="#000" />
         </TouchableOpacity>
       </View>
-
-      {/* Flashcard */}
       <View style={styles.flashCardContainer}>
         <FlipCard
-          {...panResponder.panHandlers} 
+          {...panResponder.panHandlers}
           flip={isFlipped}
           friction={6}
           perspective={1000}
           flipHorizontal={true}
           flipVertical={false}
           clickable={true}
-          onFlipEnd={() => setShowAnswer(!showAnswer)}
+          onFlipEnd={() => {}}
         >
           {/* Front Side */}
           <TouchableOpacity
-            style={styles.flashCard} 
-            onPress={() => setIsFlipped(!isFlipped)} 
+            style={styles.flashCard}
+            onPress={() => setIsFlipped((prev) => !prev)}
+            activeOpacity={1}
           >
-            <Text style={styles.word}>{currentCard?.word}</Text>
-            <Text style={styles.pronunciation}>{currentCard?.pronunciation}</Text>
-            <TouchableOpacity
-              style={styles.speakerButton}
-              onPress={playPronunciation}
-            >
-              <FontAwesome name="volume-up" size={20} color="#00BFAE" />
-            </TouchableOpacity>
+            <View style={{ alignItems: 'center', width: '100%' }}>
+              <Text style={styles.word}>{currentCard.word}</Text>
+              <Text style={styles.pronunciation}>{currentCard.pronunciation}</Text>
+              <View style={{ marginTop: 16 }}>
+                <PlaySoundButton
+                  audioUrl={
+                    currentCard.word
+                      ? (
+                        currentCard.audio?.url // Nếu có url audio từ API thì ưu tiên dùng
+                          ? currentCard.audio.url
+                          : `https://api.dictionaryapi.dev/media/pronunciations/en/${currentCard.word.toLowerCase().replace(/[^a-z]/g, '')}.mp3`
+                        )
+                      : ''
+                  }
+                />
+              </View>
+            </View>
           </TouchableOpacity>
-
           {/* Back Side */}
           <TouchableOpacity
-            style={styles.flashCard} 
-            onPress={() => setIsFlipped(!isFlipped)} 
+            style={styles.flashCard}
+            onPress={() => setIsFlipped((prev) => !prev)}
+            activeOpacity={1}
           >
-            <Text style={styles.meaning}>{currentCard?.meaning}</Text>
+            <Text style={styles.meaning}>{currentCard.meaning}</Text>
           </TouchableOpacity>
         </FlipCard>
       </View>
-
-      {/* Progress Bar */}
       <View style={styles.progressBarContainer}>
         <View style={[styles.progressBar, { width: `${progress * 100}%` }]} />
       </View>
-
-      {/* Action Buttons */}
       <View style={styles.buttons}>
         <View style={styles.actionButtonContainer}>
           <TouchableOpacity
@@ -285,60 +267,49 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   flashCardContainer: {
-    flex: 1, 
+    flex: 1,
     width: '100%',
-    justifyContent: 'center', 
+    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    
   },
   flashCard: {
     width: '100%',
-    height: 500, 
+    height: 500,
     borderRadius: 15,
     backgroundColor: '#FFF',
     justifyContent: 'center',
     alignItems: 'center',
-    padding:80,
+    padding: 80,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 5,
   },
-  flashCardContent: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   word: {
     fontSize: 30,
     fontWeight: 'bold',
     color: '#333',
-    textAlign: 'center', 
-    flexShrink: 1, 
-    flexGrow: 0, 
+    textAlign: 'center',
+    flexShrink: 1,
+    flexGrow: 0,
   },
   pronunciation: {
     fontSize: 16,
     color: '#888',
-    textAlign: 'center', 
+    textAlign: 'center',
     marginTop: 10,
-    flexShrink: 1, 
-    flexGrow: 0, 
+    flexShrink: 1,
+    flexGrow: 0,
   },
   meaning: {
     fontSize: 16,
     color: '#555',
     marginTop: 20,
-    textAlign: 'center', 
-    flexShrink: 1, 
-    flexGrow: 0, 
-  },
-  toggleButton: {
-    position: 'absolute',
-    top: 20,
-    right: 20,
+    textAlign: 'center',
+    flexShrink: 1,
+    flexGrow: 0,
   },
   speakerButton: {
     position: 'absolute',

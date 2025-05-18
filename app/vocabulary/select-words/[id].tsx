@@ -5,39 +5,67 @@ import { useRouter, useLocalSearchParams } from 'expo-router'; // Import useLoca
 
 const SelectWordsScreen = () => {
   const router = useRouter(); // Initialize router for navigation
-  const { id } = useLocalSearchParams(); // Get the topic ID from the route parameters
+  const { id, words } = useLocalSearchParams(); // Get the topic ID and words from the route parameters
   const [currentQuestion, setCurrentQuestion] = useState(0); // Start from the first question
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showCorrectAnswer, setShowCorrectAnswer] = useState(false); // Track if correct answer should be shown
   const [isPaused, setIsPaused] = useState(false); // Track if the game is paused
 
-  const questions = [
-    {
-      text: 'đề nghị (v)',
-      options: ['offer', 'advertisement', 'reserve', 'finance'],
-      correctAnswer: 0,
-    },
-    {
-      text: 'khách hàng (n)',
-      options: ['customer', 'manager', 'employee', 'supplier'],
-      correctAnswer: 0,
-    },
-    {
-      text: 'dịch vụ (n)',
-      options: ['service', 'product', 'price', 'quality'],
-      correctAnswer: 0,
-    },
-    {
-      text: 'giảm giá (n-v)',
-      options: ['discount', 'increase', 'promotion', 'sale'],
-      correctAnswer: 0,
-    },
-    {
-      text: 'sản phẩm (n)',
-      options: ['product', 'service', 'delivery', 'price'],
-      correctAnswer: 0,
-    },
-  ];
+  // If words data is available, create dynamic questions, otherwise use default questions
+  const questions =
+    words && typeof words === 'string'
+      ? (() => {
+          try {
+            const arr = JSON.parse(words);
+            return Array.isArray(arr)
+              ? arr.map((item: any, idx: number) => {
+                  // Lấy các từ khác làm đáp án nhiễu
+                  const distractors = arr
+                    .filter((other: any, i: number) => i !== idx)
+                    .map((other: any) => other.word)
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, 3);
+                  // Trộn đáp án đúng vào vị trí ngẫu nhiên
+                  const options = [...distractors, item.word].sort(() => Math.random() - 0.5);
+                  const correctAnswer = options.indexOf(item.word);
+                  return {
+                    text: item.meaning,
+                    options,
+                    correctAnswer,
+                  };
+                })
+              : [];
+          } catch {
+            return [];
+          }
+        })()
+      : [
+          {
+            text: 'đề nghị (v)',
+            options: ['offer', 'advertisement', 'reserve', 'finance'],
+            correctAnswer: 0,
+          },
+          {
+            text: 'khách hàng (n)',
+            options: ['customer', 'manager', 'employee', 'supplier'],
+            correctAnswer: 0,
+          },
+          {
+            text: 'dịch vụ (n)',
+            options: ['service', 'product', 'price', 'quality'],
+            correctAnswer: 0,
+          },
+          {
+            text: 'giảm giá (n-v)',
+            options: ['discount', 'increase', 'promotion', 'sale'],
+            correctAnswer: 0,
+          },
+          {
+            text: 'sản phẩm (n)',
+            options: ['product', 'service', 'delivery', 'price'],
+            correctAnswer: 0,
+          },
+        ];
 
   const totalQuestions = questions.length;
 

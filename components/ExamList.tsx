@@ -1,15 +1,12 @@
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
+import React from "react"; // Explicitly import React
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from "react-native";
+import { router } from "expo-router";
 
-/**
- * @typedef {Object} ExamListProps
- * @property {{ id: string; title: string; description: string }[]} data
- */
+interface ExamListProps {
+  data: { id: string; title: string; description: string }[];
+}
 
-/**
- * @param {{ data: { id: string; title: string; description: string }[] }} props
- */
-export default function ExamList({ data }) {
+export default function ExamList({ data }: ExamListProps) {
   return (
     <FlatList
       data={data}

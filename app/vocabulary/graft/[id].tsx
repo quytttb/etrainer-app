@@ -2,6 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Image, Animated } from 'react-native'; // Import Animated for shake effect
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router'; 
+import { useLocalSearchParams } from 'expo-router';
+
+type VocabularyItem = {
+  id: number;
+  word: string;
+  meaning: string;
+};
 
 const GraftScreen = () => {
   const router = useRouter(); 
@@ -18,18 +25,28 @@ const GraftScreen = () => {
     meaning: null,
   }); // Track incorrect matches
 
-  const vocabulary = [
-    { id: 1, word: 'local', meaning: 'địa phương (adj)' },
-    { id: 2, word: 'sales', meaning: 'bán hàng (n)' },
-    { id: 3, word: 'position', meaning: 'vị trí (n)' },
-    { id: 4, word: 'discount', meaning: 'giảm giá (n-v)' },
-    { id: 5, word: 'customer', meaning: 'khách hàng (n)' },
-    { id: 6, word: 'service', meaning: 'dịch vụ (n)' },
-    { id: 7, word: 'price', meaning: 'giá cả (n)' },
-    { id: 8, word: 'quality', meaning: 'chất lượng (n)' },
-    { id: 9, word: 'delivery', meaning: 'giao hàng (n)' },
-    { id: 10, word: 'product', meaning: 'sản phẩm (n)' },
-  ];
+  // Get words param from the URL
+  const { words } = useLocalSearchParams();
+
+  // Parse words from params if available, otherwise fallback to default
+  const vocabulary: VocabularyItem[] =
+    words && typeof words === 'string'
+      ? (() => {
+          try {
+            const arr = JSON.parse(words);
+            // Ensure each item has a unique id (fallback if missing)
+            return Array.isArray(arr)
+              ? arr.map((item, idx) => ({
+                  id: typeof item.id === 'undefined' ? idx + 1 : item.id,
+                  word: item.word,
+                  meaning: item.meaning,
+                }))
+              : [];
+          } catch {
+            return [];
+          }
+        })()
+      : [];
 
   const totalSets = Math.ceil(vocabulary.length / 5); // Calculate total sets
 
@@ -115,7 +132,7 @@ const GraftScreen = () => {
   };
 
   const handleClose = () => {
-    router.push(`/vocabulary/detail/${currentIndex / 5 + 1}`); 
+    router.back(); // Go back to the previous vocabulary page
   };
 
   return (
@@ -184,17 +201,18 @@ const GraftScreen = () => {
                 style={[
                   styles.card,
                   selectedWord === item.id && styles.selectedCard,
-                  incorrectCards.word === item.id && styles.incorrectCard, // Highlight incorrect card
-                  { transform: [{ translateX: incorrectCards.word === item.id ? shakeAnimation : 0 }] }, // Apply shake animation
+                  incorrectCards.word === item.id && styles.incorrectCard,
+                  { transform: [{ translateX: incorrectCards.word === item.id ? shakeAnimation : 0 }] },
                 ]}
               >
                 <TouchableOpacity onPress={() => handleWordSelect(item.id)}>
-                  <Text style={styles.cardText}>{item.word}</Text> {/* Ensure text is wrapped */}
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={styles.cardText}>{item.word}</Text>
+                  </View>
                 </TouchableOpacity>
               </Animated.View>
             ))}
         </View>
-
         {/* Meanings Column */}
         <View style={styles.column}>
           {shuffledMeanings.map((item) => (
@@ -203,12 +221,14 @@ const GraftScreen = () => {
               style={[
                 styles.card,
                 selectedMeaning === item.id && styles.selectedCard,
-                incorrectCards.meaning === item.id && styles.incorrectCard, // Highlight incorrect card
-                { transform: [{ translateX: incorrectCards.meaning === item.id ? shakeAnimation : 0 }] }, // Apply shake animation
+                incorrectCards.meaning === item.id && styles.incorrectCard,
+                { transform: [{ translateX: incorrectCards.meaning === item.id ? shakeAnimation : 0 }] },
               ]}
             >
               <TouchableOpacity onPress={() => handleMeaningSelect(item.id)}>
-                <Text style={styles.cardText}>{item.meaning}</Text> {/* Ensure text is wrapped */}
+                <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                  <Text style={styles.cardText}>{item.meaning}</Text>
+                </View>
               </TouchableOpacity>
             </Animated.View>
           ))}
