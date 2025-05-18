@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, ScrollView, StyleSheet } from "react-native";
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import Header from "../../../components/Header";
 import { useQuery } from "@tanstack/react-query";
@@ -23,6 +23,36 @@ export default function VocabularyDetailScreen() {
       />
 
       <ScrollView style={styles.content}>
+        {/* Luyện tập bài học bài học */}
+        <View style={styles.buttonsContainer}>
+          <TouchableOpacity
+            style={styles.box}
+            onPress={() => router.push({
+              pathname: `/vocabulary/flash-card/${id}`,
+              params: { words: JSON.stringify(data?.words ?? []) }
+            })}
+          >
+            <Text style={styles.boxText}>Flash Card</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.box}
+            onPress={() => router.push({
+              pathname: `/vocabulary/graft/${id}`,
+              params: { words: JSON.stringify(data?.words ?? []) }
+            })}
+          >
+            <Text style={styles.boxText}>Ghép đôi</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.box}
+            onPress={() => router.push({
+              pathname: `/vocabulary/select-words/${id}`,
+              params: { words: JSON.stringify(data?.words ?? []) }
+            })}
+          >
+            <Text style={styles.boxText}>Chọn từ</Text>
+          </TouchableOpacity>
+        </View>
         {/* Nội dung từ vựng */}
         {data?.words ? (
           <View style={styles.vocabularyList}>
@@ -68,7 +98,8 @@ const styles = StyleSheet.create({
     paddingTop: 60,
   },
   vocabularyList: {
-    marginTop: 20,
+    marginTop: 10,
+    marginBottom: 50,
     padding: 20,
   },
   wordItemContainer: {
@@ -145,7 +176,7 @@ const styles = StyleSheet.create({
   },
   boxText: {
     fontSize: 14,
-    color: "#00BFAE",
+    color: "#0099CC",
     fontWeight: "bold",
     width: "150%",
     textAlign: "center",

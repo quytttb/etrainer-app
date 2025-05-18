@@ -8,6 +8,7 @@ import {
   Alert,
   StyleSheet,
   TouchableOpacity,
+  Image,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
@@ -64,7 +65,8 @@ const LoginScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Đăng Nhập</Text>
+      <Image source={require('../../assets/images/Etrainer_LOGO.png')} style={styles.robotImage} />
+      <Text style={styles.title}>Login</Text>
 
       {/* Input cho Email */}
       <View style={styles.inputContainer}>
@@ -101,7 +103,11 @@ const LoginScreen = () => {
       </View>
 
       {/* Nút Đăng nhập */}
-      <Button title="Đăng nhập" onPress={handleLogin} color="#1abc9c" />
+      <TouchableOpacity onPress={handleLogin} style={styles.btnLogin}>
+      <Button title="Đăng nhập" onPress={handleLogin} color="#0099CC" />
+      </TouchableOpacity>
+
+      {/* Nút Đăng nhập bằng Google */}
 
       {/* Hoặc đăng nhập bằng Google và Facebook */}
       <Text style={styles.orText}>--- OR ---</Text>
@@ -146,6 +152,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#ecf0f1",
   },
+  robotImage: {
+    width: 250,
+    height: 250,
+    marginLeft: 50, 
+    marginRight: 50,
+    marginTop: -150,
+    marginBottom: -25,
+  },
   title: {
     fontSize: 28,
     marginBottom: 20,
@@ -169,6 +183,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     paddingLeft: 10,
   },
+  btnLogin: {
+    marginTop: 15,
+    marginBottom: 15,
+    marginEnd: 70,
+    marginStart: 70,
+    borderRadius: 20,
+    overflow: "hidden",
+  },
   orText: {
     textAlign: "center",
     marginVertical: 10,
@@ -184,7 +206,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   linkText: {
-    color: "#1abc9c",
+    color: "#0099CC",
     fontWeight: "bold",
     fontSize: 16,
   },

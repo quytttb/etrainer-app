@@ -25,14 +25,25 @@ const PlaySoundButton = ({ audioUrl }: IPlaySoundButtonProps) => {
         await sound.unloadAsync();
       }
 
+      // Chuẩn hóa url: nếu là từ điển api thì loại bỏ ký tự đặc biệt, viết thường
+      let url = audioUrl;
+      if (url.includes('dictionaryapi.dev')) {
+        const match = url.match(/\/en\/(.+)\.mp3$/);
+        if (match && match[1]) {
+          const normalized = match[1].toLowerCase().replace(/[^a-z]/g, '');
+          url = `https://api.dictionaryapi.dev/media/pronunciations/en/${normalized}.mp3`;
+        }
+      }
+
       const { sound: newSound } = await Audio.Sound.createAsync(
-        { uri: audioUrl },
+        { uri: url },
         { shouldPlay: true }
       );
 
       setSound(newSound);
     } catch (error) {
-      console.error("Error playing sound:", error);
+      // Có thể show toast hoặc alert nếu muốn
+      // console.error("Error playing sound:", error);
     }
   };
 
@@ -40,7 +51,7 @@ const PlaySoundButton = ({ audioUrl }: IPlaySoundButtonProps) => {
     <TouchableOpacity style={styles.playAudioButton} onPress={playSound}>
       <FontAwesome
         name="volume-up"
-        size={20}
+        size={16}
         color="#fff"
         style={styles.iconLeft}
       />
@@ -55,7 +66,7 @@ const styles = StyleSheet.create({
     top: 30,
   },
   iconLeft: {
-    backgroundColor: "#00BFAE",
+    backgroundColor: "#0099CC",
     borderRadius: 25,
     padding: 8,
   },
