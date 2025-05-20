@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -16,18 +16,20 @@ import { CreateJourney } from "../../components/Journey/CreateJourney";
 const PlanScreen: React.FC = () => {
   const router = useRouter();
   const isFocused = useIsFocused();
+  const [showCreateJourney, setShowCreateJourney] = useState(false);
 
   const {
     data: journeyData,
     isLoading,
     error,
+    refetch,
   } = useQuery({
     queryKey: ["CURRENT_JOURNEY", isFocused],
     queryFn: getCurrentJourney,
   });
 
   const handleContinueJourney = () => {
-    if (journeyData && journeyData.status) {
+    if (journeyData && journeyData.state !== "COMPLETED") {
       const currentStage = journeyData.stages[journeyData.currentStageIndex];
       router.push({
         pathname: "/learningPath",
@@ -41,16 +43,44 @@ const PlanScreen: React.FC = () => {
     }
   };
 
+  const onCreateJourneySuccess = () => {
+    setShowCreateJourney(false);
+    refetch();
+  };
+
   if (isLoading) {
     return (
-      <View style={[styles.container, styles.centerContent]}>
+      <View style={[styles.container, styles.centerContent, { flex: 1 }]}>
         <ActivityIndicator size="large" color="#0099CC" />
         <Text style={styles.loadingText}>Đang tải thông tin lộ trình...</Text>
       </View>
     );
   }
 
-  if (journeyData?.status) {
+  if (showCreateJourney) {
+    return <CreateJourney refetch={onCreateJourneySuccess} />;
+  }
+
+  if (journeyData?.status && journeyData.state === "COMPLETED") {
+    return (
+      <View style={[styles.container, styles.centerContent, { flex: 1 }]}>
+        <View style={styles.journeyHeader}>
+          <Text style={styles.journeyTitle}>Chúc mừng!</Text>
+          <Text style={[styles.scoreText, { marginTop: 10 }]}>
+            Bạn đã hoàn thành lộ trình học tập của mình
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={[styles.continueButton, { backgroundColor: "#0099CC" }]}
+          onPress={() => setShowCreateJourney(true)}
+        >
+          <Text style={styles.continueButtonText}>Xây dựng lộ trình mới</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  if (journeyData?.status && journeyData.state !== "COMPLETED") {
     return (
       <ScrollView
         style={{ flex: 1, backgroundColor: "#fff" }}
@@ -62,7 +92,9 @@ const PlanScreen: React.FC = () => {
           <View style={styles.scoreContainer}>
             <Text style={styles.scoreText}>
               Mục tiêu:{" "}
-              {journeyData.stages[journeyData.currentStageIndex]?.targetScore}{" "}
+              {Math.max(
+                ...journeyData.stages.map((stage) => stage.targetScore)
+              )}{" "}
               điểm TOEIC
             </Text>
           </View>
@@ -122,7 +154,7 @@ const PlanScreen: React.FC = () => {
     );
   }
 
-  return <CreateJourney onJourneyCreated={handleContinueJourney} />;
+  return <CreateJourney refetch={onCreateJourneySuccess} />;
 };
 
 const styles = StyleSheet.create({
@@ -134,6 +166,8 @@ const styles = StyleSheet.create({
   },
   centerContent: {
     justifyContent: "center",
+    alignItems: "center",
+    paddingBottom: 0,
   },
   loadingText: {
     marginTop: 15,

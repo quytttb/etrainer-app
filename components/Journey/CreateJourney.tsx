@@ -5,18 +5,85 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
+import request from "@/api/request";
+import { Question as PracticeQuestion } from "@/components/Practice/type";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-interface CreateJourneyProps {
-  onJourneyCreated: () => void;
+interface StageQuestion {
+  type: string;
+  questionNumber: number;
+  question: PracticeQuestion;
 }
 
-export const CreateJourney: React.FC<CreateJourneyProps> = ({
-  onJourneyCreated,
-}) => {
+interface Day {
+  dayNumber: number;
+  questions: StageQuestion[];
+}
+
+interface Stage {
+  _id: string;
+  minScore: number;
+  targetScore: number;
+  days: Day[];
+}
+
+interface CreateJourneyProps {
+  refetch: () => void;
+}
+
+export const CreateJourney: React.FC<CreateJourneyProps> = ({ refetch }) => {
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
   const [selectedTarget, setSelectedTarget] = useState<number | null>(null);
+  const [stages, setStages] = useState<Stage[]>([]);
+  const [isLoadingStages, setIsLoadingStages] = useState(false);
+  const [stagesError, setStagesError] = useState<Error | null>(null);
+
+  const { mutate: createJourney, isPending: isCreatingJourney } = useMutation({
+    mutationFn: async () => {
+      await request.post("/journeys", {
+        stageIds: stages.map((stage) => stage._id),
+      });
+    },
+    onSuccess: () => {
+      refetch();
+      Alert.alert("Thành công", "Đã tạo lộ trình học mới");
+    },
+    onError: (error) => {
+      console.error("Error creating journey:", error);
+      Alert.alert("Lỗi", "Không thể tạo lộ trình. Vui lòng thử lại sau.");
+    },
+  });
+
+  const handleFetchStages = async () => {
+    if (selectedLevel === null || selectedTarget === null) return;
+
+    setIsLoadingStages(true);
+    setStagesError(null);
+
+    try {
+      const response = await request.get<Stage[]>("/stages", {
+        params: {
+          minScore: selectedLevel,
+          maxScore: selectedTarget,
+        },
+      });
+
+      setStages(Array.isArray(response) ? response : []);
+    } catch (error) {
+      console.error("Error fetching stages:", error);
+      setStagesError(
+        error instanceof Error
+          ? error
+          : new Error("Không thể tải dữ liệu lộ trình")
+      );
+    } finally {
+      setIsLoadingStages(false);
+    }
+  };
 
   return (
     <ScrollView
@@ -122,16 +189,85 @@ export const CreateJourney: React.FC<CreateJourneyProps> = ({
           (selectedLevel === null || selectedTarget === null) &&
             styles.disabledButton,
         ]}
-        onPress={() => {
-          if (selectedLevel !== null && selectedTarget !== null) {
-            console.log("Selected Level:", selectedLevel);
-            console.log("Selected Target:", selectedTarget);
-          }
-        }}
-        disabled={selectedLevel === null || selectedTarget === null}
+        onPress={handleFetchStages}
+        disabled={
+          selectedLevel === null || selectedTarget === null || isLoadingStages
+        }
       >
-        <Text style={styles.buildButtonText}>Xây dựng lộ trình TOEIC</Text>
+        {isLoadingStages ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buildButtonText}>Xây dựng lộ trình TOEIC</Text>
+        )}
       </TouchableOpacity>
+
+      {stagesError && (
+        <Text style={styles.errorText}>
+          Không thể tải dữ liệu lộ trình. Vui lòng thử lại sau.
+        </Text>
+      )}
+
+      {stages.length > 0 && (
+        <View style={styles.stagesContainer}>
+          <Text style={styles.sectionTitle}>
+            Các giai đoạn lộ trình của bạn
+          </Text>
+          {stages.map((stage, index) => (
+            <View key={stage._id} style={styles.stageCard}>
+              <Text style={styles.stageTitle}>Giai đoạn {index + 1}</Text>
+              <View style={styles.stageInfoList}>
+                <View style={styles.stageInfoItem}>
+                  <FontAwesome5 name="flag" size={16} color="#666" />
+                  <Text style={styles.stageInfoText}>
+                    Điểm đầu vào: {stage.minScore}
+                  </Text>
+                </View>
+
+                <View style={styles.stageInfoItem}>
+                  <FontAwesome5 name="bullseye" size={16} color="#666" />
+                  <Text style={styles.stageInfoText}>
+                    Mục tiêu: {stage.targetScore} điểm
+                  </Text>
+                </View>
+
+                <View style={styles.stageInfoItem}>
+                  <FontAwesome5 name="calendar-alt" size={16} color="#666" />
+                  <Text style={styles.stageInfoText}>
+                    {stage.days.length} ngày luyện tập
+                  </Text>
+                </View>
+
+                <View style={styles.stageInfoItem}>
+                  <FontAwesome5 name="tasks" size={16} color="#666" />
+                  <Text style={styles.stageInfoText}>
+                    {`${stage.days.reduce(
+                      (sum, day) => sum + day.questions.length,
+                      0
+                    )} câu hỏi`}
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity style={styles.stageDetailButton}>
+                <Text style={styles.stageDetailButtonText}>Xem chi tiết</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+
+          <TouchableOpacity
+            style={styles.createJourneyButton}
+            onPress={() => createJourney()}
+            disabled={isCreatingJourney}
+          >
+            {isCreatingJourney ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.createJourneyButtonText}>
+                Học theo lộ trình này
+              </Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
     </ScrollView>
   );
 };
@@ -141,13 +277,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingBottom: 100,
   },
   sectionTitle: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#333",
-    marginTop: 25,
+    marginTop: 8,
     alignSelf: "flex-start",
     marginBottom: 5,
   },
@@ -157,12 +293,62 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     alignSelf: "flex-start",
   },
+  stagesContainer: {
+    width: "100%",
+  },
+  stageCard: {
+    backgroundColor: "#fff",
+    borderRadius: 15,
+    padding: 18,
+    width: "100%",
+    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+  },
+  stageTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 15,
+  },
+  stageInfoList: {
+    marginBottom: 15,
+  },
+  stageInfoItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  stageInfoText: {
+    fontSize: 16,
+    color: "#666",
+    marginLeft: 12,
+  },
+  stageDetailButton: {
+    backgroundColor: "#F0F9FF",
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    alignSelf: "flex-end",
+    marginTop: 5,
+    borderWidth: 1,
+    borderColor: "#0099CC",
+  },
+  stageDetailButtonText: {
+    color: "#0099CC",
+    fontSize: 14,
+    fontWeight: "bold",
+  },
   cardsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
     width: "100%",
-    marginBottom: 20,
   },
   levelCard: {
     backgroundColor: "#fff",
@@ -243,7 +429,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
     borderRadius: 25,
     marginTop: 20,
-    marginBottom: 100,
+    marginBottom: 20,
     width: "100%",
     alignItems: "center",
   },
@@ -255,5 +441,31 @@ const styles = StyleSheet.create({
   disabledButton: {
     backgroundColor: "#cccccc",
     opacity: 0.7,
+  },
+  createJourneyButton: {
+    backgroundColor: "#0099CC",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    marginVertical: 20,
+    alignSelf: "center",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  createJourneyButtonText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  errorText: {
+    color: "#ff3b30",
+    fontSize: 14,
+    textAlign: "center",
+    marginVertical: 10,
+    width: "100%",
   },
 });
