@@ -7,11 +7,13 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Modal,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import request from "@/api/request";
 import { Question as PracticeQuestion } from "@/components/Practice/type";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
+import { LESSON_TYPE_MAPPING } from "@/constants/lesson-types";
 
 interface StageQuestion {
   type: string;
@@ -41,6 +43,8 @@ export const CreateJourney: React.FC<CreateJourneyProps> = ({ refetch }) => {
   const [stages, setStages] = useState<Stage[]>([]);
   const [isLoadingStages, setIsLoadingStages] = useState(false);
   const [stagesError, setStagesError] = useState<Error | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
 
   const { mutate: createJourney, isPending: isCreatingJourney } = useMutation({
     mutationFn: async () => {
@@ -91,6 +95,50 @@ export const CreateJourney: React.FC<CreateJourneyProps> = ({ refetch }) => {
       contentContainerStyle={styles.container}
       showsVerticalScrollIndicator={false}
     >
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                {selectedStage &&
+                  `Chi tiết giai đoạn (${selectedStage.minScore} - ${selectedStage.targetScore} điểm)`}
+              </Text>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <FontAwesome5 name="times" size={20} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody}>
+              {selectedStage?.days
+                .sort((a, b) => a.dayNumber - b.dayNumber)
+                .map((day) => (
+                  <View key={day.dayNumber} style={styles.dayCard}>
+                    <Text style={styles.dayTitle}>Ngày {day.dayNumber}</Text>
+                    {day.questions.map((question, idx) => (
+                      <Text key={idx} style={styles.questionItem}>
+                        Câu {question.questionNumber} -{" "}
+                        {LESSON_TYPE_MAPPING[question.type]}
+                      </Text>
+                    ))}
+                  </View>
+                ))}
+            </ScrollView>
+
+            <TouchableOpacity
+              style={styles.closeModalButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.closeModalButtonText}>Đóng</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       <Text style={styles.sectionTitle}>Trình độ hiện tại của bạn</Text>
       <Text style={styles.sectionSubtitle}>
         Chọn một mức điểm phù hợp với trình độ của bạn
@@ -247,7 +295,13 @@ export const CreateJourney: React.FC<CreateJourneyProps> = ({ refetch }) => {
                   </Text>
                 </View>
               </View>
-              <TouchableOpacity style={styles.stageDetailButton}>
+              <TouchableOpacity
+                style={styles.stageDetailButton}
+                onPress={() => {
+                  setSelectedStage(stage);
+                  setModalVisible(true);
+                }}
+              >
                 <Text style={styles.stageDetailButtonText}>Xem chi tiết</Text>
               </TouchableOpacity>
             </View>
@@ -467,5 +521,68 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginVertical: 10,
     width: "100%",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+  },
+  modalContent: {
+    width: "90%",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  modalBody: {
+    maxHeight: 400,
+  },
+  dayCard: {
+    backgroundColor: "#F9F9F9",
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+  },
+  dayTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 10,
+  },
+  questionItem: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 5,
+  },
+  closeModalButton: {
+    backgroundColor: "#0099CC",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    marginTop: 10,
+    alignSelf: "flex-end",
+  },
+  closeModalButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
