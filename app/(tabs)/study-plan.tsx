@@ -29,18 +29,9 @@ const PlanScreen: React.FC = () => {
   });
 
   const handleContinueJourney = () => {
-    if (journeyData && journeyData.state !== "COMPLETED") {
-      const currentStage = journeyData.stages[journeyData.currentStageIndex];
-      router.push({
-        pathname: "/learningPath",
-        params: {
-          stageId: currentStage.stageId,
-          targetScore: currentStage.targetScore,
-        },
-      });
-    } else {
-      router.push("/learningPath");
-    }
+    router.push({
+      pathname: "/journeyStudy",
+    });
   };
 
   const onCreateJourneySuccess = () => {
@@ -63,20 +54,68 @@ const PlanScreen: React.FC = () => {
 
   if (journeyData?.status && journeyData.state === "COMPLETED") {
     return (
-      <View style={[styles.container, styles.centerContent, { flex: 1 }]}>
+      <ScrollView
+        style={{ flex: 1, backgroundColor: "#fff" }}
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.journeyHeader}>
-          <Text style={styles.journeyTitle}>Chúc mừng!</Text>
-          <Text style={[styles.scoreText, { marginTop: 10 }]}>
-            Bạn đã hoàn thành lộ trình học tập của mình
+          <Text style={styles.journeyTitle}>Lộ trình đã hoàn thành</Text>
+          <View style={styles.scoreContainer}>
+            <Text style={styles.scoreText}>
+              Mục tiêu:{" "}
+              {Math.max(
+                ...journeyData.stages.map((stage) => stage.targetScore)
+              )}{" "}
+              điểm TOEIC
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.progressContainer}>
+          <Text style={styles.progressTitle}>Tiến độ hoàn thành</Text>
+          <View style={styles.progressBarContainer}>
+            <View
+              style={[
+                styles.progressBar,
+                { width: `${journeyData.completionRate}%` },
+              ]}
+            />
+          </View>
+          <Text style={styles.progressText}>
+            {journeyData.completionRate}% hoàn thành
           </Text>
         </View>
+
+        <View style={styles.statsContainer}>
+          <View style={styles.statItem}>
+            <Text style={styles.statLabel}>Số ngày đã hoàn thành</Text>
+            <Text style={styles.statValue}>
+              {journeyData.completedDays}/{journeyData.totalDays}
+            </Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statLabel}>Giai đoạn hiện tại</Text>
+            <Text style={styles.statValue}>
+              {journeyData.currentStageIndex + 1}/{journeyData.stages.length}
+            </Text>
+          </View>
+        </View>
+
         <TouchableOpacity
-          style={[styles.continueButton, { backgroundColor: "#0099CC" }]}
+          style={styles.reviewButton}
+          onPress={handleContinueJourney}
+        >
+          <Text style={styles.continueButtonText}>Xem lại lộ trình</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.createNewButton]}
           onPress={() => setShowCreateJourney(true)}
         >
-          <Text style={styles.continueButtonText}>Xây dựng lộ trình mới</Text>
+          <Text style={styles.continueButtonText}>Tạo lộ trình mới</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     );
   }
 
@@ -284,6 +323,24 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   continueButton: {
+    backgroundColor: "#4CAF50",
+    paddingVertical: 15,
+    paddingHorizontal: 25,
+    borderRadius: 25,
+    marginTop: 10,
+    width: "100%",
+    alignItems: "center",
+  },
+  reviewButton: {
+    backgroundColor: "#0099CC",
+    paddingVertical: 15,
+    paddingHorizontal: 25,
+    borderRadius: 25,
+    marginTop: 10,
+    width: "100%",
+    alignItems: "center",
+  },
+  createNewButton: {
     backgroundColor: "#4CAF50",
     paddingVertical: 15,
     paddingHorizontal: 25,

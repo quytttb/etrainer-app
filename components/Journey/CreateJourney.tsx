@@ -11,27 +11,9 @@ import {
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import request from "@/api/request";
-import { Question as PracticeQuestion } from "@/components/Practice/type";
 import { useMutation } from "@tanstack/react-query";
 import { LESSON_TYPE_MAPPING } from "@/constants/lesson-types";
-
-interface StageQuestion {
-  type: string;
-  questionNumber: number;
-  question: PracticeQuestion;
-}
-
-interface Day {
-  dayNumber: number;
-  questions: StageQuestion[];
-}
-
-interface Stage {
-  _id: string;
-  minScore: number;
-  targetScore: number;
-  days: Day[];
-}
+import type { Stage } from "@/types/journey";
 
 interface CreateJourneyProps {
   refetch: () => void;
@@ -40,11 +22,15 @@ interface CreateJourneyProps {
 export const CreateJourney: React.FC<CreateJourneyProps> = ({ refetch }) => {
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
   const [selectedTarget, setSelectedTarget] = useState<number | null>(null);
-  const [stages, setStages] = useState<Stage[]>([]);
+  type CreateStage = Omit<
+    Stage,
+    "started" | "startedAt" | "state" | "completedAt"
+  >;
+  const [stages, setStages] = useState<CreateStage[]>([]);
   const [isLoadingStages, setIsLoadingStages] = useState(false);
   const [stagesError, setStagesError] = useState<Error | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
+  const [selectedStage, setSelectedStage] = useState<CreateStage | null>(null);
 
   const { mutate: createJourney, isPending: isCreatingJourney } = useMutation({
     mutationFn: async () => {
@@ -69,7 +55,9 @@ export const CreateJourney: React.FC<CreateJourneyProps> = ({ refetch }) => {
     setStagesError(null);
 
     try {
-      const response = await request.get<Stage[]>("/stages", {
+      const response = await request.get<
+        Array<Omit<Stage, "started" | "startedAt" | "state" | "completedAt">>
+      >("/stages", {
         params: {
           minScore: selectedLevel,
           maxScore: selectedTarget,
