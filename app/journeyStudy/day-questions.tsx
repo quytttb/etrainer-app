@@ -46,6 +46,8 @@ export default function DayQuestionsScreen() {
 
   const [allCompleted, setAllCompleted] = useState<boolean>(false);
 
+  const audioRef = useRef<any>(null);
+
   // Explanation modal state
   const [showExplanation, setShowExplanation] = useState(false);
   const [activeTab, setActiveTab] = useState("explanation");
@@ -218,6 +220,7 @@ export default function DayQuestionsScreen() {
       onSubmit: () => handleCompleteType(activeType),
       onBack: () => router.back(),
       toggleExplanation: toggleExplanation,
+      ref: audioRef,
     };
 
     switch (activeType) {
@@ -380,7 +383,10 @@ export default function DayQuestionsScreen() {
                 type === activeType && styles.activeTypeButton,
                 completedTypes[type] && styles.completedTypeButton,
               ]}
-              onPress={() => setActiveType(type as LESSON_TYPE)}
+              onPress={async () => {
+                await audioRef.current?.reset();
+                setActiveType(type as LESSON_TYPE);
+              }}
             >
               <Text
                 style={[
