@@ -116,7 +116,18 @@ export const StageJourney: React.FC<StageJourneyProps> = () => {
                     day.completed && styles.completedDayCard,
                     day.started && styles.currentDayCard,
                   ]}
-                  disabled={!day.completed}
+                  disabled={!day.started}
+                  onPress={() =>
+                    day.started &&
+                    router.push({
+                      pathname: "/journeyStudy/day-questions",
+                      params: {
+                        dayId: day._id,
+                        stageIndex: stageIndex,
+                        dayNumber: day.dayNumber,
+                      },
+                    })
+                  }
                 >
                   <View style={styles.dayCardContent}>
                     <View style={styles.dayInfo}>
