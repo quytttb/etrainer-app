@@ -215,13 +215,23 @@ export default function DayQuestionsScreen() {
     if (!activeType || !questionsByType[activeType]) return null;
 
     const questions = questionsByType[activeType];
-    const props = {
+    const props: any = {
       questions: questions,
       onSubmit: () => handleCompleteType(activeType),
       onBack: () => router.back(),
       toggleExplanation: toggleExplanation,
-      ref: audioRef,
     };
+
+    if (
+      [
+        LESSON_TYPE.IMAGE_DESCRIPTION,
+        LESSON_TYPE.ASK_AND_ANSWER,
+        LESSON_TYPE.CONVERSATION_PIECE,
+        LESSON_TYPE.SHORT_TALK,
+      ].includes(activeType)
+    ) {
+      props.ref = audioRef;
+    }
 
     switch (activeType) {
       case LESSON_TYPE.IMAGE_DESCRIPTION:
