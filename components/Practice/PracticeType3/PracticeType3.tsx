@@ -11,7 +11,10 @@ interface PracticeType3Props {
   onSubmit?: (questionAnswers: any[]) => void;
   isViewMode?: boolean;
   questionId?: string;
-  toggleExplanation?: any;
+  toggleExplanation?: (data?: {
+    subtitle: string;
+    explanation: string;
+  }) => void;
 }
 
 const PracticeType3 = ({

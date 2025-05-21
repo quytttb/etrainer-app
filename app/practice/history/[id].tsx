@@ -28,7 +28,6 @@ const PracticeHistory = () => {
   const [showExplanation, setShowExplanation] = useState(false);
   const [activeTab, setActiveTab] = useState("explanation");
   const translateYAnim = useRef(new Animated.Value(500)).current;
-  const overlayOpacity = useRef(new Animated.Value(0)).current;
   const [explanationData, setExplanationData] = useState({
     subtitle: "",
     explanation: "",
@@ -39,21 +38,13 @@ const PracticeHistory = () => {
     explanation: string;
   }) => {
     const toValue = showExplanation ? 500 : 0;
-    const opacityValue = showExplanation ? 0 : 1;
 
-    Animated.parallel([
-      Animated.spring(translateYAnim, {
-        toValue,
-        useNativeDriver: true,
-        friction: 8,
-        tension: 40,
-      }),
-      Animated.timing(overlayOpacity, {
-        toValue: opacityValue,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    Animated.spring(translateYAnim, {
+      toValue,
+      useNativeDriver: true,
+      friction: 8,
+      tension: 40,
+    }).start();
 
     setShowExplanation(!showExplanation);
     data && setExplanationData(data);

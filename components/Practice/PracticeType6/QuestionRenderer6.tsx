@@ -161,12 +161,14 @@ const QuestionRenderer6 = ({
             <Ionicons name="chevron-back" size={28} color="white" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Câu {currentQuestionIndex + 1}</Text>
-          <TouchableOpacity
-            style={{ marginLeft: "auto" }}
-            onPress={() => toggleExplanation(currentQuestion)}
-          >
-            <Text style={styles.submitExamTxt}>Giải thích</Text>
-          </TouchableOpacity>
+          {toggleExplanation && (
+            <TouchableOpacity
+              style={{ marginLeft: "auto" }}
+              onPress={() => toggleExplanation(currentQuestion)}
+            >
+              <Text style={styles.submitExamTxt}>Giải thích</Text>
+            </TouchableOpacity>
+          )}
         </View>
       )}
 
