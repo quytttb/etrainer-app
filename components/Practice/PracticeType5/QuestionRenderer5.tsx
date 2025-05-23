@@ -163,12 +163,14 @@ const QuestionRenderer5 = ({
             Câu {currentQuestionIndex + 1} / {questionList.length}
           </Text>
 
-          <TouchableOpacity
-            style={{ marginLeft: "auto" }}
-            onPress={() => toggleExplanation(currentQuestion)}
-          >
-            <Text style={styles.submitExamTxt}>Giải thích</Text>
-          </TouchableOpacity>
+          {toggleExplanation && (
+            <TouchableOpacity
+              style={{ marginLeft: "auto" }}
+              onPress={() => toggleExplanation(currentQuestion)}
+            >
+              <Text style={styles.submitExamTxt}>Giải thích</Text>
+            </TouchableOpacity>
+          )}
         </View>
       )}
 
