@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Formik } from "formik";
 import { AudioPlayerRef } from "@/components/AudioPlayer/AudioPlayer";
@@ -11,17 +17,23 @@ interface PracticeType1Props {
   onSubmit?: (questionAnswers: any[]) => void;
   isViewMode?: boolean;
   questionId?: string;
-  toggleExplanation: (data?: { subtitle: string; explanation: string }) => void;
+  toggleExplanation?: (data?: {
+    subtitle: string;
+    explanation: string;
+  }) => void;
 }
 
-const PracticeType1 = ({
-  questions,
-  onBack,
-  onSubmit,
-  isViewMode,
-  questionId,
-  toggleExplanation,
-}: PracticeType1Props) => {
+const PracticeType1 = (
+  {
+    questions,
+    onBack,
+    onSubmit,
+    isViewMode,
+    questionId,
+    toggleExplanation,
+  }: PracticeType1Props,
+  ref: any
+) => {
   const questionList = questions;
   const audioPlayerRef = useRef<AudioPlayerRef>(null);
   const navigation = useNavigation();
@@ -30,6 +42,12 @@ const PracticeType1 = ({
   questionList.forEach((q) => {
     initialValues[`question_${q._id}`] = q.userAnswer || "";
   });
+
+  useImperativeHandle(ref, () => ({
+    reset: () => {
+      return audioPlayerRef.current?.reset();
+    },
+  }));
 
   // const validationSchema = Yup.object().shape(
   //   questionList.reduce((schema, q) => {
@@ -140,4 +158,4 @@ const PracticeType1 = ({
   );
 };
 
-export default PracticeType1;
+export default forwardRef(PracticeType1);

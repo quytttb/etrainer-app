@@ -10,7 +10,7 @@ interface PracticeType5Props {
   onSubmit?: (questionAnswers: any[]) => void;
   isViewMode?: boolean;
   questionId?: string;
-  toggleExplanation: any;
+  toggleExplanation?: any;
 }
 
 const PracticeType5 = ({
