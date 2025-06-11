@@ -7,7 +7,7 @@ import {
   ScrollView,
   Image,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter } from "expo-router"; 
 import useProfile from "@/hooks/useProfile";
 import { useQuery } from "@tanstack/react-query";
 import { getNotificationService } from "./service";

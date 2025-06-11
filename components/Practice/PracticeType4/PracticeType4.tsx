@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Formik } from "formik";
 import QuestionRenderer4 from "./QuestionRenderer4";
 import { Question } from "../type";
+import AudioManager from "@/app/journeyNew/utils/AudioManager";
 
 interface PracticeType4Props {
   questions: Question[];
@@ -74,16 +75,32 @@ const PracticeType4 = ({
           }
         }, [questionId]);
 
-        const goToNextQuestion = () => {
+        const goToNextQuestion = async () => {
           if (currentQuestionIndex < questionList.length - 1) {
+            // ✅ FIX: Pause all audio khi chuyển câu hỏi theo đề xuất của user
+            try {
+              await AudioManager.pauseAllAudio();
+              console.log('🎵 Audio paused when going to next question in Practice');
+            } catch (error) {
+              console.error('❌ Error pausing audio:', error);
+            }
+
             setCurrentQuestionIndex(currentQuestionIndex + 1);
           } else {
             handleSubmit();
           }
         };
 
-        const goToPrevQuestion = () => {
+        const goToPrevQuestion = async () => {
           if (currentQuestionIndex > 0) {
+            // ✅ FIX: Pause all audio khi chuyển câu hỏi theo đề xuất của user
+            try {
+              await AudioManager.pauseAllAudio();
+              console.log('🎵 Audio paused when going to previous question in Practice');
+            } catch (error) {
+              console.error('❌ Error pausing audio:', error);
+            }
+
             setCurrentQuestionIndex(currentQuestionIndex - 1);
           }
         };

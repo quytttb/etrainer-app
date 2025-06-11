@@ -10,6 +10,7 @@ import { Formik } from "formik";
 import { AudioPlayerRef } from "@/components/AudioPlayer/AudioPlayer";
 import QuestionRenderer from "./QuestionRenderer";
 import { Question } from "../type";
+import AudioManager from "@/app/journeyNew/utils/AudioManager";
 
 interface PracticeType3Props {
   questions: Question[];
@@ -76,6 +77,9 @@ const PracticeType3 = (
   };
 
   const onFormSubmit = async (values: Record<string, string>) => {
+    // ✅ FIX: Reset audio player trước khi submit
+    await audioPlayerRef.current?.reset();
+
     const payload = questionList.map((it) => {
       const questions = it.questions.map((subQ) => {
         const userAnswer = values[`question_${it._id}_${subQ._id}`];
@@ -130,6 +134,14 @@ const PracticeType3 = (
 
         const goToNextQuestion = async () => {
           if (currentQuestionIndex < questionList.length - 1) {
+            // ✅ FIX: Pause all audio khi chuyển câu hỏi theo đề xuất của user
+            try {
+              await AudioManager.pauseAllAudio();
+              console.log('🎵 Audio paused when going to next question in Practice');
+            } catch (error) {
+              console.error('❌ Error pausing audio:', error);
+            }
+
             if (audioPlayerRef.current) {
               await audioPlayerRef.current.reset();
             }
@@ -141,6 +153,14 @@ const PracticeType3 = (
 
         const goToPrevQuestion = async () => {
           if (currentQuestionIndex > 0) {
+            // ✅ FIX: Pause all audio khi chuyển câu hỏi theo đề xuất của user
+            try {
+              await AudioManager.pauseAllAudio();
+              console.log('🎵 Audio paused when going to previous question in Practice');
+            } catch (error) {
+              console.error('❌ Error pausing audio:', error);
+            }
+
             if (audioPlayerRef.current) {
               await audioPlayerRef.current.reset();
             }

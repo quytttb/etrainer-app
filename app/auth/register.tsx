@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  Button,
   Alert,
   View,
   TextInput,
@@ -17,12 +16,11 @@ import { FontAwesome } from "@expo/vector-icons";
 const RegisterScreen = () => {
   const router = useRouter();
 
-  // States để lưu thông tin đăng ký
-  const [name, setName] = useState<string>("" as string); // Họ và tên
-  const [email, setEmail] = useState<string>(""); // Email
-  const [phone, setPhone] = useState<string>("" as string); // Số điện thoại
-  const [password, setPassword] = useState<string>("" as string); // Mật khẩu
-  const [confirmPassword, setConfirmPassword] = useState<string>("" as string); // Xác nhận mật khẩu
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const registerMutation = useMutation({
     mutationFn: registerService,
@@ -32,31 +30,35 @@ const RegisterScreen = () => {
     },
     onError: (error: any) => {
       console.error("Lỗi khi đăng ký:", error);
-      const errorMessage =
-        error.response?.data?.message || "Có lỗi xảy ra. Vui lòng thử lại.";
+
+      let errorMessage = "Có lỗi xảy ra. Vui lòng thử lại.";
+
+      if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
       Alert.alert("Lỗi", errorMessage);
     },
   });
 
-  // Hàm xử lý khi người dùng đăng ký
   const handleRegister = async () => {
-    // Kiểm tra tất cả các trường có được nhập đúng hay không
     if (!name || !email || !phone || !password || !confirmPassword) {
       Alert.alert("Lỗi", "Vui lòng điền đầy đủ thông tin");
       return;
     }
 
-    // Kiểm tra mật khẩu và xác nhận mật khẩu có khớp không
     if (password !== confirmPassword) {
       Alert.alert("Lỗi", "Mật khẩu và xác nhận mật khẩu không khớp");
       return;
     }
 
     registerMutation.mutate({
-      name: name,
-      email: email,
-      phone: phone,
-      password: password,
+      name,
+      email,
+      phone,
+      password,
     });
   };
 
@@ -67,13 +69,10 @@ const RegisterScreen = () => {
         style={styles.LogoImage}
       />
       <Text style={styles.title}>Register</Text>
+
+      {/* Họ và tên */}
       <View style={styles.inputContainer}>
-        <FontAwesome
-          name="user"
-          size={20}
-          color="#333"
-          style={styles.inputIcon}
-        />
+        <FontAwesome name="user" size={20} color="#333" style={styles.inputIcon} />
         <TextInput
           placeholder="Họ và tên"
           value={name}
@@ -81,13 +80,10 @@ const RegisterScreen = () => {
           style={styles.input}
         />
       </View>
+
+      {/* Email */}
       <View style={styles.inputContainer}>
-        <FontAwesome
-          name="envelope"
-          size={20}
-          color="#333"
-          style={styles.inputIcon}
-        />
+        <FontAwesome name="envelope" size={20} color="#333" style={styles.inputIcon} />
         <TextInput
           placeholder="Email"
           value={email}
@@ -96,13 +92,10 @@ const RegisterScreen = () => {
           keyboardType="email-address"
         />
       </View>
+
+      {/* Số điện thoại */}
       <View style={styles.inputContainer}>
-        <FontAwesome
-          name="phone"
-          size={20}
-          color="#333"
-          style={styles.inputIcon}
-        />
+        <FontAwesome name="phone" size={20} color="#333" style={styles.inputIcon} />
         <TextInput
           placeholder="Số điện thoại"
           value={phone}
@@ -111,13 +104,10 @@ const RegisterScreen = () => {
           keyboardType="phone-pad"
         />
       </View>
+
+      {/* Mật khẩu */}
       <View style={styles.inputContainer}>
-        <FontAwesome
-          name="lock"
-          size={20}
-          color="#333"
-          style={styles.inputIcon}
-        />
+        <FontAwesome name="lock" size={20} color="#333" style={styles.inputIcon} />
         <TextInput
           placeholder="Mật khẩu"
           value={password}
@@ -126,13 +116,10 @@ const RegisterScreen = () => {
           style={styles.input}
         />
       </View>
+
+      {/* Xác nhận mật khẩu */}
       <View style={styles.inputContainer}>
-        <FontAwesome
-          name="lock"
-          size={20}
-          color="#333"
-          style={styles.inputIcon}
-        />
+        <FontAwesome name="lock" size={20} color="#333" style={styles.inputIcon} />
         <TextInput
           placeholder="Xác nhận mật khẩu"
           value={confirmPassword}
@@ -143,11 +130,11 @@ const RegisterScreen = () => {
       </View>
 
       {/* Nút đăng ký */}
-
       <TouchableOpacity onPress={handleRegister} style={styles.regisButton}>
         <Text style={styles.regisButtonText}>Register</Text>
       </TouchableOpacity>
 
+      {/* Đường dẫn đến đăng nhập */}
       <View style={styles.linksContainer}>
         <Text
           style={styles.linkText}
@@ -167,10 +154,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   LogoImage: {
-    width: 150,
-    height: 150,
+    width: 250,
+    height: 250,
     alignSelf: "center",
-    marginBottom: 20,
+    marginBottom: -30,
   },
   inputIcon: {
     marginRight: 10,

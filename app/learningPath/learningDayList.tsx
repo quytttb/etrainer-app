@@ -51,7 +51,7 @@ export default function LearningPathScreen() {
 
   // Sử dụng AppState để unlock ngày tiếp theo khi quay lại màn hình này
   React.useEffect(() => {
-    const unsubscribe = () => {};
+    const unsubscribe = () => { };
     const handleFocus = () => {
       setDays(prev => {
         const newDays = [...prev];
@@ -94,9 +94,19 @@ export default function LearningPathScreen() {
     });
   };
 
+  // Test function for new exam component
+  const handleTestNewExam = () => {
+    router.push('/learningPath/exam/0'); // Test with stage index 0
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Lộ trình học Toeic của bạn</Text>
+
+      {/* TEST BUTTON - Remove this after testing */}
+      <TouchableOpacity style={styles.testButton} onPress={handleTestNewExam}>
+        <Text style={styles.testButtonText}>🧪 TEST - Bài Test Mới (Giai đoạn 1)</Text>
+      </TouchableOpacity>
 
       {/* Thống kê */}
       <View style={styles.statsContainer}>
@@ -151,6 +161,18 @@ export default function LearningPathScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 12, backgroundColor: '#fff' },
   title: { fontSize: 22, fontWeight: 'bold', marginBottom: 12 },
+  testButton: {
+    backgroundColor: '#FF6B35',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 15,
+    alignItems: 'center',
+  },
+  testButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   statsContainer: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 12 },
   statItem: { alignItems: 'center' },
   statPercent: { fontSize: 18, fontWeight: '600' },

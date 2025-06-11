@@ -1,16 +1,21 @@
 import React from "react";
+import { View, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { FontAwesome } from "@expo/vector-icons";
-import { View, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { useTranslation } from "react-i18next";
 import HomeScreen from "./home";
 import ChatScreen from "./chatAI";
 import StudyPlanScreen from "./study-plan";
-import ProfileScreen from "./profile";
+import JourneyNewTabScreen from "./journey-new";
+import ProfileScreen from "./setting";
 import Exam from "./exam";
+import "../i18n/index";
 
 const Tab = createBottomTabNavigator();
 
 export default function App() {
+  const { t } = useTranslation();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -38,7 +43,7 @@ export default function App() {
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="home" size={size} color={color} />
           ),
-          tabBarLabel: "Trang chủ",
+          tabBarLabel: t("navigation.home"),
         }}
       />
       <Tab.Screen
@@ -48,7 +53,7 @@ export default function App() {
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="pencil" size={size} color={color} />
           ),
-          tabBarLabel: "Thi",
+          tabBarLabel: t("navigation.exam"),
         }}
       />
       <Tab.Screen
@@ -74,7 +79,17 @@ export default function App() {
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="calendar" size={size} color={color} />
           ),
-          tabBarLabel: "Lộ trình",
+          tabBarLabel: t("navigation.studyPlan"),
+        }}
+      />
+      <Tab.Screen
+        name="journey-new"
+        component={JourneyNewTabScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome name="map" size={size} color={color} />
+          ),
+          tabBarLabel: t("navigation.journey"),
         }}
       />
       <Tab.Screen
@@ -84,7 +99,7 @@ export default function App() {
           tabBarIcon: ({ color, size }) => (
             <FontAwesome name="user" size={size} color={color} />
           ),
-          tabBarLabel: "Cá nhân",
+          tabBarLabel: t("navigation.settings"),
         }}
       />
     </Tab.Navigator>

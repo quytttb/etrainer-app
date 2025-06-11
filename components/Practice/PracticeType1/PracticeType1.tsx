@@ -10,6 +10,7 @@ import { Formik } from "formik";
 import { AudioPlayerRef } from "@/components/AudioPlayer/AudioPlayer";
 import QuestionRenderer from "./QuestionRenderer";
 import { Question } from "../type";
+import AudioManager from "@/app/journeyNew/utils/AudioManager";
 
 interface PracticeType1Props {
   questions: Question[];
@@ -59,6 +60,7 @@ const PracticeType1 = (
   // );
 
   const handleBack = async () => {
+    // ✅ FIX: Reset audio player trước khi back
     await audioPlayerRef.current?.reset();
 
     if (onBack) onBack();
@@ -66,6 +68,9 @@ const PracticeType1 = (
   };
 
   const onFormSubmit = async (values: Record<string, string>) => {
+    // ✅ FIX: Reset audio player trước khi submit
+    await audioPlayerRef.current?.reset();
+
     const payload = questionList.map((it) => {
       const userAnswer = values[`question_${it._id}`];
       const correctAnswer = it.answers.find((ans) => ans.isCorrect);
@@ -113,6 +118,14 @@ const PracticeType1 = (
 
         const goToNextQuestion = async () => {
           if (currentQuestionIndex < questionList.length - 1) {
+            // ✅ FIX: Pause all audio khi chuyển câu hỏi theo đề xuất của user
+            try {
+              await AudioManager.pauseAllAudio();
+              console.log('🎵 Audio paused when going to next question in Practice');
+            } catch (error) {
+              console.error('❌ Error pausing audio:', error);
+            }
+
             if (audioPlayerRef.current) {
               await audioPlayerRef.current.reset();
             }
@@ -124,6 +137,14 @@ const PracticeType1 = (
 
         const goToPrevQuestion = async () => {
           if (currentQuestionIndex > 0) {
+            // ✅ FIX: Pause all audio khi chuyển câu hỏi theo đề xuất của user
+            try {
+              await AudioManager.pauseAllAudio();
+              console.log('🎵 Audio paused when going to previous question in Practice');
+            } catch (error) {
+              console.error('❌ Error pausing audio:', error);
+            }
+
             if (audioPlayerRef.current) {
               await audioPlayerRef.current.reset();
             }

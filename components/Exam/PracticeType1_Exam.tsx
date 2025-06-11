@@ -4,6 +4,7 @@ import { Formik } from "formik";
 import { AudioPlayerRef } from "@/components/AudioPlayer/AudioPlayer";
 import QuestionRenderer from "@/components/Practice/PracticeType1/QuestionRenderer";
 import { Question } from "@/components/Practice/type";
+import AudioManager from "@/app/journeyNew/utils/AudioManager";
 
 interface PracticeType1ExamProps {
   questions: Question[];
@@ -96,6 +97,14 @@ const PracticeType1_Exam = ({
 
         const goToNextQuestion = async () => {
           if (currentQuestionIndex < questionList.length - 1) {
+            // ✅ FIX: Pause all audio khi chuyển câu hỏi theo đề xuất của user 
+            try {
+              await AudioManager.pauseAllAudio();
+              console.log('🎵 Audio paused when going to next question in Exam');
+            } catch (error) {
+              console.error('❌ Error pausing audio:', error);
+            }
+
             if (audioPlayerRef.current) {
               await audioPlayerRef.current.reset();
             }
@@ -107,6 +116,14 @@ const PracticeType1_Exam = ({
         };
 
         const goToPrevQuestion = async () => {
+          // ✅ FIX: Pause all audio khi chuyển câu hỏi theo đề xuất của user
+          try {
+            await AudioManager.pauseAllAudio();
+            console.log('🎵 Audio paused when going to previous question in Exam');
+          } catch (error) {
+            console.error('❌ Error pausing audio:', error);
+          }
+
           if (audioPlayerRef.current) {
             await audioPlayerRef.current.reset();
           }

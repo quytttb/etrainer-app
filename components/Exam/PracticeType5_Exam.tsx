@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Formik } from "formik";
 import QuestionRenderer5 from "@/components/Practice/PracticeType5/QuestionRenderer5";
 import { Question } from "@/components/Practice/type";
+import AudioManager from "@/app/journeyNew/utils/AudioManager";
 
 interface PracticeType5ExamProps {
   questions: Question[];
@@ -88,8 +89,14 @@ const PracticeType5_Exam = ({
           onValuesChange?.(payload);
         }, [values, onValuesChange]);
 
-        const goToNextQuestion = () => {
+        const goToNextQuestion = async () => {
           if (currentQuestionIndex < questionList.length - 1) {
+            try {
+              await AudioManager.pauseAllAudio();
+              console.log('🎵 Audio paused when going to next question in Exam');
+            } catch (error) {
+              console.error('❌ Error pausing audio:', error);
+            }
             setCurrentQuestionIndex(currentQuestionIndex + 1);
             onQuestionIndexChange?.(currentQuestionIndex + 1);
           } else {
@@ -97,12 +104,17 @@ const PracticeType5_Exam = ({
           }
         };
 
-        const goToPrevQuestion = () => {
+        const goToPrevQuestion = async () => {
+          try {
+            await AudioManager.pauseAllAudio();
+            console.log('🎵 Audio paused when going to previous question in Exam');
+          } catch (error) {
+            console.error('❌ Error pausing audio:', error);
+          }
           if (currentQuestionIndex > 0) {
             setCurrentQuestionIndex(currentQuestionIndex - 1);
             onQuestionIndexChange?.(currentQuestionIndex - 1);
           } else {
-            // Khi ở câu đầu tiên, gọi onBack để quay lại màn intro
             if (onBack) onBack();
           }
         };
