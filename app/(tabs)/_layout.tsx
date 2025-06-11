@@ -1,12 +1,13 @@
 import React from "react";
+import { View, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { FontAwesome } from "@expo/vector-icons";
-import { View, TouchableOpacity, StyleSheet, Image } from "react-native";
 import HomeScreen from "./home";
 import ChatScreen from "./chatAI";
 import StudyPlanScreen from "./study-plan";
-import ProfileScreen from "./profile";
+import ProfileScreen from "./setting";
 import Exam from "./exam";
+import "../i18n/index";
 
 const Tab = createBottomTabNavigator();
 

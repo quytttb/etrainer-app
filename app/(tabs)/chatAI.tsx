@@ -50,7 +50,7 @@ interface ApiErrorDetail {
 const API_BASE_URL =
   typeof window !== "undefined" && window.location && window.location.hostname
     ? `http://${window.location.hostname}:8001`
-    : "http://10.0.2.2:8001"; // Android emulator dùng 10.0.2.2
+    : "http://172.20.10.2:8001"; 
 
 const ChatScreen: React.FC = () => {
   const router = useRouter();
@@ -78,12 +78,12 @@ const ChatScreen: React.FC = () => {
     if (userName) {
       setMessages([
         { id: 'initial-1', sender: 'ChatBot', text: `Hi ${userName}!` },
-        { id: 'initial-2', sender: 'ChatBot', text: 'How can I help you? Try "/studyplan [topic]" or ask "chức năng".' },
+        { id: 'initial-2', sender: 'ChatBot', text: 'How can I help you?' },
       ]);
     } else {
       setMessages([
         { id: 'initial-loading', sender: 'ChatBot', text: 'Loading user information...' },
-        { id: 'initial-2', sender: 'ChatBot', text: 'How can I help you? Try "/studyplan [topic]" or ask "chức năng".' },
+        { id: 'initial-2', sender: 'ChatBot', text: 'How can I help you?' },
       ]);
     }
   }, [userName]);
@@ -158,12 +158,30 @@ const ChatScreen: React.FC = () => {
   // --- Xử lý gửi tin nhắn và gọi API ---
   const addMessageToList = (sender: 'User' | 'ChatBot', text: string): void => {
     // Đảm bảo text không phải là null hoặc undefined trước khi thêm
-    const messageText = text ?? "No response or error."; // Hiển thị một thông báo mặc định nếu text là null/undefined
-    console.log(`Adding message to UI: Sender=${sender}, Text="${messageText}"`); // DEBUG
+    const messageText = text ?? "No response or error.";
+    // Nếu là object (ví dụ API trả về {content: "..."}), lấy content và loại bỏ các trường phụ
+    let displayText = messageText;
+    if (
+      typeof messageText === "object" &&
+      messageText !== null
+    ) {
+      // Nếu có trường content thì lấy content
+      if ("content" in messageText && typeof (messageText as any).content === "string") {
+        displayText = (messageText as any).content;
+      } else {
+        // Loại bỏ các trường phụ như type, agent_type khi stringify
+        const { type, agent_type, ...rest } = messageText as any;
+        displayText = JSON.stringify(rest, null, 2);
+      }
+    }
+    // Thay thế \n bằng xuống dòng thực tế cho React Native
+    if (typeof displayText === "string") {
+      displayText = displayText.replace(/\\n/g, "\n");
+    }
     const newMessage: Message = {
-      id: `${Date.now()}_${Math.random()}`.replace('.','_'), // Thay . bằng _ để id hợp lệ hơn
+      id: `${Date.now()}_${Math.random()}`.replace('.','_'),
       sender,
-      text: messageText,
+      text: displayText,
     };
     setMessages((prev) => [...prev, newMessage]);
   };
@@ -210,13 +228,24 @@ const ChatScreen: React.FC = () => {
     setIsLoading(true);
     try {
       console.log(`Requesting text correction for: "${text}"`); // DEBUG
-      const response = await axios.post<CorrectEnglishResponse>(
-        `${API_BASE_URL}/correct_english`,
+      // Đổi endpoint đúng với backend FastAPI (nên là /api/process)
+      const response = await axios.post(
+        `${API_BASE_URL}/api/process`,
         { text }
       );
       console.log("Text Correction API Response Data:", JSON.stringify(response.data, null, 2)); // DEBUG
-      const correctedText = response.data.result;
-       if (correctedText && correctedText.trim() !== "") {
+      let correctedText = response.data;
+      // Nếu response là object và có trường result thì lấy ra
+      if (typeof correctedText === "object" && correctedText !== null) {
+        if (correctedText.result) {
+          correctedText = correctedText.result;
+        } else if (correctedText.message) {
+          correctedText = correctedText.message;
+        } else {
+          correctedText = JSON.stringify(correctedText, null, 2);
+        }
+      }
+      if (correctedText && correctedText.toString().trim() !== "") {
         addMessageToList('ChatBot', correctedText);
       } else {
         addMessageToList('ChatBot', "No correction provided or the result is empty.");
@@ -236,6 +265,38 @@ const ChatScreen: React.FC = () => {
     setCurrentMessage(""); 
 
     const lowerCaseMessage = trimmedMessage.toLowerCase();
+
+    // Nếu người dùng chào AI thì AI chỉ chào lại, không phân tích yêu cầu
+    if (
+      lowerCaseMessage === "hi" ||
+      lowerCaseMessage === "hello" ||
+      lowerCaseMessage === "xin chào" ||
+      lowerCaseMessage === "chào" ||
+      lowerCaseMessage === "chào ai" ||
+      lowerCaseMessage === "hello ai" ||
+      lowerCaseMessage === "hi ai"
+    ) {
+      addMessageToList('ChatBot', `Hi ${userName || ""}! 👋`);
+      return;
+    }
+
+    // 1. Thử lấy thông tin từ cơ sở dữ liệu trước
+    setIsLoading(true);
+    try {
+      const dbRes = await axios.post(
+        `${API_BASE_URL}/db_search`,
+        { text: trimmedMessage }
+      );
+      // Nếu có kết quả từ DB (giả sử trả về {found: true, answer: "..."} hoặc {found: false})
+      if (dbRes.data && dbRes.data.found && dbRes.data.answer) {
+        addMessageToList('ChatBot', dbRes.data.answer);
+        setIsLoading(false);
+        return;
+      }
+    } catch (err) {
+      // Nếu lỗi DB thì vẫn tiếp tục cho model trả lời
+      console.warn("DB search error, fallback to model.", err);
+    }
 
     if (
       lowerCaseMessage.includes("chức năng") ||
@@ -276,6 +337,7 @@ const ChatScreen: React.FC = () => {
     } else {
       await processTextCorrectionRequest(trimmedMessage);
     }
+    setIsLoading(false);
   };
 
   // --- Xử lý giao diện ---

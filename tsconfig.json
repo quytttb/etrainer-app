@@ -5,6 +5,7 @@
     "moduleResolution": "bundler",
     "jsx": "react",
     "resolveJsonModule": true,
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
       "@/*": [

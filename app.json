@@ -40,7 +40,8 @@
           "icon": "./assets/images/diary.png",
           "color": "#ffffff"
         }
-      ]
+      ],
+      "expo-facebook"
     ],
     "experiments": {
       "typedRoutes": true

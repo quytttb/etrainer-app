@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Text,
   View,
@@ -61,33 +61,75 @@ const QuestionRenderer = ({
 
   const combineStyles = (
     ...styles: (object | boolean | null | undefined)[]
-  ) => {
-    return styles.filter(Boolean) as object[];
-  };
+  ) => styles.filter(Boolean) as object[];
 
   const getAnswerButtonStyle = (option: IAnswer) => {
-    const isSelected = values[`question_${currentQuestion._id}`] === option._id;
-    const isCorrectAnswer = option.isCorrect;
-    const userHasAnswered = !!values[`question_${currentQuestion._id}`];
-    const showCorrectAnswer =
-      (userHasAnswered || isViewMode) && isCorrectAnswer;
-    const isWrongAnswer =
-      userHasAnswered && isSelected && !isCorrectAnswer && showWrongAnswer;
+    const selected = values[`question_${currentQuestion._id}`] === option._id;
+    const correct = option.isCorrect;
+    const answered = !!values[`question_${currentQuestion._id}`];
+    const showCorrect = (answered || isViewMode) && correct;
+    const wrongSelected =
+      answered && selected && !correct && showWrongAnswer;
 
     return combineStyles(
       styles.answerButton,
-      isWrongAnswer && styles.selectedWrongAnswer,
-      ((showCorrectAnswer && showWrongAnswer) ||
-        (isSelected && !showWrongAnswer)) &&
+      wrongSelected && styles.selectedWrongAnswer,
+      ((showCorrect && showWrongAnswer) || (selected && !showWrongAnswer)) &&
         styles.correctAnswer
     );
+  };
+
+  // ✅ 1. State lưu các câu đã yêu thích
+  const [favoriteMap, setFavoriteMap] = useState<{ [questionId: string]: boolean }>({});
+  const userId = "demo-user-id"; // TODO: lấy từ context/auth
+
+  // ✅ 2. Lấy trạng thái yêu thích từ server khi chuyển câu
+  useEffect(() => {
+    const fetchFavoriteStatus = async () => {
+      try {
+        const response = await fetch(
+          `http://197.187.3.102/api/favorite/status?userId=${userId}&questionId=${currentQuestion._id}`
+        );
+        const data = await response.json();
+        setFavoriteMap((prev) => ({
+          ...prev,
+          [currentQuestion._id]: data.isFavorite,
+        }));
+      } catch (error) {
+        console.error("Lỗi khi lấy trạng thái yêu thích:", error);
+      }
+    };
+
+    fetchFavoriteStatus();
+  }, [currentQuestion._id]);
+
+  const isFavorite = !!favoriteMap[currentQuestion._id];
+
+  const handleToggleFavorite = async () => {
+    const newState = !isFavorite;
+    setFavoriteMap((prev) => ({
+      ...prev,
+      [currentQuestion._id]: newState,
+    }));
+
+    try {
+      await fetch("http://197.187.3.102/api/favorite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          questionId: currentQuestion._id,
+          isFavorite: newState,
+        }),
+      });
+    } catch (error) {
+      console.error("Lỗi cập nhật yêu thích:", error);
+    }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0099CC" />
-
-      {/* Header */}
       {!hideHeader && (
         <View style={styles.header}>
           <TouchableOpacity onPress={handleBack} style={styles.backButton}>
@@ -96,7 +138,16 @@ const QuestionRenderer = ({
           <Text style={styles.headerTitle}>
             Câu {currentQuestionIndex + 1} / {questionList.length}
           </Text>
-
+          <TouchableOpacity
+            style={styles.heartButton}
+            onPress={handleToggleFavorite}
+          >
+            <AntDesign
+              name={isFavorite ? "heart" : "hearto"}
+              size={26}
+              color={isFavorite ? "#FF4D4F" : "#fff"}
+            />
+          </TouchableOpacity>
           {toggleExplanation && (
             <TouchableOpacity
               style={{ marginLeft: "auto" }}
@@ -108,7 +159,6 @@ const QuestionRenderer = ({
         </View>
       )}
 
-      {/* Audio Player */}
       <AudioPlayer
         audioUri={currentAudioUri}
         ref={audioPlayerRef}
@@ -116,13 +166,11 @@ const QuestionRenderer = ({
         autoPlay={!isViewMode}
       />
 
-      {/* Question Content */}
       <View style={styles.content}>
         <View style={styles.contentInner}>
           <View style={styles.instructionBar}>
             <Text style={styles.instructionText}>Select the answer</Text>
           </View>
-
           <Image
             source={{ uri: currentImageUri }}
             style={styles.questionImage}
@@ -131,7 +179,6 @@ const QuestionRenderer = ({
         </View>
       </View>
 
-      {/* Answer Options */}
       <View style={styles.answerContainer}>
         {currentAnswers.map((option) => (
           <TouchableOpacity
@@ -158,9 +205,7 @@ const QuestionRenderer = ({
       </View>
 
       <View style={styles.navigationButtons}>
-        {isViewMode && currentQuestionIndex === 0 ? (
-          <></>
-        ) : (
+        {isViewMode && currentQuestionIndex === 0 ? null : (
           <TouchableOpacity
             style={[
               styles.navButton,
@@ -190,22 +235,24 @@ const QuestionRenderer = ({
             style={[
               styles.navButton,
               { marginLeft: "auto" },
-              isSubmitButton
-                ? { backgroundColor: "#0099CC", borderColor: "#0099CC" }
-                : null,
+              isSubmitButton && {
+                backgroundColor: "#0099CC",
+                borderColor: "#0099CC",
+              },
             ]}
             onPress={goToNextQuestion}
           >
             <Text
               style={[
                 styles.navButtonText,
-                isSubmitButton ? { color: "white" } : null,
+                isSubmitButton && { color: "white" },
               ]}
             >
               {isSubmitButton ? "Submit" : "Next"}
             </Text>
-            {(currentQuestionIndex !== questionList.length - 1 ||
-              !isSubmit) && <AntDesign name="right" size={20} color="#333" />}
+            {(currentQuestionIndex !== questionList.length - 1 || !isSubmit) && (
+              <AntDesign name="right" size={20} color="#333" />
+            )}
           </TouchableOpacity>
         )}
       </View>
@@ -216,131 +263,125 @@ const QuestionRenderer = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: "#F5F6FA",
   },
-
   header: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#0099CC",
-    paddingHorizontal: 15,
-    height: 60,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   backButton: {
-    padding: 5,
+    marginRight: 12,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: "600",
     color: "white",
-    marginLeft: 32,
+    fontSize: 18,
+    fontWeight: "bold",
   },
-
+  heartButton: {
+    marginLeft: 16,
+  },
+  submitExamTxt: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+    marginLeft: 16,
+  },
   content: {
     flex: 1,
-    backgroundColor: "#fff",
-    padding: 10,
-    borderTopColor: "#eee",
-    borderTopWidth: 1,
-  },
-  contentInner: {
-    backgroundColor: "#FFF",
-    borderRadius: 10,
-  },
-  instructionBar: {
-    backgroundColor: "#E4C767",
-    padding: 15,
-    alignItems: "center",
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    marginBottom: 10,
-  },
-  instructionText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
-  },
-  questionImage: {
-    width: "100%",
-    height: "70%",
-  },
-
-  answerContainer: {
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    alignItems: "center",
-    paddingVertical: 14,
-    backgroundColor: "#F0F0F0",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    borderTopColor: "#eee",
-    borderTopWidth: 1,
-  },
-  answerButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 25,
-    borderWidth: 1,
-    borderColor: "#BBB",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "white",
+    paddingHorizontal: 16,
   },
-  selectedWrongAnswer: {
-    backgroundColor: "red",
-    borderColor: "red",
+  contentInner: {
+    width: "100%",
+    alignItems: "center",
   },
-  correctAnswer: {
-    backgroundColor: "#0099CC",
-    borderColor: "#0099CC",
+  instructionBar: {
+    backgroundColor: "#E6F7FF",
+    borderRadius: 8,
+    padding: 8,
+    marginBottom: 12,
+    width: "100%",
+    alignItems: "center",
   },
-  answerText: {
+  instructionText: {
+    color: "#0099CC",
+    fontWeight: "bold",
     fontSize: 16,
-    fontWeight: "600",
   },
-  correctAnswerText: {
-    color: "white",
+  questionImage: {
+    width: 220,
+    height: 140,
+    borderRadius: 8,
+    marginBottom: 16,
+    backgroundColor: "#eee",
   },
-  selectedAnswerText: {
-    color: "white",
-  },
-
-  navigationButtons: {
+  answerContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 15,
-    borderTopWidth: 1,
-    borderTopColor: "#EEE",
-    backgroundColor: "#FFF",
+    marginHorizontal: 16,
+    marginBottom: 24,
+  },
+  answerButton: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#0099CC",
+    borderRadius: 8,
+    paddingVertical: 16,
+    marginHorizontal: 6,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  selectedWrongAnswer: {
+    backgroundColor: "#FF4D4F",
+    borderColor: "#FF4D4F",
+  },
+  correctAnswer: {
+    backgroundColor: "#52C41A",
+    borderColor: "#52C41A",
+  },
+  answerText: {
+    fontSize: 18,
+    color: "#0099CC",
+    fontWeight: "bold",
+  },
+  correctAnswerText: {
+    color: "#fff",
+  },
+  navigationButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 16,
+    marginBottom: 24,
   },
   navButton: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 8,
+    backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: "#CCC",
-    borderRadius: 6,
-    backgroundColor: "#F8F8F8",
+    borderColor: "#0099CC",
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    marginRight: 8,
   },
   navButtonText: {
-    marginHorizontal: 5,
-    color: "#333",
-    fontWeight: "500",
+    fontSize: 16,
+    color: "#0099CC",
+    fontWeight: "bold",
+    marginLeft: 6,
+    marginRight: 6,
   },
   disabledButton: {
     backgroundColor: "#F0F0F0",
-    borderColor: "#EEE",
+    borderColor: "#CCC",
   },
   disabledText: {
     color: "#CCC",
-  },
-
-  submitExamTxt: {
-    color: "#fff",
-    textDecorationLine: "underline",
-    fontSize: 16,
-    marginBottom: 1,
   },
 });
 

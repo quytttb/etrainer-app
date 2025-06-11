@@ -1,19 +1,44 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getFavoriteQuestionsService, IFavoriteQuestion } from "../(tabs)/service";
 
 export default function SaveQuestionScreen() {
   const router = useRouter();
+  const [savedQuestions, setSavedQuestions] = useState<IFavoriteQuestion[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const savedQuestions = [
-    {
-      id: 1,
-      question: "Select the answer",
-      answer: "B",
-      category: "Mô tả hình ảnh",
-    },
-  ];
+  useEffect(() => {
+    const fetchSavedQuestions = async () => {
+      try {
+        const userId = await AsyncStorage.getItem("userId");
+        if (!userId) {
+          setSavedQuestions([]);
+          setLoading(false);
+          return;
+        }
+
+        const data = await getFavoriteQuestionsService(userId);
+        setSavedQuestions(data);
+      } catch (error) {
+        console.error("Lỗi lấy câu hỏi yêu thích:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSavedQuestions();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+        <ActivityIndicator size="large" color="#0099CC" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -23,31 +48,35 @@ export default function SaveQuestionScreen() {
           <FontAwesome name="chevron-left" size={20} color="#FFFFFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Câu hỏi đã lưu</Text>
-        <View style={{ width: 20 }} /> {/* Placeholder to balance the layout */}
+        <View style={{ width: 20 }} />
       </View>
 
       {/* Saved Questions */}
       <ScrollView style={styles.questionList}>
-        {savedQuestions.map((item) => (
-          <View key={item.id} style={styles.questionCard}>
-            <View style={styles.questionContent}>
-              <Text style={styles.questionText}>{item.question}</Text>
-              <Text style={styles.answerText}>{item.answer}</Text>
+        {savedQuestions.length === 0 ? (
+          <Text style={{ textAlign: "center", marginTop: 20 }}>Bạn chưa lưu câu hỏi nào.</Text>
+        ) : (
+          savedQuestions.map((item) => (
+            <View key={item._id} style={styles.questionCard}>
+              <View style={styles.questionContent}>
+                <Text style={styles.questionText}>{item.question}</Text>
+                <Text style={styles.answerText}>Đáp án: {item.answer}</Text>
+              </View>
+              <View style={styles.questionFooter}>
+                <TouchableOpacity style={styles.categoryButton}>
+                  <Image
+                    source={require("../../assets/images/image_icon.png")}
+                    style={styles.categoryIcon}
+                  />
+                  <Text style={styles.categoryText}>{item.category}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity>
+                  <Text style={styles.favoriteIcon}>❤️</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <View style={styles.questionFooter}>
-              <TouchableOpacity style={styles.categoryButton}>
-                <Image
-                  source={require("../../assets/images/image_icon.png")}
-                  style={styles.categoryIcon}
-                />
-                <Text style={styles.categoryText}>{item.category}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity>
-                <Text style={styles.favoriteIcon}>❤️</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        ))}
+          ))
+        )}
       </ScrollView>
     </View>
   );
@@ -124,4 +153,3 @@ const styles = StyleSheet.create({
     color: "#FF6666",
   },
 });
-

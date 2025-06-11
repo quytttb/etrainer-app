@@ -29,3 +29,39 @@ export interface IExam {
 export const getExamListService = (): Promise<IExam[]> => {
   return request.get("/exam");
 };
+
+export interface IFavoriteQuestion {
+  _id: string;
+  userId: string;
+  questionId: string;
+  question: string;
+  answer: string;
+  category: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const getFavoriteQuestionsService = (
+  userId: string
+): Promise<IFavoriteQuestion[]> => {
+  return request.get("/favorite-question", {
+    params: { userId },
+  });
+};
+
+// Thêm/xóa câu hỏi yêu thích
+export const toggleFavoriteQuestionService = async ({
+  userId,
+  questionId,
+  isFavorite,
+}: {
+  userId: string;
+  questionId: string;
+  isFavorite: boolean;
+}) => {
+  return request.post("/favorite-question/toggle", {
+    userId,
+    questionId,
+    isFavorite,
+  });
+};

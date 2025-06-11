@@ -166,7 +166,10 @@ const QuestionRenderer = ({
           <Text style={styles.headerTitle}>
             Câu {currentQuestionIndex + 1} / {questionList.length}
           </Text>
-
+          {/* Thêm icon trái tim (yêu thích) */}
+          <TouchableOpacity style={styles.heartButton}>
+            <AntDesign name="hearto" size={26} color="#fff" />
+          </TouchableOpacity>
           {toggleExplanation && (
             <TouchableOpacity
               style={{ marginLeft: "auto" }}
@@ -262,6 +265,12 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "white",
     marginLeft: 32,
+    flex: 1,
+  },
+  heartButton: {
+    marginLeft: 8,
+    marginRight: 8,
+    padding: 4,
   },
   headerRight: {
     flexDirection: "row",
