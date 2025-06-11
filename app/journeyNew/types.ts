@@ -191,14 +191,17 @@ export interface TimerState {
 
 // Reexport commonly used types with shorter names
 export type Question = JourneyNewQuestion;
-export type Answer = { answer: string; isCorrect: boolean; _id: string; };
+export type Answer = UserAnswer;
 
-// ✅ ADD Missing Types for Context
+// ✅ Enhanced UserAnswer interface to match AnswerContext usage
 export interface UserAnswer {
      questionId: string;
-     answer: string | string[];
+     answer: string | string[]; // Renamed from 'value' to 'answer' for consistency
+     value?: string | string[]; // Keep 'value' for backward compatibility
      isCorrect?: boolean;
      timestamp: string;
+     score?: number; // For scoring
+     attempts?: number; // For tracking attempts
 }
 
 export interface QuestionResult {

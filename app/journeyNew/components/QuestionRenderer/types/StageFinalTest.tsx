@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { Question } from '../../../../types/question';
+import { Question } from '../../../types';
 import AudioPlayer from '../../AudioPlayer';
 
 interface StageFinalTestProps {

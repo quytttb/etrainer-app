@@ -1,1 +1,2 @@
-export { default, AudioPlayerRef } from './AudioPlayer'; 
+export { default } from './AudioPlayer';
+export type { AudioPlayerRef } from './AudioPlayer'; 

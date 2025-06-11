@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Alert } from 'react-native';
 import { LessonSessionEnhanced, TestSessionEnhanced } from './QuestionSessionEnhanced';
 import { Question, LESSON_TYPE } from './types';
-import { JourneyNewService } from '../../service';
+import { JourneyApiService } from '../../../../../src/services/api/journey';
 
 /**
  * Existing Integration Component

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { JourneyNewQuestion, UserAnswer } from '../types';
+import { JourneyNewQuestion, UserAnswer, Answer } from '../types';
 
 // State interface
 interface AnswerState {
