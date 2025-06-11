@@ -184,7 +184,10 @@ export default function DayQuestionsScreen() {
 
           // Check if this type is now complete
           const currentTypeQuestions = questionsByType[activeType!] || [];
-          const answeredInType = currentTypeQuestions.filter(q => getAnswer(q.id)).length;
+          const answeredInType = currentTypeQuestions.filter(q => {
+               const questionId = q.id || q._id;
+               return questionId && getAnswer(questionId);
+          }).length;
 
           if (answeredInType === currentTypeQuestions.length) {
                handleCompleteType(activeType!);
@@ -343,8 +346,11 @@ export default function DayQuestionsScreen() {
                               </Text>
                               <QuestionRenderer
                                    question={question}
-                                   userAnswer={getAnswer(question.id)?.value}
-                                   onAnswer={(answer: string | string[]) => handleAnswerSubmit(question.id, answer)}
+                                   userAnswer={getAnswer(question.id || question._id || '')?.value}
+                                   onAnswer={(answer: string | string[]) => {
+                                        const questionId = question.id || question._id || '';
+                                        if (questionId) handleAnswerSubmit(questionId, answer);
+                                   }}
                                    isReview={false}
                               />
                          </View>

@@ -98,7 +98,7 @@ export interface JourneyNewFinalExam {
 }
 
 export interface JourneyNewQuestion {
-     id: string;
+     id?: string; // ✅ FIXED: Made optional for backward compatibility
      _id?: string; // ✅ ADD: Backward compatibility for components expecting _id
      questionNumber: number;
      type: 'IMAGE_DESCRIPTION' | 'ASK_AND_ANSWER' | 'CONVERSATION_PIECE' | 'SHORT_TALK' |

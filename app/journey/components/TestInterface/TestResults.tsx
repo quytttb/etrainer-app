@@ -61,7 +61,8 @@ const TestResults: React.FC<TestResultsProps> = ({
      const getPerformanceAnalysis = () => {
           const correctCount = questions.filter((q, index) => {
                // Mock logic for checking if answer is correct
-               return userAnswers[q.id] && userAnswers[q.id].length > 0;
+               const questionId = q.id || q._id;
+               return questionId && userAnswers[questionId] && userAnswers[questionId].length > 0;
           }).length;
 
           const accuracy = Math.round((correctCount / questions.length) * 100);
@@ -77,7 +78,8 @@ const TestResults: React.FC<TestResultsProps> = ({
 
      const getQuestionResults = (): QuestionResult[] => {
           return questions.map((question, index) => {
-               const userAnswer = userAnswers[question.id]?.[0];
+               const questionId = question.id || question._id || '';
+               const userAnswer = userAnswers[questionId]?.[0];
                const isCorrect = userAnswer === question.correctAnswer;
 
                return {

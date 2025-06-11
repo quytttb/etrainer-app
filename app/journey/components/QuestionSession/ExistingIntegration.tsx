@@ -176,9 +176,9 @@ const ExistingIntegration: React.FC<ExistingIntegrationProps> = ({
                     );
 
                     // Use response data from backend
-                    const passed = response.dayPassed;
-                    const nextDayUnlocked = response.nextDayUnlocked;
-                    const message = response.message;
+                    const passed = (response.data as any)?.dayPassed;
+                    const nextDayUnlocked = (response.data as any)?.nextDayUnlocked;
+                    const message = response.data.message;
 
                     // Show completion message with unlock logic
                     Alert.alert(
@@ -221,9 +221,9 @@ const ExistingIntegration: React.FC<ExistingIntegrationProps> = ({
                     }
 
                     // ✅ FALLBACK: Direct backend call if no onComplete handler
-                    const backendResponse = await JourneyNewService.completeStageFinalTest(
+                    const backendResponse = await journeyService.submitStageFinalTest(
                          parseInt(stageIndex),
-                         results
+                         results.answers || []
                     );
                     console.log("✅ Final test completed:", backendResponse);
 
@@ -232,8 +232,8 @@ const ExistingIntegration: React.FC<ExistingIntegrationProps> = ({
                          console.log("🔄 Force refreshing journey data after test completion...");
 
                          await Promise.all([
-                              JourneyNewService.getJourneyOverview(true),  // Force refresh overview
-                              JourneyNewService.getJourneyStages(true),    // Force refresh stages
+                              journeyService.getCurrentJourney(),  // Force refresh overview
+                              journeyService.getJourneyStages(undefined, true),    // Force refresh stages
                          ]);
 
                          console.log("✅ Journey data force refreshed successfully");
@@ -242,9 +242,9 @@ const ExistingIntegration: React.FC<ExistingIntegrationProps> = ({
                     }
 
                     // Calculate passed status
-                    const score = backendResponse?.score || 0;
-                    const minScore = backendResponse?.minScore || 70;
-                    const passed = backendResponse?.passed !== undefined ? backendResponse.passed : score >= minScore;
+                    const score = backendResponse?.data?.score || 0;
+                    const minScore = backendResponse?.data?.minScore || 70;
+                    const passed = backendResponse?.data?.passed !== undefined ? backendResponse.data.passed : score >= minScore;
 
                     // Show completion message
                     Alert.alert(

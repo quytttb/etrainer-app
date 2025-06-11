@@ -133,8 +133,8 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
 
           const timeSpent = Math.floor((Date.now() - startTime) / 1000);
           const questionAnswers = questions.map((question) => ({
-               questionId: question._id,
-               userAnswer: userAnswers[question._id] || [],
+               questionId: question._id || question.id || '',
+               userAnswer: userAnswers[question._id || question.id || ''] || [],
                isCorrect: false,
                type: question.type
           }));
@@ -149,9 +149,10 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
      };
 
      const getAnsweredCount = (): number => {
-          return questions.filter(question =>
-               userAnswers[question._id] && userAnswers[question._id].length > 0
-          ).length;
+          return questions.filter(question => {
+               const questionId = question._id || question.id;
+               return questionId && userAnswers[questionId] && userAnswers[questionId].length > 0;
+          }).length;
      };
 
      const currentQuestion = questions[currentQuestionIndex];
@@ -183,8 +184,11 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
                     <QuestionRenderer
                          question={currentQuestion}
-                         onAnswer={(answers) => handleAnswerChange(currentQuestion._id, Array.isArray(answers) ? answers : [answers])}
-                         userAnswer={userAnswers[currentQuestion._id]}
+                         onAnswer={(answers) => {
+                              const questionId = currentQuestion._id || currentQuestion.id || '';
+                              handleAnswerChange(questionId, Array.isArray(answers) ? answers : [answers]);
+                         }}
+                         userAnswer={userAnswers[currentQuestion._id || currentQuestion.id || '']}
                          isReview={false}
                     />
                </ScrollView>
