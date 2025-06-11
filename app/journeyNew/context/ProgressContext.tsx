@@ -109,8 +109,9 @@ const progressReducer = (state: ProgressState, action: ProgressAction): Progress
                               ? completedLessons.reduce((sum, l) => sum + l.score, 0) / completedLessons.length
                               : 0;
                          const stageTimeSpent = updatedLessons.reduce((sum, l) => sum + l.timeSpent, 0);
-                         const stageStatus = completedLessons.length === updatedLessons.length ? 'completed' :
-                              completedLessons.length > 0 ? 'in_progress' : 'not_started';
+                         const stageStatus: 'not_started' | 'in_progress' | 'completed' =
+                              completedLessons.length === updatedLessons.length ? 'completed' :
+                                   completedLessons.length > 0 ? 'in_progress' : 'not_started';
 
                          return {
                               ...stage,
@@ -130,8 +131,9 @@ const progressReducer = (state: ProgressState, action: ProgressAction): Progress
                     ? completedStages.reduce((sum, s) => sum + s.overallScore, 0) / completedStages.length
                     : 0;
                const journeyTimeSpent = updatedStages.reduce((sum, s) => sum + s.timeSpent, 0);
-               const journeyStatus = completedStages.length === updatedStages.length ? 'completed' :
-                    completedStages.length > 0 ? 'in_progress' : 'not_started';
+               const journeyStatus: 'not_started' | 'in_progress' | 'completed' =
+                    completedStages.length === updatedStages.length ? 'completed' :
+                         completedStages.length > 0 ? 'in_progress' : 'not_started';
 
                return {
                     ...state,

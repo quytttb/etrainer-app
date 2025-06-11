@@ -19,7 +19,7 @@ interface QuestionResult {
      index: number;
      isCorrect: boolean;
      userAnswer?: string;
-     correctAnswer: string;
+     correctAnswer?: string; // ✅ FIX: Make optional to handle undefined cases
      explanation?: string;
 }
 

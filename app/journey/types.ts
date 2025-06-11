@@ -99,6 +99,7 @@ export interface JourneyNewFinalExam {
 
 export interface JourneyNewQuestion {
      id: string;
+     _id?: string; // ✅ ADD: Backward compatibility for components expecting _id
      questionNumber: number;
      type: 'IMAGE_DESCRIPTION' | 'ASK_AND_ANSWER' | 'CONVERSATION_PIECE' | 'SHORT_TALK' |
      'FILL_IN_THE_BLANK_QUESTION' | 'FILL_IN_THE_PARAGRAPH' | 'READ_AND_UNDERSTAND' |

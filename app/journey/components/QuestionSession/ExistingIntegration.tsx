@@ -4,6 +4,9 @@ import { LessonSessionEnhanced, TestSessionEnhanced } from './QuestionSessionEnh
 import { Question, LESSON_TYPE } from './types';
 import { JourneyApiService } from '../../../../../src/services/api/journey';
 
+// Create service instance
+const journeyService = new JourneyApiService();
+
 /**
  * Existing Integration Component
  * Test integration với existing screens và real backend data
@@ -99,8 +102,9 @@ const ExistingIntegration: React.FC<ExistingIntegrationProps> = ({
      const fetchLessonQuestions = async (questionIds: string[]): Promise<Question[]> => {
           console.log('🎓 Fetching lesson questions for day:', dayData?.dayNumber);
 
-          // Use real API call: JourneyNewService.getLessonQuestions
-          const questionsData = await JourneyNewService.getLessonQuestions(questionIds);
+          // Use real API call: journeyService.getDayQuestions  
+          const response = await journeyService.getDayQuestions('stageId', dayData?.dayNumber || 1);
+          const questionsData = response.data || [];
 
           // Transform backend data to our Question format (already compatible)
           return questionsData
@@ -122,15 +126,15 @@ const ExistingIntegration: React.FC<ExistingIntegrationProps> = ({
                }
 
                // ✅ SIMPLIFIED: Backend now returns questions directly when test is unlocked
-               const testData = await JourneyNewService.getStageFinalTest(parseInt(stageIndex));
+               const testResponse = await journeyService.getStageFinalTest(parseInt(stageIndex));
+               const testQuestions = testResponse.data || [];
                console.log('📝 Test data loaded:', {
-                    questionsCount: testData?.finalTestInfo?.questions?.length || 0,
-                    testName: testData?.finalTestInfo?.name,
-                    canTakeTest: testData?.canTakeTest
+                    questionsCount: testQuestions.length,
+                    stageIndex: stageIndex
                });
 
-               // Extract questions from test data (backend automatically collects from days with duplicates removed)
-               const examQuestions = testData?.finalTestInfo?.questions || [];
+               // Use questions directly from API response
+               const examQuestions = testQuestions;
 
                if (examQuestions.length === 0) {
                     console.warn('⚠️ No questions available for this final test');
@@ -166,14 +170,9 @@ const ExistingIntegration: React.FC<ExistingIntegrationProps> = ({
 
                // ✅ FIXED: Pass score data to backend and handle response
                if (dayData?.dayNumber && route?.params?.stageIndex !== undefined) {
-                    const response = await JourneyNewService.updateLessonProgress(
+                    const response = await journeyService.completeDay(
                          parseInt(route.params.stageIndex),
-                         dayData.dayNumber,
-                         {
-                              score: score,
-                              totalQuestions: totalQuestions,
-                              correctAnswers: correctAnswers
-                         }
+                         dayData.dayNumber
                     );
 
                     // Use response data from backend

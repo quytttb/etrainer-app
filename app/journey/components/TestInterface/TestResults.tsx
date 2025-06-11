@@ -19,7 +19,7 @@ interface QuestionResult {
      index: number;
      isCorrect: boolean;
      userAnswer?: string;
-     correctAnswer: string;
+     correctAnswer?: string; // ✅ FIX: Make optional to handle undefined cases
      explanation?: string;
 }
 
@@ -179,7 +179,7 @@ const TestResults: React.FC<TestResultsProps> = ({
                                                   ❌ Bạn chọn: {result.userAnswer}
                                              </Text>
                                              <Text style={styles.reviewCorrectAnswer}>
-                                                  ✅ Đáp án đúng: {result.correctAnswer}
+                                                  ✅ Đáp án đúng: {result.correctAnswer || "Không có"}
                                              </Text>
                                         </View>
                                    </TouchableOpacity>
