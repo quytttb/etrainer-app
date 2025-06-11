@@ -40,28 +40,48 @@ export interface IFavoriteQuestion {
   createdAt: string;
   updatedAt: string;
 }
+export interface IFavoriteQuestion {
+  _id: string;
+  userId: string;
+  questionId: string;
+  question: string;
+  answer: string;
+  category: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
-export const getFavoriteQuestionsService = (
-  userId: string
-): Promise<IFavoriteQuestion[]> => {
-  return request.get("/favorite-question", {
+// 1. Lấy danh sách câu hỏi yêu thích theo userId
+export const getFavoriteQuestionsService = (userId: string): Promise<IFavoriteQuestion[]> => {
+  return request.get("/favorite", {
     params: { userId },
   });
 };
 
-// Thêm/xóa câu hỏi yêu thích
-export const toggleFavoriteQuestionService = async ({
+// 2. Thêm câu hỏi yêu thích
+export const addFavoriteQuestionService = async ({
   userId,
   questionId,
-  isFavorite,
+  question,
+  answer,
+  category,
 }: {
   userId: string;
   questionId: string;
-  isFavorite: boolean;
+  question: string;
+  answer: string;
+  category: string;
 }) => {
-  return request.post("/favorite-question/toggle", {
+  return request.post("/favorite/add", {
     userId,
     questionId,
-    isFavorite,
+    question,
+    answer,
+    category,
   });
+};
+
+// 3. Xóa câu hỏi yêu thích theo id
+export const deleteFavoriteQuestionService = async (id: string) => {
+  return request.delete(`/favorite/${id}`);
 };

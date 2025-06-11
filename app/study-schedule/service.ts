@@ -5,7 +5,7 @@ export const getCurrentJourney = (): Promise<Journey> => {
 };
 
 export const createJourney = (data: CreateJourneyPayload): Promise<Journey> => {
-  return request.post("/journeys/create", data);
+  return request.post("/journeys", data);
 };
 
 import { Journey } from "@/types/journey";

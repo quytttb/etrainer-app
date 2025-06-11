@@ -44,10 +44,10 @@ const JourneyMain: React.FC = () => {
 
                     <TouchableOpacity
                          style={[styles.button, styles.primaryButton]}
-                         onPress={() => router.push('/journeyNew/')}
+                         onPress={() => router.push('/journey/screens/DayQuestions')}
                     >
                          <Text style={[styles.buttonText, styles.primaryButtonText]}>
-                              Modern Journey (New)
+                              Merged Journey (Recommended)
                          </Text>
                     </TouchableOpacity>
                </View>

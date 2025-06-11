@@ -76,6 +76,9 @@ const PracticeType3 = (
   };
 
   const onFormSubmit = async (values: Record<string, string>) => {
+    // ✅ FIX: Reset audio player trước khi submit
+    await audioPlayerRef.current?.reset();
+
     const payload = questionList.map((it) => {
       const questions = it.questions.map((subQ) => {
         const userAnswer = values[`question_${it._id}_${subQ._id}`];

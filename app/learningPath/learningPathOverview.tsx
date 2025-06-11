@@ -154,6 +154,20 @@ const LearningPathScreen = () => {
     }
   };
 
+  // Test function for new exam component
+  const handleTestNewExam = () => {
+    // @ts-ignore
+    if (typeof window !== "undefined" && window.location) {
+      window.location.href = '/learningPath/exam/0';
+    } else if (typeof require !== "undefined") {
+      // Native Expo Router
+      // @ts-ignore
+      const { useRouter } = require('expo-router');
+      const router = useRouter();
+      router.push('/learningPath/exam/0');
+    }
+  };
+
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.header}>Lộ trình học được xây dựng cho bạn</Text>
@@ -162,6 +176,11 @@ const LearningPathScreen = () => {
         <Text>🎯 Điểm đầu vào: {currentLevel} ({levelLabel(currentLevel)})</Text>
         <Text>📈 Mục tiêu: {targetLevel} ({levelLabel(targetLevel)})</Text>
       </View>
+
+      {/* TEST BUTTON - Remove this after testing */}
+      <TouchableOpacity style={styles.testButton} onPress={handleTestNewExam}>
+        <Text style={styles.testButtonText}>🧪 TEST - Bài Test Mới (Giai đoạn 1)</Text>
+      </TouchableOpacity>
 
       {/* Render stages based on logic */}
       {stages.slice(0, stageCount).map((stage, idx) => (
@@ -177,7 +196,7 @@ const LearningPathScreen = () => {
       ))}
 
       {/* Modal hiển thị chi tiết lộ trình */}
-      <Modal visible={showDetail !== false} animationType="slide" onRequestClose={() => setShowDetail(false)}>
+      <Modal visible={showDetail !== false} transparent={true} animationType="slide">
         <View style={styles.detailModalContainer}>
           <View style={styles.detailHeader}>
             <TouchableOpacity onPress={() => setShowDetail(false)}>
@@ -232,10 +251,23 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginBottom: 20,
   },
+  testButton: {
+    backgroundColor: '#FF6B35',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 15,
+    alignItems: 'center',
+  },
+  testButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   stageBox: {
     backgroundColor: '#E0F8E9',
     padding: 14,
     borderRadius: 6,
+    marginBottom: 12,
   },
   stageTitle: { fontWeight: 'bold', color: '#008A44', marginBottom: 8 },
   detailLink: { marginTop: 8, color: '#007AFF', textDecorationLine: 'underline' },
@@ -308,13 +340,13 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   detailItemText: {
-    fontSize: 15,
-    color: '#333',
+    fontSize: 14,
+    color: '#444',
+    lineHeight: 20,
   },
   detailSubText: {
-    fontSize: 13,
-    color: '#888',
-    marginLeft: 2,
-    marginTop: 1,
+    fontSize: 12,
+    color: '#666',
+    marginTop: 2,
   },
 });

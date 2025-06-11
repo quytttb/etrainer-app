@@ -59,6 +59,7 @@ const PracticeType1 = (
   // );
 
   const handleBack = async () => {
+    // ✅ FIX: Reset audio player trước khi back
     await audioPlayerRef.current?.reset();
 
     if (onBack) onBack();
@@ -66,6 +67,9 @@ const PracticeType1 = (
   };
 
   const onFormSubmit = async (values: Record<string, string>) => {
+    // ✅ FIX: Reset audio player trước khi submit
+    await audioPlayerRef.current?.reset();
+
     const payload = questionList.map((it) => {
       const userAnswer = values[`question_${it._id}`];
       const correctAnswer = it.answers.find((ans) => ans.isCorrect);

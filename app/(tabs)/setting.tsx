@@ -174,7 +174,7 @@ export default function SettingsScreen() {
         >
           <AntDesign name="earth" size={24} color="black" style={styles.icon} />
           <Text style={styles.settingText}>
-            {t("languageSetting") || "Ngôn ngữ"}
+            {t("settings.languageSettings")}
           </Text>
           <Text style={styles.languageText}>
             {i18n.language === "en" ? "English" : "Tiếng Việt"}
@@ -216,8 +216,8 @@ export default function SettingsScreen() {
             <Text style={styles.reminderTimeText}>
               {reminderTime
                 ? `${reminderTime.getHours()
-                    .toString()
-                    .padStart(2, "0")}:${reminderTime
+                  .toString()
+                  .padStart(2, "0")}:${reminderTime
                     .getMinutes()
                     .toString()
                     .padStart(2, "0")}`

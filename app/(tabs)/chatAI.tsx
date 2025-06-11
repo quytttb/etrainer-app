@@ -50,7 +50,7 @@ interface ApiErrorDetail {
 const API_BASE_URL =
   typeof window !== "undefined" && window.location && window.location.hostname
     ? `http://${window.location.hostname}:8001`
-    : "http://172.20.10.2:8001"; 
+    : "http://197.187.3.104:8001"; 
 
 const ChatScreen: React.FC = () => {
   const router = useRouter();

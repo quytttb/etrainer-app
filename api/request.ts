@@ -26,6 +26,7 @@ interface CustomAxiosInstance {
 
 const axiosInstance = axios.create({
   baseURL: process.env.EXPO_PUBLIC_APP_API_URL,
+  timeout: 10000, // 10 seconds timeout
 });
 
 axiosInstance.interceptors.response.use(
@@ -33,12 +34,16 @@ axiosInstance.interceptors.response.use(
     return response.data;
   },
   function (error) {
-    if (error.response.status === 401) {
+    console.log("API Error:", error.response?.data || error.message);
+
+    if (error.response?.status === 401) {
       removeAccessToken();
 
       Alert.alert("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!");
 
       router.navigate("/auth/login");
+    } else if (error.code === 'NETWORK_ERROR' || !error.response) {
+      Alert.alert("Lỗi kết nối", "Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.");
     }
 
     return Promise.reject(error);

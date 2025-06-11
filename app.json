@@ -9,14 +9,44 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you.",
+        "SKAdNetworkItems": [
+          {
+            "SKAdNetworkIdentifier": "v9wttpbfk9.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "n38lu8286q.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "v9wttpbfk9.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "n38lu8286q.skadnetwork"
+          }
+        ]
+      },
+      "bundleIdentifier": "com.etrainer.myapp"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.etrainer.myapp"
+      "package": "com.etrainer.myapp",
+      "usesCleartextTraffic": true,
+      "networkSecurityConfig": {
+        "cleartextTrafficPermitted": true
+      },
+      "statusBar": {
+        "barStyle": "dark-content",
+        "backgroundColor": "transparent",
+        "translucent": true
+      },
+      "navigationBar": {
+        "backgroundColor": "transparent"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -41,7 +71,7 @@
           "color": "#ffffff"
         }
       ],
-      "expo-facebook"
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true

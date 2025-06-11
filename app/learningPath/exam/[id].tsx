@@ -1,343 +1,768 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Modal, ScrollView, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+  SafeAreaView
+} from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import HeaderCard from '../../../components/HeaderTest';
-import QuestionCard from '../../../components/QuestionCard';
-import AudioControls from '../../../components/AudioControls';
-import NavigationButtons from '../../../components/NavigationButtons';
-import axios from 'axios';
+import { getStageFinalTestService, startStageFinalTestService, completeStageFinalTestService } from '../../journeyStudy/service';
 
-const ExamDetailScreen = () => {
-  const { examId } = useLocalSearchParams(); 
+const LearningPathTestScreen = () => {
+  const { id } = useLocalSearchParams(); // This is stageIndex
   const router = useRouter();
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({}); // Lưu câu trả lời
+  const stageIndex = parseInt(id as string) || 0;
+
+  // Component states
+  const [isLoading, setIsLoading] = useState(true);
+  const [finalTestData, setFinalTestData] = useState<any>(null);
+  const [questions, setQuestions] = useState<any[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isSubmitModalVisible, setIsSubmitModalVisible] = useState(false);
-  const [examCompleted, setExamCompleted] = useState(false);
-  const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
-  const [questions, setQuestions] = useState<any[]>([]); // Dữ liệu câu hỏi
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, any>>({});
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [testStarted, setTestStarted] = useState(false);
 
-  const mockData = [
-    {
-      id: '1',
-      image: 'https://via.placeholder.com/200', 
-      options: ['A', 'B', 'C'],
-      correctAnswer: 'A',
-      audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-    },
-    {
-      id: '2',
-      question: 'Where is the meeting happening?', 
-      options: ['A', 'B', 'C'],
-      correctAnswer: 'B',
-      audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
-    },
-  ];
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Load final test data
   useEffect(() => {
-    setQuestions(mockData); // Use mock data instead of API call
-  }, []);
+    loadFinalTestData();
+  }, [stageIndex]);
 
-  const currentQuestion = questions[currentQuestionIndex];
+  // Timer effect
+  useEffect(() => {
+    if (testStarted && timeLeft > 0) {
+      timerRef.current = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            handleAutoSubmit();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [testStarted, timeLeft]);
+
+  const loadFinalTestData = async () => {
+    try {
+      setIsLoading(true);
+      console.log('Loading final test data for stage:', stageIndex);
+      const response = await getStageFinalTestService(stageIndex);
+      console.log('Final test response:', JSON.stringify(response, null, 2));
+
+      if (response?.finalTestInfo) {
+        setFinalTestData(response.finalTestInfo);
+        console.log('Final test data set:', response.finalTestInfo);
+
+        // If test is already started and has questions, load them
+        if (response.finalTestInfo.questions && response.finalTestInfo.questions.length > 0) {
+          console.log('Questions found:', response.finalTestInfo.questions.length);
+
+          // Transform API data structure to component-expected structure
+          const transformedQuestions = response.finalTestInfo.questions.flatMap((item: any, itemIndex: number) => {
+            if (item.type === 'CONVERSATION_PIECE' && item.questions) {
+              // For CONVERSATION_PIECE, each item can have multiple questions
+              return item.questions.map((subQuestion: any, subIndex: number) => ({
+                _id: `${item._id}_${subIndex}`,
+                question: subQuestion.question,
+                type: 'single_choice',
+                answers: subQuestion.answers || [],
+                audio: item.audio,
+                subtitle: item.subtitle,
+                explanation: item.explanation
+              }));
+            } else {
+              // For other types, use the item directly
+              return [{
+                _id: item._id,
+                question: item.question,
+                type: item.type || 'single_choice',
+                answers: item.answers || [],
+                audio: item.audio,
+                subtitle: item.subtitle,
+                explanation: item.explanation
+              }];
+            }
+          });
+
+          console.log('Transformed questions:', transformedQuestions.length);
+          setQuestions(transformedQuestions);
+          setTestStarted(true);
+          // Set timer based on duration
+          const duration = response.finalTestInfo.duration || 30; // Default 30 minutes
+          setTimeLeft(duration * 60); // Convert to seconds
+        } else {
+          console.log('No questions in finalTestInfo');
+        }
+      } else {
+        console.log('No finalTestInfo in response');
+        // Try to use mock data for testing if API fails
+        const mockQuestions = [
+          {
+            _id: '1',
+            question: 'Câu hỏi test - Bạn có hiểu nội dung giai đoạn này không?',
+            type: 'single_choice',
+            answers: [
+              { _id: 'a1', answer: 'Có, tôi hiểu rất rõ', isCorrect: true },
+              { _id: 'a2', answer: 'Hiểu một phần', isCorrect: false },
+              { _id: 'a3', answer: 'Chưa hiểu lắm', isCorrect: false },
+              { _id: 'a4', answer: 'Không hiểu', isCorrect: false }
+            ]
+          },
+          {
+            _id: '2',
+            question: 'Câu hỏi test 2 - Bạn có thể áp dụng kiến thức vào thực tế không?',
+            type: 'single_choice',
+            answers: [
+              { _id: 'b1', answer: 'Có thể áp dụng tốt', isCorrect: true },
+              { _id: 'b2', answer: 'Áp dụng được một phần', isCorrect: false },
+              { _id: 'b3', answer: 'Khó áp dụng', isCorrect: false },
+              { _id: 'b4', answer: 'Không thể áp dụng', isCorrect: false }
+            ]
+          }
+        ];
+        setQuestions(mockQuestions);
+        setFinalTestData({
+          totalQuestions: mockQuestions.length,
+          duration: 10, // 10 minutes for testing
+          stage: stageIndex
+        });
+        console.log('Using mock data for testing');
+      }
+    } catch (error) {
+      console.error('Error loading final test:', error);
+      // Use mock data when API fails
+      const mockQuestions = [
+        {
+          _id: '1',
+          question: 'Câu hỏi test - Bạn có hiểu nội dung giai đoạn này không?',
+          type: 'single_choice',
+          answers: [
+            { _id: 'a1', answer: 'Có, tôi hiểu rất rõ', isCorrect: true },
+            { _id: 'a2', answer: 'Hiểu một phần', isCorrect: false },
+            { _id: 'a3', answer: 'Chưa hiểu lắm', isCorrect: false },
+            { _id: 'a4', answer: 'Không hiểu', isCorrect: false }
+          ]
+        },
+        {
+          _id: '2',
+          question: 'Câu hỏi test 2 - Bạn có thể áp dụng kiến thức vào thực tế không?',
+          type: 'single_choice',
+          answers: [
+            { _id: 'b1', answer: 'Có thể áp dụng tốt', isCorrect: true },
+            { _id: 'b2', answer: 'Áp dụng được một phần', isCorrect: false },
+            { _id: 'b3', answer: 'Khó áp dụng', isCorrect: false },
+            { _id: 'b4', answer: 'Không thể áp dụng', isCorrect: false }
+          ]
+        }
+      ];
+      setQuestions(mockQuestions);
+      setFinalTestData({
+        totalQuestions: mockQuestions.length,
+        duration: 10, // 10 minutes for testing
+        stage: stageIndex
+      });
+      console.log('Using mock data due to API error');
+      Alert.alert('Thông báo', 'Đang sử dụng dữ liệu test. API hiện tại chưa sẵn sàng.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const startTest = async () => {
+    try {
+      setIsLoading(true);
+      console.log('Starting test for stage:', stageIndex);
+      const response = await startStageFinalTestService(stageIndex);
+      console.log('Start test response:', JSON.stringify(response, null, 2));
+
+      if (response?.finalTest?.questions && response.finalTest.questions.length > 0) {
+        console.log('Questions received from API:', response.finalTest.questions.length);
+
+        // Transform API data structure to component-expected structure
+        const transformedQuestions = response.finalTest.questions.flatMap((item: any, itemIndex: number) => {
+          if (item.type === 'CONVERSATION_PIECE' && item.questions) {
+            // For CONVERSATION_PIECE, each item can have multiple questions
+            return item.questions.map((subQuestion: any, subIndex: number) => ({
+              _id: `${item._id}_${subIndex}`,
+              question: subQuestion.question,
+              type: 'single_choice',
+              answers: subQuestion.answers || [],
+              audio: item.audio,
+              subtitle: item.subtitle,
+              explanation: item.explanation
+            }));
+          } else {
+            // For other types, use the item directly
+            return [{
+              _id: item._id,
+              question: item.question,
+              type: item.type || 'single_choice',
+              answers: item.answers || [],
+              audio: item.audio,
+              subtitle: item.subtitle,
+              explanation: item.explanation
+            }];
+          }
+        });
+
+        console.log('Transformed questions in startTest:', transformedQuestions.length);
+        setQuestions(transformedQuestions);
+        setTestStarted(true);
+        // Set timer
+        const duration = response.finalTest.duration || 30;
+        setTimeLeft(duration * 60);
+
+        Alert.alert('Bắt đầu', 'Bài test đã được bắt đầu. Chúc bạn làm bài tốt!');
+      } else {
+        console.log('No questions in API response, using mock data');
+        // Use mock data for testing
+        const mockQuestions = [
+          {
+            _id: '1',
+            question: 'Câu hỏi test - Bạn có hiểu nội dung giai đoạn này không?',
+            type: 'single_choice',
+            answers: [
+              { _id: 'a1', answer: 'Có, tôi hiểu rất rõ', isCorrect: true },
+              { _id: 'a2', answer: 'Hiểu một phần', isCorrect: false },
+              { _id: 'a3', answer: 'Chưa hiểu lắm', isCorrect: false },
+              { _id: 'a4', answer: 'Không hiểu', isCorrect: false }
+            ]
+          },
+          {
+            _id: '2',
+            question: 'Câu hỏi test 2 - Bạn có thể áp dụng kiến thức vào thực tế không?',
+            type: 'single_choice',
+            answers: [
+              { _id: 'b1', answer: 'Có thể áp dụng tốt', isCorrect: true },
+              { _id: 'b2', answer: 'Áp dụng được một phần', isCorrect: false },
+              { _id: 'b3', answer: 'Khó áp dụng', isCorrect: false },
+              { _id: 'b4', answer: 'Không thể áp dụng', isCorrect: false }
+            ]
+          }
+        ];
+        setQuestions(mockQuestions);
+        setTestStarted(true);
+        setTimeLeft(10 * 60); // 10 minutes for testing
+
+        Alert.alert('Bắt đầu', 'Bài test đã được bắt đầu với dữ liệu test. Chúc bạn làm bài tốt!');
+      }
+    } catch (error) {
+      console.error('Error starting test:', error);
+      // Use mock data when API fails
+      const mockQuestions = [
+        {
+          _id: '1',
+          question: 'Câu hỏi test - Bạn có hiểu nội dung giai đoạn này không?',
+          type: 'single_choice',
+          answers: [
+            { _id: 'a1', answer: 'Có, tôi hiểu rất rõ', isCorrect: true },
+            { _id: 'a2', answer: 'Hiểu một phần', isCorrect: false },
+            { _id: 'a3', answer: 'Chưa hiểu lắm', isCorrect: false },
+            { _id: 'a4', answer: 'Không hiểu', isCorrect: false }
+          ]
+        },
+        {
+          _id: '2',
+          question: 'Câu hỏi test 2 - Bạn có thể áp dụng kiến thức vào thực tế không?',
+          type: 'single_choice',
+          answers: [
+            { _id: 'b1', answer: 'Có thể áp dụng tốt', isCorrect: true },
+            { _id: 'b2', answer: 'Áp dụng được một phần', isCorrect: false },
+            { _id: 'b3', answer: 'Khó áp dụng', isCorrect: false },
+            { _id: 'b4', answer: 'Không thể áp dụng', isCorrect: false }
+          ]
+        }
+      ];
+      setQuestions(mockQuestions);
+      setTestStarted(true);
+      setTimeLeft(10 * 60); // 10 minutes for testing
+
+      Alert.alert('Bắt đầu', 'Bài test đã được bắt đầu với dữ liệu test do lỗi API. Chúc bạn làm bài tốt!');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleAnswerSelect = (questionId: string, answer: string) => {
-    setSelectedAnswers((prev) => ({ ...prev, [questionId]: answer }));
+    setSelectedAnswers(prev => ({
+      ...prev,
+      [questionId]: answer
+    }));
+  };
 
-    // Show the submit modal if it's the last question
-    if (isLastQuestion) {
-      openSubmitModal();
+  const handleSubmitTest = async () => {
+    if (isSubmitting) return;
+
+    Alert.alert(
+      'Xác nhận nộp bài',
+      'Bạn có chắc chắn muốn nộp bài? Bạn sẽ không thể thay đổi câu trả lời sau khi nộp.',
+      [
+        { text: 'Hủy', style: 'cancel' },
+        { text: 'Nộp bài', onPress: submitTest }
+      ]
+    );
+  };
+
+  const handleAutoSubmit = () => {
+    Alert.alert('Hết thời gian', 'Thời gian làm bài đã kết thúc. Bài thi sẽ được nộp tự động.');
+    submitTest();
+  };
+
+  const submitTest = async () => {
+    try {
+      setIsSubmitting(true);
+
+      // Convert answers to the format backend expects
+      const questionAnswers = questions.map(question => {
+        const userAnswer = selectedAnswers[question._id];
+        const correctAnswer = question.answers?.find((ans: any) => ans.isCorrect)?.answer;
+
+        return {
+          questionId: question._id,
+          userAnswer: userAnswer || '',
+          isCorrect: userAnswer === correctAnswer,
+          isNotAnswer: !userAnswer,
+          type: question.type
+        };
+      });
+
+      const submitData = {
+        startTime: new Date(Date.now() - (finalTestData?.duration || 30) * 60 * 1000).toISOString(),
+        endTime: new Date().toISOString(),
+        questionAnswers: questionAnswers
+      };
+
+      console.log('Submitting test data:', submitData);
+
+      try {
+        const response = await completeStageFinalTestService(stageIndex, submitData);
+        console.log('Submit response:', response);
+
+        // Clear timer
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+        }
+
+        // Navigate to result page with API response data
+        router.push({
+          pathname: `/learningPath/result/${id}`,
+          params: {
+            score: response.score || 0,
+            correctAnswers: response.correctAnswers || 0,
+            totalQuestions: response.totalQuestions || questions.length,
+            passed: String(response.passed || false)
+          }
+        });
+      } catch (apiError) {
+        console.error('API submit error, using local calculation:', apiError);
+
+        // Calculate local results when API fails
+        const correctCount = questionAnswers.filter(q => q.isCorrect).length;
+        const score = Math.round((correctCount / questions.length) * 100);
+        const passed = score >= 60; // Assuming 60% is passing
+
+        // Clear timer
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+        }
+
+        // Navigate to result page with local calculation
+        router.push({
+          pathname: `/learningPath/result/${id}`,
+          params: {
+            score: score,
+            correctAnswers: correctCount,
+            totalQuestions: questions.length,
+            passed: String(passed)
+          }
+        });
+      }
+
+    } catch (error) {
+      console.error('Error submitting test:', error);
+      Alert.alert('Lỗi', 'Không thể nộp bài. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleSubmit = () => {
-    setExamCompleted(true);
-    const correctCount = questions.filter(
-      (item) => selectedAnswers[item.id] === item.correctAnswer
-    ).length;
-    setCorrectAnswersCount(correctCount);
-
-    closeSubmitModal();
-    closeModal();
-
-    // Navigate to the resultEvaluate page with the exam ID
-    router.push({
-      pathname: `learningPath/result/${examId}`,
-      params: {
-        correctAnswers: correctCount,
-        totalQuestions: questions.length,
-      },
-    });
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const openModal = () => setIsModalVisible(true);
-  const closeModal = () => setIsModalVisible(false);
-  const openSubmitModal = () => setIsSubmitModalVisible(true);
-  const closeSubmitModal = () => setIsSubmitModalVisible(false);
+  const currentQuestion = questions[currentQuestionIndex];
+  const progress = questions.length > 0 ? ((currentQuestionIndex + 1) / questions.length) * 100 : 0;
 
-  const getOptionStyle = (questionId: string, option: string) => {
-    if (selectedAnswers[questionId] === option) {
-      return { backgroundColor: '#0099CC', color: '#fff' };
-    }
-    return { backgroundColor: '#f2f2f2', color: '#000' };
-  };
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0099CC" />
+          <Text style={styles.loadingText}>Đang tải bài test...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
-  const isLastQuestion = currentQuestionIndex === questions.length - 1;
+  // Show start screen if test hasn't started
+  if (!testStarted || questions.length === 0) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.startContainer}>
+          <Text style={styles.startTitle}>Bài Test Tổng Kết Giai Đoạn {stageIndex + 1}</Text>
+
+          {finalTestData && (
+            <View style={styles.testInfo}>
+              <Text style={styles.infoText}>📝 Tổng số câu hỏi: {finalTestData.totalQuestions}</Text>
+              <Text style={styles.infoText}>⏱️ Thời gian: {finalTestData.duration} phút</Text>
+              <Text style={styles.infoText}>🎯 Yêu cầu: Đạt điểm tối thiểu để qua giai đoạn</Text>
+            </View>
+          )}
+
+          <Text style={styles.instructions}>
+            • Đọc kỹ câu hỏi trước khi trả lời{'\n'}
+            • Bạn có thể xem lại và thay đổi câu trả lời{'\n'}
+            • Thời gian sẽ tự động kết thúc khi hết giờ{'\n'}
+            • Chúc bạn làm bài tốt!
+          </Text>
+
+          <TouchableOpacity
+            style={styles.startButton}
+            onPress={startTest}
+            disabled={isLoading}
+          >
+            <Text style={styles.startButtonText}>
+              {isLoading ? 'Đang tải...' : 'Bắt đầu làm bài'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <View style={styles.container}>
-      <HeaderCard onBackPress={() => {}} onMenuPress={openModal} />
+    <SafeAreaView style={styles.container}>
+      {/* Header with timer and progress */}
+      <View style={styles.header}>
+        <View style={styles.progressContainer}>
+          <Text style={styles.progressText}>
+            Câu {currentQuestionIndex + 1}/{questions.length}
+          </Text>
+          <View style={styles.progressBar}>
+            <View style={[styles.progressFill, { width: `${progress}%` }]} />
+          </View>
+        </View>
 
-      <ScrollView contentContainerStyle={styles.scrollView}>
-        {currentQuestion && currentQuestion.image && (
-          <View style={[styles.pictureSection, styles.sectionBorder]}>
-            <Text style={styles.sectionTitle}>Picture</Text>
-            <Image source={{ uri: currentQuestion.image }} style={styles.questionImage} />
+        <View style={styles.timerContainer}>
+          <Text style={[styles.timerText, timeLeft < 300 && styles.timerWarning]}>
+            ⏱️ {formatTime(timeLeft)}
+          </Text>
+        </View>
+      </View>
+
+      {/* Question content */}
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {currentQuestion && (
+          <View style={styles.questionContainer}>
+            {/* Show subtitle/conversation for CONVERSATION_PIECE questions */}
+            {currentQuestion.subtitle && (
+              <View style={styles.subtitleContainer}>
+                <Text style={styles.subtitleLabel}>🎧 Đoạn hội thoại:</Text>
+                <Text style={styles.subtitleText}>
+                  {currentQuestion.subtitle}
+                </Text>
+              </View>
+            )}
+
+            <Text style={styles.questionText}>
+              {currentQuestion.question}
+            </Text>
+
+            {/* Answer options */}
+            <View style={styles.answersContainer}>
+              {currentQuestion.answers?.map((answer: any, index: number) => (
+                <TouchableOpacity
+                  key={answer._id}
+                  style={[
+                    styles.answerOption,
+                    selectedAnswers[currentQuestion._id] === answer.answer && styles.selectedAnswer
+                  ]}
+                  onPress={() => handleAnswerSelect(currentQuestion._id, answer.answer)}
+                >
+                  <View style={styles.answerContent}>
+                    <Text style={styles.answerLabel}>
+                      {String.fromCharCode(65 + index)}
+                    </Text>
+                    <Text style={[
+                      styles.answerText,
+                      selectedAnswers[currentQuestion._id] === answer.answer && styles.selectedAnswerText
+                    ]}>
+                      {answer.answer}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
         )}
-
-        {currentQuestion && !currentQuestion.image && (
-          <View style={[styles.textSection, styles.sectionBorder]}>
-            <Text style={styles.sectionTitle}>Question</Text>
-            <Text style={styles.questionText}>{currentQuestion.question}</Text>
-          </View>
-        )}
-
-        <QuestionCard
-          question={currentQuestion?.question || ''}
-          options={currentQuestion?.options || []}
-          selectedAnswer={selectedAnswers[currentQuestion?.id || '']}
-          onSelectAnswer={(answer: string) => handleAnswerSelect(currentQuestion?.id || '', answer)}
-        />
       </ScrollView>
 
-      {currentQuestion && currentQuestion.audio && (
-        <AudioControls audioUri={currentQuestion.audio} />
-      )}
+      {/* Navigation buttons */}
+      <View style={styles.navigation}>
+        <TouchableOpacity
+          style={[styles.navButton, currentQuestionIndex === 0 && styles.disabledButton]}
+          onPress={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
+          disabled={currentQuestionIndex === 0}
+        >
+          <Text style={[styles.navButtonText, currentQuestionIndex === 0 && styles.disabledButtonText]}>
+            ← Câu trước
+          </Text>
+        </TouchableOpacity>
 
-      <NavigationButtons
-        currentQuestionIndex={currentQuestionIndex}
-        totalQuestions={questions.length}
-        onPrevious={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))} 
-        onNext={() => {
-          if (currentQuestionIndex < questions.length - 1) {
-            setCurrentQuestionIndex(currentQuestionIndex + 1); 
-          } else {
-            openSubmitModal(); 
-          }
-        }}
-        isPrevDisabled={currentQuestionIndex === 0}
-        isNextDisabled={currentQuestionIndex === questions.length - 1}
-        isLastQuestion={isLastQuestion}
-        // Removed renderPrevButton and renderNextButton as they are not part of NavigationButtonsProps
-      />
+        <TouchableOpacity
+          style={styles.submitButton}
+          onPress={handleSubmitTest}
+          disabled={isSubmitting}
+        >
+          <Text style={styles.submitButtonText}>
+            {isSubmitting ? 'Đang nộp bài...' : 'Nộp bài'}
+          </Text>
+        </TouchableOpacity>
 
-      {/* Modal cho câu hỏi */}
-      <Modal visible={isModalVisible} transparent={true} animationType="slide" onRequestClose={closeModal}>
-        <View style={styles.modalBackground}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Bảng câu hỏi</Text>
-            <ScrollView style={styles.modalScrollView}>
-              {questions.map((item, index) => (
-                <View key={index} style={styles.questionItem}>
-                  <Text style={styles.questionItem}>{`Câu ${index + 1}: ${item.question}`}</Text>
-                  <View style={styles.optionContainer}>
-                    {item.options.map((option: string, optionIndex: number) => (
-                      <TouchableOpacity
-                        key={optionIndex}
-                        style={[styles.optionButton, getOptionStyle(item.id, option)]}
-                        onPress={() => handleAnswerSelect(item.id, option)}
-                      >
-                        <Text style={[styles.optionText, { color: getOptionStyle(item.id, option).color }]}>{option}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </View>
-              ))}
-            </ScrollView>
-
-            <View style={styles.closeButtonContainer}>
-              <TouchableOpacity onPress={closeModal} style={styles.buttonCancel}>
-                <Text style={styles.closeText}>Hủy</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={openSubmitModal} style={styles.buttonSubmit}>
-                <Text style={styles.closeSubmitText}>Nộp bài</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Modal xác nhận nộp bài */}
-      <Modal visible={isSubmitModalVisible} transparent={true} animationType="slide" onRequestClose={closeSubmitModal}>
-        <View style={styles.modalBackground}>
-          <View style={styles.modalContent}>
-            <Text style={styles.submitModalTitle}>Bạn có chắc muốn nộp bài không?</Text>
-            <View style={styles.submitModalButtons}>
-              <TouchableOpacity onPress={closeSubmitModal} style={styles.buttonCancel}>
-                <Text style={styles.closeText}>Không</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleSubmit} style={styles.buttonSubmit}>
-                <Text style={styles.closeSubmitText}>OK</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-    </View>
+        <TouchableOpacity
+          style={[styles.navButton, currentQuestionIndex === questions.length - 1 && styles.disabledButton]}
+          onPress={() => setCurrentQuestionIndex(Math.min(questions.length - 1, currentQuestionIndex + 1))}
+          disabled={currentQuestionIndex === questions.length - 1}
+        >
+          <Text style={[styles.navButtonText, currentQuestionIndex === questions.length - 1 && styles.disabledButtonText]}>
+            Câu sau →
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: '#fff', 
-    padding: 20 },
-  resultContainer: { 
-    padding: 20, 
-    alignItems: 'center' 
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
   },
-  resultTitle: { 
-    fontSize: 24, 
-    fontWeight: 'bold' 
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  sectionTitle: { 
-    fontSize: 18, 
-    fontWeight: 'bold', 
-    marginBottom: 10 
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#666',
   },
-  sectionBorder: { 
-    borderWidth: 1, 
-    borderColor: '#ccc', 
-    padding: 10, 
-    borderRadius: 8 
+  startContainer: {
+    flex: 1,
+    padding: 20,
+    justifyContent: 'center',
   },
-  closeButtonContainer: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between',
-    marginTop: 20 
+  startTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 30,
+    color: '#333',
   },
-  optionContainer: { 
-    flexDirection: 'row', 
-    flexWrap: 'wrap', 
-    justifyContent: 'space-between', 
-    marginVertical: 10 
+  testInfo: {
+    backgroundColor: '#f8f9fa',
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 20,
   },
-  questionItem: { 
-    padding: 10, 
-    borderBottomWidth: 1, 
-    borderBottomColor: '#ccc' 
+  infoText: {
+    fontSize: 16,
+    marginBottom: 8,
+    color: '#333',
   },
-  pictureSection: { 
-    marginVertical: 10, 
-    alignItems: 'center'
+  instructions: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: '#666',
+    marginBottom: 30,
+    padding: 15,
+    backgroundColor: '#f0f8ff',
+    borderRadius: 8,
   },
-  submitModalButtons: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
-    marginTop: 20 
+  startButton: {
+    backgroundColor: '#0099CC',
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+    alignItems: 'center',
   },
-  questionImage: { 
-    width: 200, 
-    height: 200, 
-    resizeMode: 'contain', 
-    marginVertical: 10 
-  },
-  resultText: { 
+  startButtonText: {
+    color: '#fff',
     fontSize: 18,
-     marginVertical: 5 
-    },
-  scrollView: { 
-    flexGrow: 1, 
-    marginVertical: 10 
+    fontWeight: 'bold',
   },
-  resultSubtitle: { 
-    fontSize: 18, 
-    fontWeight: 'bold', 
-    marginTop: 15 
-  },
-  continueButton: { 
-    marginTop: 20, 
-    backgroundColor: '#0099CC', 
-    padding: 10, 
-    borderRadius: 8, 
-    width: '100%',
-    alignItems: 'center' 
-  },
-  continueText: { 
-    color: '#fff', 
-    fontWeight: 'bold' 
-  },
-  modalBackground: { 
-    flex: 1, 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    backgroundColor: 'rgba(0, 0, 0, 0.5)' 
-  },
-  modalContent: { 
-    backgroundColor: 'white', 
-    padding: 20, 
-    borderRadius: 10, 
-    width: '80%' 
-  },
-  modalTitle: { 
-    fontSize: 18, 
-    fontWeight: 'bold', 
-    marginBottom: 10, 
-    textAlign: 'center' 
-  },
-  submitModalTitle: { 
-    fontSize: 18, 
-    fontWeight: 'bold', 
-    marginBottom: 10, 
-    textAlign: 'center', 
-    color: '#000' 
-  },
-  buttonCancel: { 
-    backgroundColor: 'white', 
-    borderColor: '#0099CC', 
-    borderWidth: 2, padding: 10, 
-    borderRadius: 8, 
-    flex: 1, 
-    marginHorizontal: 5, 
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
-  buttonSubmit: { 
-    backgroundColor: '#0099CC', 
-    alignItems: 'center',
-    padding: 10, 
-    borderRadius: 8, 
-    flex: 1, 
-    marginHorizontal: 5 
+  progressContainer: {
+    flex: 1,
+    marginRight: 20,
   },
-  closeText: { 
-    color: '#0099CC', 
-    fontWeight: 'bold' 
+  progressText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 5,
   },
-  closeSubmitText: { 
-    color: '#fff', 
-    fontWeight: 'bold' },
-  optionButton: { 
-    padding: 10, 
-    backgroundColor: '#0099CC', 
-    margin: 5, 
-    borderRadius: 8, 
-    borderWidth: 1, 
-    borderColor: '#ccc' },
-  optionText: { 
-    fontSize: 14, 
-    color: '#000' 
+  progressBar: {
+    height: 4,
+    backgroundColor: '#eee',
+    borderRadius: 2,
   },
-  modalScrollView: { 
-    marginBottom: 20 
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#0099CC',
+    borderRadius: 2,
   },
-  textSection: { 
-    marginVertical: 10 
+  timerContainer: {
+    alignItems: 'flex-end',
+  },
+  timerText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  timerWarning: {
+    color: '#ff4444',
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+  },
+  questionContainer: {
+    marginBottom: 20,
   },
   questionText: {
-     fontSize: 16, 
-     color: '#000', 
-     marginBottom: 10 },
+    fontSize: 18,
+    lineHeight: 26,
+    color: '#333',
+    marginBottom: 20,
+    fontWeight: '500',
+  },
+  subtitleContainer: {
+    backgroundColor: '#f8f9fa',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 15,
+    borderLeftWidth: 4,
+    borderLeftColor: '#0099CC',
+  },
+  subtitleLabel: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#0099CC',
+    marginBottom: 8,
+  },
+  subtitleText: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: '#555',
+  },
+  answersContainer: {
+    gap: 12,
+  },
+  answerOption: {
+    borderWidth: 2,
+    borderColor: '#eee',
+    borderRadius: 8,
+    padding: 15,
+    backgroundColor: '#fff',
+  },
+  selectedAnswer: {
+    borderColor: '#0099CC',
+    backgroundColor: '#f0f8ff',
+  },
+  answerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  answerLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#0099CC',
+    marginRight: 12,
+    minWidth: 20,
+  },
+  answerText: {
+    fontSize: 16,
+    color: '#333',
+    flex: 1,
+  },
+  selectedAnswerText: {
+    color: '#0099CC',
+    fontWeight: '500',
+  },
+  navigation: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    backgroundColor: '#fff',
+  },
+  navButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 6,
+    backgroundColor: '#f8f9fa',
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+  navButtonText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  disabledButtonText: {
+    color: '#ccc',
+  },
+  submitButton: {
+    backgroundColor: '#0099CC',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  submitButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });
 
-export default ExamDetailScreen;
+export default LearningPathTestScreen;

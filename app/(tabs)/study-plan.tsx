@@ -11,12 +11,12 @@ import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { getCurrentJourney } from "../study-schedule/service";
 import { useIsFocused } from "@react-navigation/native";
-import { CreateJourney } from "../../components/Journey/CreateJourney";
+import { LevelSelector } from "../../components/Journey/LevelSelector";
 
 const PlanScreen: React.FC = () => {
   const router = useRouter();
   const isFocused = useIsFocused();
-  const [showCreateJourney, setShowCreateJourney] = useState(false);
+  const [showLevelSelector, setShowLevelSelector] = useState(false);
 
   const {
     data: journeyData,
@@ -30,12 +30,12 @@ const PlanScreen: React.FC = () => {
 
   const handleContinueJourney = () => {
     router.push({
-      pathname: "/journeyStudy",
+      pathname: "/journey",
     });
   };
 
-  const onCreateJourneySuccess = () => {
-    setShowCreateJourney(false);
+  const onJourneyCreated = () => {
+    setShowLevelSelector(false);
     refetch();
   };
 
@@ -48,8 +48,8 @@ const PlanScreen: React.FC = () => {
     );
   }
 
-  if (showCreateJourney) {
-    return <CreateJourney refetch={onCreateJourneySuccess} />;
+  if (showLevelSelector) {
+    return <LevelSelector onJourneyCreated={onJourneyCreated} />;
   }
 
   if (journeyData?.status && journeyData.state === "COMPLETED") {
@@ -111,7 +111,7 @@ const PlanScreen: React.FC = () => {
 
         <TouchableOpacity
           style={[styles.createNewButton]}
-          onPress={() => setShowCreateJourney(true)}
+          onPress={() => setShowLevelSelector(true)}
         >
           <Text style={styles.continueButtonText}>Tạo lộ trình mới</Text>
         </TouchableOpacity>
@@ -193,7 +193,7 @@ const PlanScreen: React.FC = () => {
     );
   }
 
-  return <CreateJourney refetch={onCreateJourneySuccess} />;
+  return <LevelSelector onJourneyCreated={onJourneyCreated} />;
 };
 
 const styles = StyleSheet.create({

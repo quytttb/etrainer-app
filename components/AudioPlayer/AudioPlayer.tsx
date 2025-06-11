@@ -8,6 +8,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import Slider from "@react-native-community/slider";
 import { Audio } from "expo-av";
 import { FontAwesome5 } from "@expo/vector-icons";
+import AudioManager from "../../app/journeyNew/utils/AudioManager";
 
 interface AudioPlayerProps {
   audioUri: string;
@@ -57,6 +58,9 @@ const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>(
           );
           setSound(sound);
           sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
+
+          // ✅ FIX: Register sound with AudioManager
+          AudioManager.registerSound(sound);
         } catch (error) {
           console.error("Error loading sound:", error);
         }
@@ -66,6 +70,8 @@ const AudioPlayer = forwardRef<AudioPlayerRef, AudioPlayerProps>(
 
       return () => {
         if (sound) {
+          // ✅ FIX: Unregister sound from AudioManager
+          AudioManager.unregisterSound(sound);
           sound
             .unloadAsync()
             .catch((err) => console.error("Error unloading sound:", err));
